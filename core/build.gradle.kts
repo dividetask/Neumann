@@ -22,4 +22,6 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     systemProperty("neumann.dataDir", rootProject.file("data").absolutePath)
+    // The tests read data/, so a change there must rerun them.
+    inputs.dir(rootProject.file("data"))
 }

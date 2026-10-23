@@ -66,7 +66,7 @@ class SensorTypesTest {
 
     @Test
     fun `radar finds a cold ship that a telescope cannot`() {
-        val w = setup(5_000_000.0) // 0.033 AU: beyond a telescope's reach for a cold raider, inside radar's
+        val w = setup(1_000_000.0) // beyond a telescope's reach for a cold raider, inside radar's
         val d = Fixture.dummy(w)
         d.sensorRules.radarActive = false // silent, so the emission receiver cannot find it either
         d.sensorRules.lidarActive = false

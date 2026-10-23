@@ -98,8 +98,13 @@ data class SensorConfig(
 
 @Serializable
 data class LaserConfig(
+    /** No damage beyond this. */
     val rangeKm: Double,
-    val damagePerSecond: Double,
+    /** Full damage out to here; beyond, it falls with the square of distance. */
+    val focusRangeKm: Double,
+    /** Beam power: damage per second (MJ/s) at full focus. */
+    val beamMW: Double,
+    /** Electrical draw while firing. */
     val powerMW: Double,
     val burstSeconds: Double,
     val arcDeg: Double,
@@ -108,6 +113,8 @@ data class LaserConfig(
 @Serializable
 data class CannonConfig(
     val muzzleSpeedKmS: Double,
+    /** Drawn from the batteries per shot. */
+    val shotEnergyMJ: Double,
     val cooldownSeconds: Double,
     val autoRangeKm: Double,
     val arcDeg: Double,
@@ -124,8 +131,9 @@ data class MissileBayConfig(
 @Serializable
 data class MunitionsConfig(val slug: SlugConfig, val torpedo: TorpedoConfig)
 
+/** Slug damage is its kinetic energy at impact, so it has no damage field. */
 @Serializable
-data class SlugConfig(val damage: Double, val massKg: Double, val cost: Double, val buildHours: Double)
+data class SlugConfig(val massKg: Double, val cost: Double, val buildHours: Double)
 
 @Serializable
 data class TorpedoConfig(

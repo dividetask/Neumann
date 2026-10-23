@@ -193,7 +193,9 @@ The first-version system is defined in `data/scenario.yaml`.
 - **Balance rule:** the probe must be able to beat four raiders at once
   without significant strategy (all weapon rules on, facing the nearest
   enemy), at medium difficulty. **(interpretation)** Medium means it wins with
-  40–80% of its hull left. `BalanceTest` checks this against the data.
+  40–80% integrity left (hit points across all its modules; hits land on
+  every module, not just the hull). `BalanceTest` checks this against the
+  data.
 - The first-version system has four raiders, a base, and a defence platform.
 - **(interpretation)** First-version AI:
   - Fixed defences and bases fire at the player whenever in range.

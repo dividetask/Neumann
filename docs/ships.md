@@ -9,7 +9,8 @@ ships use their own, weaker designs built from the same modules.
 - Ship designs: `data/ships.yaml` — a design names its modules and how many
   of each. Fixed defences and bases are designs too.
 
-Starting values are untuned.
+Numbers follow [tech-level.md](tech-level.md). Hit points are energy:
+1 hit point = 1 MJ.
 
 ## Modules
 

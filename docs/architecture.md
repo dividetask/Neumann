@@ -96,7 +96,7 @@ Run in this order by `SimulationStep`:
 | `ClaimCheck` | Detects a claimed system or a lost ship. |
 | `HistoryPhase` | Records positions for light delay. |
 
-Helpers: `StepSizer` (step length; short steps when projectiles are near
+Helpers: `LaserFalloff` (laser damage by distance: full to the focus range, then 1/distance²), `StepSizer` (step length; short steps when projectiles are near
 targets), `DamageResolver` (applies a hit to a module), `HeadingResolver`
 (where a heading points now), `ShipPerformance` (mass, thrust, turn rate,
 capacities, sensor and threat range from the working modules).

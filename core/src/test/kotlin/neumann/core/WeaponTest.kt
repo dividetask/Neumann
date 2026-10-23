@@ -4,6 +4,7 @@ import neumann.core.Fixture.damageTaken
 import neumann.core.game.OrderDesk
 import neumann.core.math.Units
 import neumann.core.math.Vec3
+import neumann.core.sim.LaserFalloff
 import neumann.core.sim.SimulationStep
 import neumann.core.world.ModuleKind
 import neumann.core.world.SensorType
@@ -51,7 +52,7 @@ class WeaponTest {
         val orders = OrderDesk(w)
         assertNull(orders.setTarget(d.id))
         assertNull(orders.fireNow(WeaponKind.TORPEDO))
-        Fixture.runFor(w, 3600.0)
+        Fixture.runFor(w, 3 * 3600.0) // a torpedo takes over an hour to cross 50,000 km
         assertEquals(munitions.torpedo.damage, damageTaken(d), 1e-6)
         assertTrue(w.torpedoes.isEmpty())
     }
@@ -60,7 +61,7 @@ class WeaponTest {
     fun `laser point defence shoots down an incoming torpedo`() {
         val w = duel(50_000.0)
         val t = incomingTorpedo(w)
-        Fixture.runFor(w, 3600.0)
+        Fixture.runFor(w, 3 * 3600.0) // a torpedo takes over an hour to cross 50,000 km
         assertFalse(t.alive)
         assertEquals(0.0, damageTaken(w.player), 1e-6)
         assertTrue(w.log.events.any { it.message.contains("shot down") })
@@ -73,7 +74,7 @@ class WeaponTest {
         p.working(ModuleKind.GENERATOR).forEach { it.hitPoints = 0.0 }
         p.energy = 0.0
         incomingTorpedo(w)
-        Fixture.runFor(w, 3600.0)
+        Fixture.runFor(w, 3 * 3600.0) // a torpedo takes over an hour to cross 50,000 km
         assertEquals(munitions.torpedo.damage, damageTaken(p) - p.modules.filter { it.kind == ModuleKind.GENERATOR }.sumOf { it.type.hitPoints }, 1e-6)
     }
 
@@ -85,7 +86,10 @@ class WeaponTest {
         assertEquals(SensorType.LIDAR, w.player.contacts[d.id]!!.sensor)
         assertNull(orders.fireNow(WeaponKind.CANNON))
         Fixture.runFor(w, 600.0)
-        assertEquals(munitions.slug.damage, damageTaken(d), 1e-6)
+        // Damage is the slug's kinetic energy relative to the target (MJ): muzzle 20 km/s, target crossing at 3 km/s.
+        val ke = { v: Double -> 0.5 * munitions.slug.massKg * v * v / 1e6 }
+        val muzzle = w.player.working(ModuleKind.CANNON).first().type.cannon!!.muzzleSpeedKmS * 1000
+        assertTrue(damageTaken(d) in ke(muzzle - 3_000.0)..ke(muzzle + 3_000.0), "one hit of ${damageTaken(d)} MJ")
     }
 
     @Test
@@ -99,12 +103,21 @@ class WeaponTest {
         val before = damageTaken(d)
         repeat(60) { step.run(w, 1.0) }
         val laser = p.working(ModuleKind.LASER_TURRET).map { it.type.laser!! }
-        val expected = laser.sumOf { it.damagePerSecond * (1 - 2_000.0 / it.rangeKm) } * 60
+        val expected = laser.sumOf { LaserFalloff.damagePerSecond(it, 2_000_000.0) } * 60
         assertEquals(expected, damageTaken(d) - before, expected * 0.05, "a full minute of fire from every turret")
         p.rules.laserAutoFire = false
         val energy = p.energy
         repeat(60) { step.run(w, 1.0) }
         assertTrue(p.energy >= energy, "no target, no laser draw: the batteries recharge")
+    }
+
+    @Test
+    fun `laser damage is full out to the focus range, then falls with the square of distance`() {
+        val laser = Fixture.data.modules.getValue("laserTurret").laser!!
+        val focus = laser.focusRangeKm * Units.KM
+        assertEquals(laser.beamMW, LaserFalloff.damagePerSecond(laser, focus * 0.5), 1e-9)
+        assertEquals(laser.beamMW / 4, LaserFalloff.damagePerSecond(laser, focus * 2), 1e-9)
+        assertEquals(0.0, LaserFalloff.damagePerSecond(laser, laser.rangeKm * Units.KM * 1.01), 1e-9)
     }
 
     @Test

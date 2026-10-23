@@ -1,12 +1,12 @@
 # Ship designs: each lists its modules (from data/modules.yaml) and how many.
-# See docs/ships.md. Starting values are untuned.
+# See docs/ships.md; numbers follow docs/tech-level.md.
 
 designs:
   probe:
     name: Von Neumann probe
     role: SHIP
     sizeM: 100
-    signature: 0.02
+    signature: 0.005
     burningSignature: 4.0
     modules:
       probeHull: 1
@@ -14,7 +14,7 @@ designs:
       manoeuvringThrusters: 2
       reactor: 1
       battery: 2
-      fuelTank: 3
+      fuelTank: 5
       telescope: 1
       radar: 1
       lidar: 1
@@ -29,12 +29,12 @@ designs:
     name: Raider
     role: SHIP
     sizeM: 80
-    signature: 0.01
+    signature: 0.003
     burningSignature: 4.0
     modules:
       raiderHull: 1
       plasmaDrive: 1
-      reactor: 1
+      smallReactor: 1
       battery: 1
       fuelTank: 2
       telescope: 1
@@ -49,7 +49,7 @@ designs:
     name: Defence platform
     role: DEFENCE
     sizeM: 60
-    signature: 0.05
+    signature: 0.02
     burningSignature: 0.3
     modules:
       platformHull: 1
@@ -66,7 +66,7 @@ designs:
     name: Base
     role: BASE
     sizeM: 500
-    signature: 0.5
+    signature: 0.2
     burningSignature: 2.0
     modules:
       baseHull: 1

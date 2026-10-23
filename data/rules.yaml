@@ -32,4 +32,4 @@ autoPause:
 ai:
   standoffKm: 2000             # enemy ships try to hold this distance
   combatDvKmS: 0.5             # inside weapon range, burn only for course errors bigger than this
-  maxClosingSpeedKmS: 60
+  maxClosingSpeedKmS: 10

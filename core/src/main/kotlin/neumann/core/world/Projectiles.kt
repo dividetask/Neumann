@@ -8,7 +8,7 @@ class Slug(
     val faction: Faction,
     var position: Vec3,
     var velocity: Vec3,
-    val damage: Double,
+    val massKg: Double,
     val launchTime: Double,
 ) {
     var previousPosition: Vec3 = position

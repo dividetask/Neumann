@@ -39,9 +39,10 @@ class BalanceTest {
         for (r in w.vessels) println("VESSEL ${r.name} alive=${r.alive} dmg=${Fixture.damageTaken(r).toInt()} torps=${r.torpedoes} slugs=${r.slugs} energy=${r.energy.toInt()}")
         val hull = p.modules.filter { it.kind == ModuleKind.HULL }
         val hullLeft = hull.sumOf { it.hitPoints } / hull.sumOf { it.type.hitPoints }
-        println("balance: claimed=${w.claimed} after ${w.time / 3600} h, hull left ${(hullLeft * 100).toInt()}%, " +
+        val integrity = p.modules.sumOf { it.hitPoints } / p.modules.sumOf { it.type.hitPoints }
+        println("balance: claimed=${w.claimed} after ${w.time / 3600} h, integrity ${(integrity * 100).toInt()}%, hull left ${(hullLeft * 100).toInt()}%, " +
             "damage taken ${Fixture.damageTaken(p).toInt()}, torpedoes left ${p.torpedoes}, slugs left ${p.slugs}")
         assertTrue(w.claimed, "the probe should destroy all four raiders")
-        assertTrue(hullLeft in 0.4..0.8, "medium difficulty: 40-80% hull left, was ${(hullLeft * 100).toInt()}%")
+        assertTrue(integrity in 0.4..0.8, "medium difficulty: 40-80% integrity left, was ${(integrity * 100).toInt()}%")
     }
 }

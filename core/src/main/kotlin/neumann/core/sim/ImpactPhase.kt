@@ -14,7 +14,9 @@ class ImpactPhase(private val damage: DamageResolver) {
                 val ca = ClosestApproach.between(s.previousPosition, s.position, v.previousPosition, v.position)
                 if (ca.distance <= v.design.sizeM) {
                     s.alive = false
-                    damage.hit(world, v, s.damage, s.ownerId, "cannon")
+                    // Kinetic energy relative to the target, in MJ.
+                    val rel = (s.velocity - v.velocity).length()
+                    damage.hit(world, v, 0.5 * s.massKg * rel * rel / 1e6, s.ownerId, "cannon")
                     break
                 }
             }

@@ -1,8 +1,8 @@
 # Weapons
 
 Weapons are modules (see [ships.md](ships.md)): laser turrets, cannons, and
-missile bays. Their numbers live in `data/modules.yaml`. Starting values are
-untuned.
+missile bays. Their numbers live in `data/modules.yaml` and follow
+[tech-level.md](tech-level.md). Damage is energy: 1 hit point = 1 MJ.
 
 Each weapon module fires on its own and has a firing arc: `arcDeg`, the
 largest angle from the ship's front it can fire at. **(interpretation)**
@@ -14,8 +14,9 @@ any direction (180°).
 The bare minimum to test the game.
 
 - **Laser** — a beam weapon. Hits at the speed of light, so it cannot be
-  dodged. Damage per second falls off linearly from `damagePerSecond` at
-  point blank to zero at `range`. Fires continuously while it has a target in
+  dodged. Damage per second is `beamMW` out to `focusRangeKm`, then falls with
+  the square of distance (the spot spreads), and is zero beyond `rangeKm`.
+  Fires continuously while it has a target in
   range and arc, drawing `powerMW`; between engagements it has no target and
   draws nothing. Also serves as point defence: with point
   defence on, it fires at the nearest torpedo aimed at its ship before any
@@ -25,7 +26,9 @@ The bare minimum to test the game.
   [sensors.md](sensors.md)), so it needs good tracking at range. Fires solid
   slugs (railgun-style) at `muzzleSpeed` relative to
   the ship, one per `cooldownSeconds`, taken from the ship's ammo containers
-  (shared by all cannons). Heavy damage, but a slug is slow, so a
+  (shared by all cannons). Each shot draws `shotEnergyMJ` from the batteries.
+  A slug's damage is its kinetic energy relative to what it hits. Heavy
+  damage, but a slug is slow, so a
   target that changes course after the shot can be missed. The gun aims at
   where the target will be if it keeps its current velocity. A slug hits if it
   passes within a ship's `sizeM`. **(interpretation)** Slugs are too small
@@ -45,6 +48,8 @@ The bare minimum to test the game.
 
 Kept for later versions.
 
+- **Nuclear warheads** — for torpedoes; any ship within about a kilometre
+  would be destroyed.
 - **Guided ramming torpedo** — steers itself into the target and damages it
   by impact.
 - **Point defence** — dedicated fast short-range guns or small lasers that

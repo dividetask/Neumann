@@ -26,6 +26,9 @@
 - **Facing** — Which way a ship's front and top point.
 - **Fixed defence** — A weapon installation without real engines; it only
   keeps its orbit.
+- **Focus range** — How far a laser keeps its beam tight enough for full
+  damage.
+- **Hit point** — One megajoule of damage a module can absorb.
 - **Lidar** — Laser ranging: an active sensor that tracks the target very
   precisely.
 - **Light delay** — The time light takes to reach the ship; sensors show

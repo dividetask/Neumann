@@ -10,7 +10,7 @@ planets:
   - { name: Shale, orbitAu: 1.7, inclinationDeg: 4, phaseDeg: 250, massEarth: 15, radiusKm: 25000 }
 
 # The ship arrives at bearingDeg [azimuth, elevation] from the star (where it came from).
-entry: { radiusAu: 1.3, bearingDeg: [0, 5], minSpeedKmS: 20, maxSpeedKmS: 300, defaultSpeedKmS: 80 }
+entry: { radiusAu: 1.3, bearingDeg: [0, 5], minSpeedKmS: 5, maxSpeedKmS: 40, defaultSpeedKmS: 15 }
 
 player: { name: Neumann, design: probe }
 

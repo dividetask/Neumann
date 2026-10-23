@@ -33,11 +33,11 @@ class LaserPhase(private val damage: DamageResolver) {
                 if (torpedo != null) {
                     engaged.add(torpedo.id)
                     val d = (torpedo.position - v.position).length()
-                    torpedo.hitPoints -= laser.damagePerSecond * (1 - d / range) * dt
+                    torpedo.hitPoints -= LaserFalloff.damagePerSecond(laser, d) * dt
                     if (torpedo.hitPoints <= 0.0 && torpedo.alive) shotDown(world, v, torpedo)
                 } else if (target != null) {
                     val d = (target.position - v.position).length()
-                    damage.hit(world, target, laser.damagePerSecond * (1 - d / range) * dt, v.id, "laser")
+                    damage.hit(world, target, LaserFalloff.damagePerSecond(laser, d) * dt, v.id, "laser")
                 }
             }
         }

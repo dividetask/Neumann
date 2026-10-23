@@ -28,10 +28,10 @@ class BurnTest {
     fun `a desired speed burns until that speed, then coasts`() {
         val w = still()
         val p = w.player
-        assertNull(OrderDesk(w).burn(HeadingMode.FIXED, north, 1.0, 2.0, null))
+        assertNull(OrderDesk(w).burn(HeadingMode.FIXED, north, 1.0, 0.2, null))
         Fixture.runFor(w, 3600.0)
         assertNull(p.burn)
-        assertEquals(2_000.0, along(w).first, 5.0)
+        assertEquals(200.0, along(w).first, 2.0)
         val fuel = p.fuel
         Fixture.runFor(w, 3600.0)
         assertEquals(fuel, p.fuel, 1e-9, "coasting uses no fuel")
@@ -42,7 +42,7 @@ class BurnTest {
     fun `a desired distance speeds up to halfway, then brakes and stops there`() {
         val w = still()
         val p = w.player
-        OrderDesk(w).burn(HeadingMode.FIXED, north, 1.0, null, 10_000.0)
+        OrderDesk(w).burn(HeadingMode.FIXED, north, 1.0, null, 1_000.0)
         val step = SimulationStep(w.data)
         var braked = false
         while (p.burn != null && w.time < 86400.0) {
@@ -52,34 +52,34 @@ class BurnTest {
         assertTrue(braked)
         val (speed, distance) = along(w)
         assertEquals(0.0, speed, 1.0, "stopped")
-        assertEquals(10_000_000.0, distance, 600_000.0, "near the desired distance")
+        assertEquals(1_000_000.0, distance, 60_000.0, "near the desired distance")
     }
 
     @Test
     fun `speed and distance together accelerate to the speed, coast, then stop at the distance`() {
         val w = still()
         val p = w.player
-        OrderDesk(w).burn(HeadingMode.FIXED, north, 1.0, 1.0, 50_000.0)
+        OrderDesk(w).burn(HeadingMode.FIXED, north, 1.0, 0.2, 5_000.0)
         val step = SimulationStep(w.data)
         var coasted = false
         var top = 0.0
-        while (p.burn != null && w.time < 3 * 86400.0) {
+        while (p.burn != null && w.time < 5 * 86400.0) {
             if (p.burn?.stage == BurnStage.COAST) coasted = true
             top = maxOf(top, along(w).first)
             step.run(w, 2.0)
         }
         assertTrue(coasted)
-        assertEquals(1_000.0, top, 15.0, "never faster than the desired speed")
+        assertEquals(200.0, top, 5.0, "never faster than the desired speed")
         val (speed, distance) = along(w)
         assertEquals(0.0, speed, 1.0)
-        assertEquals(50_000_000.0, distance, 1_500_000.0)
+        assertEquals(5_000_000.0, distance, 150_000.0)
     }
 
     @Test
     fun `braking turns the ship around before it thrusts`() {
         val w = still()
         val p = w.player
-        OrderDesk(w).burn(HeadingMode.FIXED, north, 1.0, null, 10_000.0)
+        OrderDesk(w).burn(HeadingMode.FIXED, north, 1.0, null, 1_000.0)
         val step = SimulationStep(w.data)
         while (p.burn?.stage != BurnStage.BRAKE) step.run(w, 1.0)
         repeat(60) { step.run(w, 1.0) }
@@ -116,7 +116,7 @@ class BurnTest {
         while (w.time + 0.5 < turnTime * 0.9) step.run(w, 0.5)
         assertEquals(0.0, p.velocity.dot(-north), 1.0, "no thrust while still turning")
         repeat((turnTime * 0.2 / 0.5).toInt() + 20) { step.run(w, 0.5) }
-        assertTrue(p.velocity.dot(-north) > 10.0, "thrusting once facing the burn direction")
+        assertTrue(p.velocity.dot(-north) > 0.5, "thrusting once facing the burn direction")
     }
 
     @Test

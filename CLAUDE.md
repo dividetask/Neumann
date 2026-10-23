@@ -246,6 +246,7 @@ After every push:
 ├── docs/        # Shared specification (source of truth)
 │   ├── README.md
 │   ├── game-design.md
+│   ├── tech-level.md
 │   ├── ships.md
 │   ├── sensors.md
 │   ├── weapons.md

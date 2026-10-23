@@ -30,13 +30,13 @@ class TimeSkipTest {
     }
 
     @Test
-    fun `the same event from the same source does not pause again within the suppression time`() {
-        val config = Fixture.data.rules.autoPause
-        val m = AutoPauseMonitor(config)
-        fun hit(t: Double, source: String) = GameEvent(t, EventKind.DAMAGE_TAKEN, source, "hit")
-        assertEquals(1, m.pausing(listOf(hit(0.0, "E-1"))).size)
-        assertEquals(0, m.pausing(listOf(hit(100.0, "E-1"))).size)
-        assertEquals(1, m.pausing(listOf(hit(100.0, "E-2"))).size)
-        assertEquals(1, m.pausing(listOf(hit(config.repeatSuppressionSeconds + 1.0, "E-1"))).size)
+    fun `continuing damage from the same source is not new and does not pause again`() {
+        val gap = Fixture.data.rules.autoPause.repeatSuppressionSeconds
+        val m = AutoPauseMonitor(Fixture.data.rules.autoPause)
+        fun hit(t: Double, source: String) = m.pausing(listOf(GameEvent(t, EventKind.DAMAGE_TAKEN, source, "hit"))).size
+        assertEquals(1, hit(0.0, "E-1"), "first hit pauses")
+        assertEquals(1, hit(10.0, "E-2"), "a different enemy's hit is new")
+        for (i in 1..30) assertEquals(0, hit(i * gap / 2, "E-1"), "steady hits never pause")
+        assertEquals(1, hit(15 * gap + gap, "E-1"), "a hit after a quiet gap is new")
     }
 }

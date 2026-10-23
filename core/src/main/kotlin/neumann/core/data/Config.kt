@@ -11,7 +11,6 @@ import neumann.core.world.VesselRole
 data class RulesFile(
     val sim: SimConfig,
     val autoPause: AutoPauseConfig,
-    val mining: MiningConfig,
     val ai: AiConfig,
 )
 
@@ -35,14 +34,6 @@ data class AutoPauseConfig(
 )
 
 @Serializable
-data class MiningConfig(
-    val clearRadiusKm: Double,
-    val miningDistanceKm: Double,
-    val maxRelativeSpeedKmS: Double,
-    val mineralsPerHour: Double,
-)
-
-@Serializable
 data class AiConfig(
     val standoffKm: Double,
     val maxClosingSpeedKmS: Double,
@@ -62,7 +53,6 @@ data class ShipClass(
     val laser: LaserConfig? = null,
     val cannon: CannonConfig? = null,
     val torpedo: TorpedoConfig? = null,
-    val factory: FactoryConfig? = null,
 )
 
 @Serializable
@@ -104,15 +94,6 @@ data class TorpedoConfig(
     val launchRangeKm: Double,
     val signature: Double,
     val burningSignature: Double,
-)
-
-@Serializable
-data class FactoryConfig(
-    val mineralsPerHour: Double,
-    val repairPointsPerMineral: Double,
-    val fuelPerMineral: Double,
-    val mineralsPerSlug: Double,
-    val mineralsPerTorpedo: Double,
 )
 
 @Serializable

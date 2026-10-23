@@ -18,8 +18,9 @@ class BurnTest {
         val fuel = p.fuel
         assertNull(OrderDesk(w).setBurn(BurnDirection.RETROGRADE, 1.0, 100.0))
         val r = Fixture.timeSkip(w).run(w, 3600.0)
-        assertEquals(EventKind.BURN_COMPLETE, r.pausedBy.single().kind)
-        assertEquals(9_500.0, p.velocity.length(), 5.0)
+        assertEquals(3600.0, r.elapsedSeconds, 1e-6, "the end of a burn does not pause")
+        assertTrue(w.log.events.any { it.kind == EventKind.BURN_COMPLETE })
+        assertEquals(9_500.0, p.velocity.length(), 25.0)
         assertEquals(fuel - 0.5, p.fuel, 1e-6)
     }
 

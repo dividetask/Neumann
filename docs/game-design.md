@@ -16,8 +16,10 @@ B. The player picks an approach vector.
 C. The player gives orders and uses time skips until the system is claimed
    (win) or the ship is lost.
 
-Star map, travel, mineral estimates, saving ship state between battles, and
-probe copies are **Pending** for later versions.
+Star map, travel, mineral estimates, saving ship state between battles,
+mining, the auto factory, and probe copies are **Pending** for later
+versions. The game is won once the system is claimed, so the first version
+has no need for the factory.
 
 ## Core loop (full game)
 
@@ -31,9 +33,8 @@ E. Back to A, keeping the ship's state.
 
 ## Win and loss
 
-- **First version:** the player wins by claiming the system.
-  **(interpretation)** A system is claimed when every enemy ship, fixed
-  defence, and base in it is destroyed.
+- **First version:** the player wins by claiming the system. A system is
+  claimed when every enemy ship, fixed defence, and base in it is destroyed.
 - **Later versions:** there is a limited number of unclaimed stars, all within
   a random radius. The game is won by destroying all enemy players.
 - The player loses when their ship's hull is destroyed, or the ship hits a
@@ -58,13 +59,17 @@ once.
 - The player's ship takes damage.
 - A target is destroyed.
 - Fuel or ammunition runs low (drops below `lowSupplyFraction`).
-- **(interpretation)** A burn order finishes.
 - The system is claimed, or the player's ship is lost.
 
-**(interpretation)** Repeat suppression: after an event pauses a skip, the
-same kind of event from the same source does not pause again for
-`repeatSuppressionSeconds`. Without this, a steady laser hit would stop every
-skip after a few seconds. It is still logged.
+Pausing requires new information. An event that continues something already
+happening is not new: an event does not pause if the same kind of event from
+the same source happened within the previous `repeatSuppressionSeconds`. For
+example, a steady laser hit pauses once when it starts, not again while it
+keeps hitting; if that enemy then stops for `repeatSuppressionSeconds`, its
+next hit pauses. Every event is still logged. Claiming the system and losing
+the ship always pause.
+
+The end of a burn does not pause; it is logged.
 
 ## Orders
 
@@ -130,7 +135,6 @@ the part's hit weight. Damage beyond what a part has left goes to the hull.
 | Laser | Laser cannot fire. |
 | Cannon | Cannon cannot fire. |
 | Torpedo launcher | Torpedoes cannot launch. |
-| Factory | No mining or manufacturing. |
 | Fuel tank | All fuel is lost. |
 
 ## Star systems
@@ -147,7 +151,7 @@ The first-version system is defined in `data/scenario.yaml`.
 ## Player ship
 
 - One ship: a von Neumann probe. Drones may be added in a later version.
-- Ship state (damage, fuel, ammunition, minerals) is kept between battles.
+- Ship state (damage, fuel, ammunition) is kept between battles.
 - Pending: the probe builds copies of itself. Copies are not player
   controlled.
 
@@ -172,15 +176,13 @@ The first-version system is defined in `data/scenario.yaml`.
 
 ## Mining and the auto factory
 
+**Pending** — not in the first version.
+
 - The ship carries an auto factory and mining equipment.
-- Mining is automatic once the area is cleared; mining before then is not
-  realistic. **(interpretation)** The area is cleared when no known enemy
-  (ship, defence, base, or torpedo) is within `clearRadius` of the ship.
-  Mining also needs the ship within `miningDistance` of a planet and moving
-  slower than `maxRelativeSpeed` relative to it.
+- The ship can mine at any time, but mining makes the mining equipment and
+  factory vulnerable to attack.
+- If the factory or the mining equipment is destroyed, the game is lost.
 - The factory turns minerals into repairs, fuel, cannon slugs, and torpedoes.
-  **(interpretation)** Priority order: repair parts, then refill fuel, then
-  slugs, then torpedoes.
 - When choosing a destination, the player sees a mineral estimate for it.
 
 ## Presentation

@@ -1,4 +1,4 @@
-# Simulation, auto-pause, mining, and AI settings.
+# Simulation, auto-pause, and AI settings.
 # See docs/game-design.md. Starting values are untuned.
 
 sim:
@@ -22,15 +22,8 @@ autoPause:
     - DESTROYED
     - LOW_FUEL
     - LOW_AMMO
-    - BURN_COMPLETE
     - SYSTEM_CLAIMED
     - SHIP_LOST
-
-mining:
-  clearRadiusKm: 10000000      # no known enemy this close
-  miningDistanceKm: 500000     # this close to a planet
-  maxRelativeSpeedKmS: 2       # slower than this relative to the planet
-  mineralsPerHour: 20
 
 ai:
   standoffKm: 3000             # enemy ships try to hold this distance

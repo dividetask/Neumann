@@ -52,10 +52,6 @@ class Vessel(
     var fuel: Double = shipClass.drive?.fuelCapacity ?: 0.0
     var slugs: Int = shipClass.cannon?.ammo ?: 0
     var torpedoes: Int = shipClass.torpedo?.ammo ?: 0
-    var minerals: Double = 0.0
-    var slugProgress: Double = 0.0
-    var torpedoProgress: Double = 0.0
-    var mining: Boolean = false
 
     var burn: Burn? = null
     var targetId: String? = null

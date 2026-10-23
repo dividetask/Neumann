@@ -32,9 +32,9 @@ on load into the world.
 ### `neumann.core.data` — config holders (no logic)
 
 - `GameData` — everything loaded from `data/`.
-- `RulesFile` → `SimConfig`, `AutoPauseConfig`, `MiningConfig`, `AiConfig`.
+- `RulesFile` → `SimConfig`, `AutoPauseConfig`, `AiConfig`.
 - `ShipsFile` → `ShipClass` → `PartConfig`, `DriveConfig`, `SensorConfig`,
-  `LaserConfig`, `CannonConfig`, `TorpedoConfig`, `FactoryConfig`.
+  `LaserConfig`, `CannonConfig`, `TorpedoConfig`.
 - `ScenarioConfig` → `StarConfig`, `PlanetConfig`, `EntryConfig`,
   `PlayerPlacement`, `EnemyPlacement`.
 - `DataSource` — interface: read a data file's text by name (platform
@@ -83,8 +83,6 @@ Run in this order by `SimulationStep`:
 | `SensorPhase` | Updates every vessel's contacts. Uses `LightDelay`. |
 | `WeaponRangeWatch` | Warns when the player enters an enemy's weapon range. |
 | `SupplyWatch` | Warns when the player's fuel or ammunition runs low. |
-| `MiningPhase` | Mines when the area is cleared. |
-| `FactoryPhase` | Turns minerals into repairs, fuel, and ammunition. |
 | `ClaimCheck` | Detects a claimed system or a lost ship. |
 | `HistoryPhase` | Records positions for light delay. |
 

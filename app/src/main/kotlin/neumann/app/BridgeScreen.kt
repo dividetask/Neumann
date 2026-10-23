@@ -118,7 +118,6 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
                 }
                 player.shipClass.cannon?.let { Line("Slugs      ${player.slugs}/${it.ammo}") }
                 player.shipClass.torpedo?.let { Line("Torpedoes  ${player.torpedoes}/${it.ammo}") }
-                Line("Minerals   %.1f  %s".format(player.minerals, if (player.mining) "MINING" else ""))
                 val burn = player.burn
                 Line(if (burn == null) "Burn       none" else
                     "Burn       ${burn.direction.name.lowercase()} ${(burn.throttle * 100).toInt()}% ${DisplayFormat.duration(burn.remainingSeconds)} left",

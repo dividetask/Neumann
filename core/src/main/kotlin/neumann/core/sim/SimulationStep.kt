@@ -21,8 +21,6 @@ class SimulationStep(data: GameData) {
     val sensors = SensorPhase(LightDelay())
     private val rangeWatch = WeaponRangeWatch()
     private val supplyWatch = SupplyWatch(rules.autoPause)
-    private val mining = MiningPhase(rules.mining)
-    private val factory = FactoryPhase()
     private val claimCheck = ClaimCheck()
     private val history = HistoryPhase(rules.sim)
 
@@ -42,8 +40,6 @@ class SimulationStep(data: GameData) {
         sensors.run(world)
         rangeWatch.run(world)
         supplyWatch.run(world)
-        mining.run(world, dt)
-        factory.run(world, dt)
         claimCheck.run(world)
         history.run(world)
         world.torpedoes.removeAll { !it.alive }

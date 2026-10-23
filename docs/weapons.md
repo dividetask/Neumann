@@ -5,7 +5,7 @@
 The bare minimum to test the game.
 
 - **Laser** — a beam weapon. Hits at the speed of light, so it cannot be
-  dodged; damage falls off with range. **(interpretation)** Also serves as
+  dodged; damage falls off with range. Also serves as
   point defence: it can fire at incoming torpedoes.
 - **Cannon** — fires solid slugs (railgun-style). Heavy damage, but a slug is
   slow, so at long range a target can move out of the way.

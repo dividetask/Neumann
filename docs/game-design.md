@@ -2,13 +2,15 @@
 
 ## Summary
 
-The player commands one sublight ship against AI opponents. They choose a
-star to travel to, choose an approach vector into its system, and fight
-whatever is there. Ship state carries over from battle to battle.
+The player commands one sublight ship, a von Neumann probe, against AI
+opponents. They choose a star to travel to, choose an approach vector into
+its system, and fight whatever is there. Ship state carries over from battle
+to battle.
 
 ## Core loop
 
-A. On the star map, the player picks a destination star.
+A. On the star map, the player picks a destination star, helped by its
+   mineral estimate.
 B. The ship travels there (see [Travel](#travel)).
 C. On arrival, the player picks an approach vector into the system.
 D. Inside the system, the player gives orders and advances time with
@@ -21,6 +23,9 @@ Controls: **1 minute**, **1 hour**, **4 hours**, **1 day**.
 
 A time skip moves the game forward until the chosen time has passed, or until
 an auto-pause event happens, whichever comes first.
+
+The game never makes the player wait in real time: a time skip resolves at
+once.
 
 ### Auto-pause events
 
@@ -36,6 +41,19 @@ an auto-pause event happens, whichever comes first.
 - The game is in **3D**.
 - **(interpretation)** An approach vector is a direction in 3D plus an entry
   speed, chosen before entering the system.
+- **Realistic scale.** Distances are real: a system is billions of km across,
+  and light takes minutes to hours to cross it.
+- **Light delay.** Sensors show where a contact was when its light left it,
+  not where it is now.
+
+## Physics
+
+- Real Newtonian movement. A ship keeps its velocity until it burns its
+  engine; to stop, it turns around and burns against its motion.
+- Burns use fuel.
+- The gravity of stars and planets affects ships. **(interpretation)** Stars
+  and planets follow fixed orbits; only ships, torpedoes, and slugs are moved
+  by gravity.
 
 ## Star systems
 
@@ -48,8 +66,8 @@ A star system may contain any mix of:
 
 ## Player ship
 
-- One ship. Drones may be added in a later version.
-- Ship state (damage, fuel, ammunition) is kept between battles.
+- One ship: a von Neumann probe. Drones may be added in a later version.
+- Ship state (damage, fuel, ammunition, minerals) is kept between battles.
 
 ## Opponents
 
@@ -58,7 +76,16 @@ A star system may contain any mix of:
 
 ## Travel
 
-Open — see question O-3.
+- Travel between stars uses fuel.
+- The game skips straight to the next decision (arrival, in the first
+  version).
+- Pending: events during travel.
+
+## Repair and resupply
+
+- The ship carries an auto factory and mining equipment.
+- It repairs itself using minerals mined in the system it is in.
+- When choosing a destination, the player sees a mineral estimate for it.
 
 ## Presentation
 
@@ -68,16 +95,5 @@ Open — see question O-3.
 
 ## Open questions
 
-- **O-1 Physics.** Real Newtonian movement (momentum; to stop, turn around and
-  burn; fuel limits) or something simpler? Does the gravity of stars and
-  planets matter?
-- **O-2 Scale.** Real distances (a system is billions of km across; light
-  takes minutes to cross it, so sensors see where things *were*) or shrunk
-  to keep things simple?
-- **O-3 Travel between stars.** Does the trip between stars take game time,
-  use fuel, or have events, or is it instant?
-- **O-4 Repair and resupply.** Where and how does the ship repair and get
-  fuel and ammunition back (captured bases, friendly ports, between
-  battles)?
 - **O-5 Orders.** What orders can the player give before a time skip
   (course, target, weapon rules)?

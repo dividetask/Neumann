@@ -14,7 +14,8 @@ graphics and close to text, styled like a ship's own display.
   design, and architecture.
 - **Data** (`data/` — YAML) — canonical, code-free definitions. Logic loads
   this data; it never hard-codes it.
-- **Source** (`app/`) — Kotlin, Android.
+- **Source** — Kotlin. `core/` holds the game rules; `app/` is the Android
+  app.
 
 ### Documentation precedence
 
@@ -93,8 +94,7 @@ in step.
 - Platform-specific concerns (UI, persistence, OS APIs) sit behind plain
   interfaces so core logic can be unit-tested without them.
 - See [docs/architecture.md](docs/architecture.md) for the canonical class
-  list (not written yet — it follows once the open design questions in
-  [docs/game-design.md](docs/game-design.md) are settled).
+  list.
 
 ### Configuration and data
 
@@ -224,12 +224,16 @@ After every push:
 
 - Linux, vim. Ruby preferred but only when Ruby is a good option — the game
   itself is Kotlin, because it runs on Android.
-- The agent's environment has Java and Gradle but no Android SDK.
-  **(interpretation)** Game rules should sit in code with no Android
-  dependency, so their unit tests can run without the SDK.
+- The agent's environment has Java and Gradle but no Android SDK, and cannot
+  reach Google's Maven repository. All game rules live in `core/` (plain
+  Kotlin, no Android), so their tests run here; the build only includes
+  `app/` when an SDK is found (see
+  [docs/architecture.md](docs/architecture.md)).
+- Maven Central sometimes answers 429 (too many requests); `--max-workers=1`
+  helps.
 
 ```bash
-./gradlew test   # unit tests
+./gradlew :core:test   # unit tests (no SDK needed)
 ```
 
 ## File Structure
@@ -243,8 +247,10 @@ After every push:
 │   ├── README.md
 │   ├── game-design.md
 │   ├── weapons.md
+│   ├── architecture.md
 │   └── glossary.md
-├── app/         # Android app (Kotlin)
+├── core/        # Game rules (plain Kotlin, unit-tested)
+├── app/         # Android app (Kotlin, Compose)
 ├── versions/    # APKs committed by build_branches.sh
 └── build-logs/  # Build output committed by build_branches.sh
 ```

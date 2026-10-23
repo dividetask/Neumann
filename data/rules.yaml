@@ -1,0 +1,37 @@
+# Simulation, auto-pause, mining, and AI settings.
+# See docs/game-design.md. Starting values are untuned.
+
+sim:
+  baseStepSeconds: 10          # normal simulation step
+  fineStepSeconds: 0.5         # shortest step, used near impacts
+  fineStepDivisions: 10        # step ≈ projectile time-to-target / this
+  historySampleSeconds: 10     # how often positions are recorded for light delay
+  historyKeepSeconds: 21600    # how far back positions are kept
+  slugLifetimeSeconds: 21600
+  torpedoLifetimeSeconds: 43200
+  seed: 1
+
+autoPause:
+  lowSupplyFraction: 0.25
+  repeatSuppressionSeconds: 600
+  pauseOn:
+    - NEW_CONTACT
+    - TORPEDO_INBOUND
+    - ENTERED_WEAPON_RANGE
+    - DAMAGE_TAKEN
+    - DESTROYED
+    - LOW_FUEL
+    - LOW_AMMO
+    - BURN_COMPLETE
+    - SYSTEM_CLAIMED
+    - SHIP_LOST
+
+mining:
+  clearRadiusKm: 10000000      # no known enemy this close
+  miningDistanceKm: 500000     # this close to a planet
+  maxRelativeSpeedKmS: 2       # slower than this relative to the planet
+  mineralsPerHour: 20
+
+ai:
+  standoffKm: 3000             # enemy ships try to hold this distance
+  maxClosingSpeedKmS: 60

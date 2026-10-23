@@ -1,16 +1,31 @@
 # Weapons
 
+All weapon numbers live in `data/ships.yaml`. Starting values are untuned.
+
 ## First version
 
 The bare minimum to test the game.
 
 - **Laser** — a beam weapon. Hits at the speed of light, so it cannot be
-  dodged; damage falls off with range. Also serves as
-  point defence: it can fire at incoming torpedoes.
-- **Cannon** — fires solid slugs (railgun-style). Heavy damage, but a slug is
-  slow, so at long range a target can move out of the way.
-- **Guided exploding torpedo** — steers itself toward its target and explodes
-  near it. Can be shot down.
+  dodged. Damage per second falls off linearly from `damagePerSecond` at
+  point blank to zero at `range`. Also serves as point defence: with point
+  defence on, it fires at the nearest torpedo aimed at its ship before any
+  other target. **(interpretation)** Beam travel time is ignored (at laser
+  range it is a fraction of a second).
+- **Cannon** — fires solid slugs (railgun-style) at `muzzleSpeed` relative to
+  the ship, one per `cooldownSeconds`. Heavy damage, but a slug is slow, so a
+  target that changes course after the shot can be missed. The gun aims at
+  where the target will be if it keeps its current velocity. A slug hits if it
+  passes within a ship's `sizeM`. **(interpretation)** Slugs are too small
+  to show up on sensors.
+- **Guided exploding torpedo** — launched at `launchSpeed`, then accelerates
+  at `acceleration` until its `deltaV` is used up. Steers itself toward its
+  target and explodes when it passes within `blastRadius`, damaging every
+  ship in that radius. Has `hitPoints` and can be shot down.
+  **(interpretation)** It steers by its own seeker, so its guidance has no
+  light delay. If its target is destroyed first, it self-destructs.
+- **(interpretation)** Slugs and torpedoes that hit nothing are removed after
+  `slugLifetimeSeconds` / `torpedoLifetimeSeconds` (`data/rules.yaml`).
 
 ## Pending
 

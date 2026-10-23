@@ -1,0 +1,107 @@
+# Ship classes. See docs/game-design.md and docs/weapons.md.
+# Starting values are untuned.
+
+ships:
+  probe:
+    name: Von Neumann probe
+    role: SHIP
+    sizeM: 100
+    parts:
+      - { kind: HULL, hitPoints: 3000, hitWeight: 40 }
+      - { kind: ENGINE, hitPoints: 200, hitWeight: 10 }
+      - { kind: SENSORS, hitPoints: 100, hitWeight: 8 }
+      - { kind: LASER, hitPoints: 150, hitWeight: 8 }
+      - { kind: CANNON, hitPoints: 150, hitWeight: 8 }
+      - { kind: TORPEDO_LAUNCHER, hitPoints: 150, hitWeight: 8 }
+      - { kind: FACTORY, hitPoints: 200, hitWeight: 10 }
+      - { kind: FUEL_TANK, hitPoints: 150, hitWeight: 8 }
+    drive: { accelerationMS2: 5, fuelCapacity: 600, fuelPerKmS: 1 }
+    sensor: { rangeAu: 1.0, signature: 1.0, burningSignature: 4.0, damagedFraction: 0.1 }
+    laser: { rangeKm: 5000, damagePerSecond: 4, burstSeconds: 60 }
+    cannon: { muzzleSpeedKmS: 20, cooldownSeconds: 30, ammo: 200, damage: 40, autoRangeKm: 20000 }
+    torpedo:
+      launchSpeedKmS: 0.05
+      accelerationMS2: 100
+      deltaVKmS: 15
+      hitPoints: 100
+      damage: 250
+      blastRadiusKm: 1
+      ammo: 12
+      cooldownSeconds: 120
+      launchRangeKm: 300000
+      signature: 0.1
+      burningSignature: 3.0
+    factory:
+      mineralsPerHour: 10
+      repairPointsPerMineral: 5
+      fuelPerMineral: 1
+      mineralsPerSlug: 0.5
+      mineralsPerTorpedo: 20
+
+  frigate:
+    name: Frigate
+    role: SHIP
+    sizeM: 80
+    parts:
+      - { kind: HULL, hitPoints: 1500, hitWeight: 40 }
+      - { kind: ENGINE, hitPoints: 150, hitWeight: 10 }
+      - { kind: SENSORS, hitPoints: 80, hitWeight: 8 }
+      - { kind: LASER, hitPoints: 120, hitWeight: 8 }
+      - { kind: CANNON, hitPoints: 120, hitWeight: 8 }
+      - { kind: TORPEDO_LAUNCHER, hitPoints: 120, hitWeight: 8 }
+      - { kind: FUEL_TANK, hitPoints: 100, hitWeight: 8 }
+    drive: { accelerationMS2: 8, fuelCapacity: 600, fuelPerKmS: 1 }
+    sensor: { rangeAu: 1.0, signature: 0.05, burningSignature: 4.0, damagedFraction: 0.1 }
+    laser: { rangeKm: 5000, damagePerSecond: 3, burstSeconds: 60 }
+    cannon: { muzzleSpeedKmS: 20, cooldownSeconds: 30, ammo: 100, damage: 40, autoRangeKm: 20000 }
+    torpedo:
+      launchSpeedKmS: 0.05
+      accelerationMS2: 100
+      deltaVKmS: 15
+      hitPoints: 100
+      damage: 250
+      blastRadiusKm: 1
+      ammo: 6
+      cooldownSeconds: 180
+      launchRangeKm: 300000
+      signature: 0.1
+      burningSignature: 3.0
+
+  defencePlatform:
+    name: Defence platform
+    role: DEFENCE
+    sizeM: 60
+    parts:
+      - { kind: HULL, hitPoints: 1200, hitWeight: 50 }
+      - { kind: SENSORS, hitPoints: 80, hitWeight: 10 }
+      - { kind: LASER, hitPoints: 100, hitWeight: 10 }
+      - { kind: CANNON, hitPoints: 100, hitWeight: 10 }
+    sensor: { rangeAu: 1.0, signature: 0.3, burningSignature: 0.3, damagedFraction: 0.1 }
+    laser: { rangeKm: 8000, damagePerSecond: 4, burstSeconds: 60 }
+    cannon: { muzzleSpeedKmS: 20, cooldownSeconds: 20, ammo: 300, damage: 40, autoRangeKm: 30000 }
+
+  base:
+    name: Base
+    role: BASE
+    sizeM: 500
+    parts:
+      - { kind: HULL, hitPoints: 6000, hitWeight: 60 }
+      - { kind: SENSORS, hitPoints: 200, hitWeight: 10 }
+      - { kind: LASER, hitPoints: 200, hitWeight: 10 }
+      - { kind: CANNON, hitPoints: 200, hitWeight: 10 }
+      - { kind: TORPEDO_LAUNCHER, hitPoints: 200, hitWeight: 10 }
+    sensor: { rangeAu: 1.5, signature: 2.0, burningSignature: 2.0, damagedFraction: 0.1 }
+    laser: { rangeKm: 8000, damagePerSecond: 6, burstSeconds: 60 }
+    cannon: { muzzleSpeedKmS: 20, cooldownSeconds: 20, ammo: 500, damage: 40, autoRangeKm: 30000 }
+    torpedo:
+      launchSpeedKmS: 0.05
+      accelerationMS2: 100
+      deltaVKmS: 15
+      hitPoints: 100
+      damage: 250
+      blastRadiusKm: 1
+      ammo: 20
+      cooldownSeconds: 180
+      launchRangeKm: 300000
+      signature: 0.1
+      burningSignature: 3.0

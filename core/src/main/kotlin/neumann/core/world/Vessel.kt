@@ -15,9 +15,6 @@ class ModuleState(val typeId: String, val type: ModuleType) {
 
     /** Missile bays: torpedoes held. */
     var torpedoes = 0
-
-    /** Laser turrets: seconds left in the current shot. */
-    var shotRemaining = 0.0
 }
 
 /** The direction a vessel turns to and holds. [vector] is used by FIXED. */

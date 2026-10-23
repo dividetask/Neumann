@@ -89,23 +89,22 @@ class WeaponTest {
     }
 
     @Test
-    fun `a laser fires in shots with a cooldown between them`() {
+    fun `a laser fires continuously while it has a target, and draws no power without one`() {
         val w = duel(2_000.0)
         val p = w.player
         lockOn(w)
         p.rules.laserAutoFire = true
-        val turret = p.working(ModuleKind.LASER_TURRET).first()
-        val laser = turret.type.laser!!
+        val d = Fixture.dummy(w)
         val step = SimulationStep(w.data)
-        var firing = 0
-        var total = 0
-        repeat(600) {
-            step.run(w, 1.0)
-            total++
-            if (turret.shotRemaining > 0.0 || turret.cooldown == laser.cooldownSeconds) firing++
-        }
-        val duty = laser.shotSeconds / (laser.shotSeconds + laser.cooldownSeconds)
-        assertEquals(duty, firing.toDouble() / total, 0.05, "fires about shot / (shot + cooldown) of the time")
+        val before = damageTaken(d)
+        repeat(60) { step.run(w, 1.0) }
+        val laser = p.working(ModuleKind.LASER_TURRET).map { it.type.laser!! }
+        val expected = laser.sumOf { it.damagePerSecond * (1 - 2_000.0 / it.rangeKm) } * 60
+        assertEquals(expected, damageTaken(d) - before, expected * 0.05, "a full minute of fire from every turret")
+        p.rules.laserAutoFire = false
+        val energy = p.energy
+        repeat(60) { step.run(w, 1.0) }
+        assertTrue(p.energy >= energy, "no target, no laser draw: the batteries recharge")
     }
 
     @Test

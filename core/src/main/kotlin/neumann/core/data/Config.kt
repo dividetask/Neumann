@@ -101,8 +101,6 @@ data class LaserConfig(
     val rangeKm: Double,
     val damagePerSecond: Double,
     val powerMW: Double,
-    val shotSeconds: Double,
-    val cooldownSeconds: Double,
     val burstSeconds: Double,
     val arcDeg: Double,
 )

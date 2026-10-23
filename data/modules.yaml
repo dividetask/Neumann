@@ -7,7 +7,7 @@ modules:
   probeHull:
     { name: Probe hull, kind: HULL, cost: 200, massT: 60, buildHours: 48, hitPoints: 4000 }
   raiderHull:
-    { name: Raider hull, kind: HULL, cost: 60, massT: 30, buildHours: 16, hitPoints: 600 }
+    { name: Raider hull, kind: HULL, cost: 60, massT: 30, buildHours: 16, hitPoints: 900 }
   platformHull:
     { name: Platform hull, kind: HULL, cost: 80, massT: 50, buildHours: 24, hitPoints: 1200 }
   baseHull:
@@ -120,7 +120,7 @@ modules:
     massT: 8
     buildHours: 24
     hitPoints: 120
-    laser: { rangeKm: 5000, damagePerSecond: 4, powerMW: 5, shotSeconds: 10, cooldownSeconds: 20, burstSeconds: 60, arcDeg: 150 }
+    laser: { rangeKm: 5000, damagePerSecond: 4, powerMW: 5, burstSeconds: 60, arcDeg: 150 }
   lightLaserTurret:
     name: Light laser turret
     kind: LASER_TURRET
@@ -128,7 +128,7 @@ modules:
     massT: 5
     buildHours: 12
     hitPoints: 80
-    laser: { rangeKm: 4000, damagePerSecond: 2, powerMW: 4, shotSeconds: 10, cooldownSeconds: 30, burstSeconds: 60, arcDeg: 150 }
+    laser: { rangeKm: 4000, damagePerSecond: 2, powerMW: 4, burstSeconds: 60, arcDeg: 150 }
   heavyLaserTurret:
     name: Heavy laser turret
     kind: LASER_TURRET
@@ -136,7 +136,7 @@ modules:
     massT: 15
     buildHours: 40
     hitPoints: 200
-    laser: { rangeKm: 8000, damagePerSecond: 6, powerMW: 12, shotSeconds: 10, cooldownSeconds: 20, burstSeconds: 60, arcDeg: 150 }
+    laser: { rangeKm: 8000, damagePerSecond: 6, powerMW: 12, burstSeconds: 60, arcDeg: 150 }
   cannon:
     name: Cannon
     kind: CANNON
@@ -152,7 +152,7 @@ modules:
     massT: 6
     buildHours: 12
     hitPoints: 80
-    cannon: { muzzleSpeedKmS: 20, cooldownSeconds: 60, autoRangeKm: 12000, arcDeg: 10 }
+    cannon: { muzzleSpeedKmS: 20, cooldownSeconds: 30, autoRangeKm: 12000, arcDeg: 10 }
   cannonTurret:
     name: Cannon turret
     kind: CANNON
@@ -187,7 +187,7 @@ munitions:
     deltaVKmS: 40
     terminalReserveFraction: 0.25   # delta-v kept for steering on the final approach
     sizeM: 5
-    hitPoints: 30
+    hitPoints: 60
     damage: 250
     blastRadiusKm: 1
     signature: 0.1

@@ -81,9 +81,9 @@ Worked out from the modules that are still working:
 - Electrical engines charge the batteries; anything beyond battery capacity
   is lost.
 - Sensors draw their power every step they are on. Lasers draw theirs only
-  during a shot; a laser with too little stored power does not fire. The
-  generator only needs to cover the average, since batteries cover each
-  shot.
+  while firing; a laser with too little stored power does not fire. The
+  batteries carry the ship through an engagement and recharge in the gaps
+  between them, so the generator need not match the lasers' full draw.
 - A destroyed battery loses its share of the stored power.
 
 ## Damage

@@ -15,10 +15,9 @@ The bare minimum to test the game.
 
 - **Laser** — a beam weapon. Hits at the speed of light, so it cannot be
   dodged. Damage per second falls off linearly from `damagePerSecond` at
-  point blank to zero at `range`. Fires in shots: each shot lasts
-  `shotSeconds`, then the turret cools for `cooldownSeconds` before the next,
-  so lasers do not fire constantly. Draws `powerMW` during a shot. Also serves
-  as point defence: with point
+  point blank to zero at `range`. Fires continuously while it has a target in
+  range and arc, drawing `powerMW`; between engagements it has no target and
+  draws nothing. Also serves as point defence: with point
   defence on, it fires at the nearest torpedo aimed at its ship before any
   other target. **(interpretation)** Beam travel time is ignored (at laser
   range it is a fraction of a second).

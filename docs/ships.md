@@ -62,8 +62,8 @@ Worked out from the modules that are still working:
 ## Facing and turning
 
 - Every ship has a facing: a front, and an up. Right is front × up.
-- Ships turn toward their heading at their turn rate: the front first, then
-  any roll. A ship with no working propulsion, or no fuel, cannot turn.
+- Ships turn toward their heading at their turn rate. A ship with no
+  working propulsion, or no fuel, cannot turn.
 - Turning uses a small amount of fuel: `turnFuelKgPerTonneDeg`
   (`data/rules.yaml`) × mass in tonnes × degrees turned. **(interpretation)**
   Heavier ships use more fuel to turn the same angle.
@@ -74,8 +74,9 @@ Worked out from the modules that are still working:
   counts thrusting time only, not the turn before it.
 - All player controls are relative to the ship (see
   [game-design.md](game-design.md#orders)).
-- Fixed defences and bases do not turn. **(interpretation)** Their front
-  points away from the planet they guard.
+- Fixed defences and bases have no propulsion, so they do not turn.
+  **(interpretation)** Their front starts pointing away from the body they
+  orbit and stays fixed in space.
 
 ## Power
 

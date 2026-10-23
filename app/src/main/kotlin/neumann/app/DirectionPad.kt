@@ -25,27 +25,27 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 
-private enum class Axis(val label: String, val top: String) { YAW("YAW", "front"), PITCH("PITCH", "front"), ROLL("ROLL", "up") }
+private enum class Axis(val label: String) { YAW("YAW"), PITCH("PITCH") }
 
 /**
- * The YAW, PITCH, and ROLL dials. The top of each dial is the ship's current
- * facing. [pending] (filled dot) is the turn being set; [toGo] (ring) is the
+ * The YAW and PITCH dials. The top of each dial is the ship's current
+ * front. [pending] (filled dot) is the turn being set; [toGo] (ring) is the
  * turn the ship still has to make, which moves to the top as it turns.
  */
 @Composable
-fun DirectionPad(pending: Angles?, toGo: Angles?, onChange: (Angles) -> Unit) {
+fun DirectionPad(pending: Angles?, toGo: Angles?, toGoLabel: String = "To go: ", onChange: (Angles) -> Unit) {
     Row(Modifier.fillMaxWidth().padding(top = 6.dp)) {
         for (axis in Axis.entries) {
             Column(Modifier.weight(1f).padding(3.dp)) {
                 Line(axis.label, Theme.dim)
                 Dial(axis, pending?.let { angleOf(it, axis) }, toGo?.let { angleOf(it, axis) }) { deg ->
-                    onChange(withAngle(pending ?: Angles(0.0, 0.0, 0.0), axis, deg))
+                    onChange(withAngle(pending ?: Angles(0.0, 0.0), axis, deg))
                 }
             }
         }
     }
     Line("Set:   " + (pending?.let(::describe) ?: "drag a dial"), if (pending == null) Theme.dim else Theme.alert)
-    Line("To go: " + (toGo?.let(::describe) ?: "no heading"), Theme.dim)
+    if (toGoLabel.isNotEmpty()) Line(toGoLabel + (toGo?.let(::describe) ?: "no heading"), Theme.dim)
 }
 
 @Composable
@@ -86,18 +86,15 @@ private fun DrawScope.onRim(deg: Double, f: Float): Offset {
 private fun angleOf(a: Angles, axis: Axis) = when (axis) {
     Axis.YAW -> a.yaw
     Axis.PITCH -> a.pitch
-    Axis.ROLL -> a.roll
 }
 
 private fun withAngle(a: Angles, axis: Axis, deg: Double) = when (axis) {
     Axis.YAW -> a.copy(yaw = deg)
     Axis.PITCH -> a.copy(pitch = deg)
-    Axis.ROLL -> a.copy(roll = deg)
 }
 
 private fun describe(a: Angles): String =
-    "yaw %.0f° %s, pitch %.0f° %s, roll %.0f° %s".format(
+    "yaw %.0f° %s, pitch %.0f° %s".format(
         abs(a.yaw), if (a.yaw >= 0) "R" else "L",
         abs(a.pitch), if (a.pitch >= 0) "U" else "D",
-        abs(a.roll), if (a.roll >= 0) "R" else "L",
     )

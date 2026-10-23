@@ -28,6 +28,6 @@ class GameSession(val data: GameData, approach: ApproachVector) {
     fun turnToGo(): DirectionDials.Angles? {
         val p = world.player
         val dir = headingDirection() ?: return null
-        return DirectionDials.remaining(p.forward, p.up, dir, p.heading?.up)
+        return DirectionDials.remaining(p.forward, p.up, dir)
     }
 }

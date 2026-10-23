@@ -19,7 +19,6 @@ class SimulationStep(data: GameData) {
     private val cannons = CannonPhase(InterceptSolver(), data.munitions.slug)
     private val launches = TorpedoLaunchPhase(data.munitions.torpedo)
     private val motion = MotionPhase(GravityField(), rules.sim)
-    private val stationKeeping = StationKeeping()
     private val impacts = ImpactPhase(damage)
     private val collisions = BodyCollisionPhase(damage)
     val sensors = SensorPhase(LightDelay(), performance)
@@ -40,7 +39,6 @@ class SimulationStep(data: GameData) {
         motion.run(world, dt)
         world.time += dt
         planetMover.run(world)
-        stationKeeping.run(world)
         impacts.run(world)
         collisions.run(world)
         sensors.run(world)

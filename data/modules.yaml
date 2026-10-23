@@ -5,9 +5,9 @@
 modules:
   # --- Hulls -------------------------------------------------------------
   probeHull:
-    { name: Probe hull, kind: HULL, cost: 200, massT: 60, buildHours: 48, hitPoints: 2500 }
-  frigateHull:
-    { name: Frigate hull, kind: HULL, cost: 100, massT: 40, buildHours: 24, hitPoints: 1200 }
+    { name: Probe hull, kind: HULL, cost: 200, massT: 60, buildHours: 48, hitPoints: 4000 }
+  raiderHull:
+    { name: Raider hull, kind: HULL, cost: 60, massT: 30, buildHours: 16, hitPoints: 600 }
   platformHull:
     { name: Platform hull, kind: HULL, cost: 80, massT: 50, buildHours: 24, hitPoints: 1200 }
   baseHull:
@@ -104,6 +104,14 @@ modules:
     buildHours: 24
     hitPoints: 120
     laser: { rangeKm: 5000, damagePerSecond: 4, powerMW: 8, burstSeconds: 60, arcDeg: 150 }
+  lightLaserTurret:
+    name: Light laser turret
+    kind: LASER_TURRET
+    cost: 50
+    massT: 5
+    buildHours: 12
+    hitPoints: 80
+    laser: { rangeKm: 4000, damagePerSecond: 2, powerMW: 4, burstSeconds: 60, arcDeg: 150 }
   heavyLaserTurret:
     name: Heavy laser turret
     kind: LASER_TURRET
@@ -120,6 +128,14 @@ modules:
     buildHours: 20
     hitPoints: 120
     cannon: { muzzleSpeedKmS: 20, cooldownSeconds: 30, autoRangeKm: 20000, arcDeg: 10 }
+  lightCannon:
+    name: Light cannon
+    kind: CANNON
+    cost: 40
+    massT: 6
+    buildHours: 12
+    hitPoints: 80
+    cannon: { muzzleSpeedKmS: 20, cooldownSeconds: 60, autoRangeKm: 15000, arcDeg: 10 }
   cannonTurret:
     name: Cannon turret
     kind: CANNON
@@ -137,13 +153,22 @@ modules:
     hitPoints: 100
     missileBay: { capacity: 6, cooldownSeconds: 120, launchRangeKm: 300000, arcDeg: 180 }
 
+  smallMissileBay:
+    name: Small missile bay
+    kind: MISSILE_BAY
+    cost: 30
+    massT: 3
+    buildHours: 8
+    hitPoints: 60
+    missileBay: { capacity: 3, cooldownSeconds: 120, launchRangeKm: 300000, arcDeg: 180 }
+
 munitions:
   slug: { damage: 40, massKg: 50, cost: 0.5, buildHours: 0.1 }
   torpedo:
     launchSpeedKmS: 0.05
     accelerationMS2: 100
-    deltaVKmS: 15
-    hitPoints: 100
+    deltaVKmS: 40
+    hitPoints: 50
     damage: 250
     blastRadiusKm: 1
     signature: 0.1

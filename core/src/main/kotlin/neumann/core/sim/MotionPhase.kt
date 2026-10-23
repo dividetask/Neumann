@@ -3,13 +3,12 @@ package neumann.core.sim
 import neumann.core.data.SimConfig
 import neumann.core.world.World
 
-/** Moves free ships, torpedoes, and slugs under gravity. */
+/** Moves vessels, torpedoes, and slugs under gravity. */
 class MotionPhase(private val gravity: GravityField, private val config: SimConfig) {
     fun run(world: World, dt: Double) {
         for (v in world.vessels) {
             if (!v.alive) continue
             v.previousPosition = v.position
-            if (v.station != null) continue
             v.velocity += gravity.acceleration(world, v.position) * dt
             v.position += v.velocity * dt
         }

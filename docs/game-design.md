@@ -81,23 +81,23 @@ B. **Burn** in a direction: throttle (fraction of full thrust) and duration.
 
 All directions are relative to the ship. They are chosen with:
 
-- **Direction circles** — three circles, one for each axis, each with a dot
-  that can be dragged around it. **(interpretation)** Each circle is a dial:
+- **Direction circles** — two dials, each with a dot that can be dragged
+  around it. Two are enough: a direction needs only yaw and pitch. Roll would
+  matter only for weapons that fire to the ship's sides, and every weapon arc
+  is measured from the front. **(interpretation)**
   - **YAW** (seen from above): the top is the ship's front; clockwise is
     right.
   - **PITCH** (seen from the side): the top is the ship's front; clockwise is
     up. Limited to ±90°.
-  - **ROLL** (seen from behind): the top is the ship's up; clockwise rolls
-    right.
 
-  The turn is yaw, then pitch, then roll, from the ship's facing when the
-  order is given; the resulting orientation is then fixed in space. While the
-  ship turns, each dot shows the turn still to go, so the dots move to the
-  top as the ship turns.
+  The turn is yaw, then pitch, from the ship's facing when the order is
+  given; the resulting direction is then fixed in space. While the ship
+  turns, each dot shows the turn still to go, so the dots move to the top as
+  the ship turns.
 - **Presets** **(interpretation)**: prograde, retrograde, toward target, away
   from target, and match target velocity (burns against the velocity relative
   to the target and stops itself when that reaches zero). Presets keep
-  tracking as things move, and set no roll.
+  tracking as things move.
 C. **Pick a target** from the contact list.
 D. **Fire a weapon now** at the target. **(interpretation)** One cannon fires
    one slug and one missile bay launches one torpedo, as soon as one is ready
@@ -110,10 +110,13 @@ E. **Set weapon rules**: laser point defence, laser auto-fire at target,
 ## Space
 
 - The game is in **3D**.
-- **(interpretation)** An approach vector is a bearing from the star
-  (azimuth and elevation) plus an entry speed. The ship starts on the entry
-  sphere (`entryRadius` from the star) at that bearing, heading toward the
-  star.
+- Everything the player chooses is from the ship's point of view; there are
+  no star-relative controls.
+- **(interpretation)** The ship arrives on the entry sphere (`radiusAu` from
+  the star) at a bearing set by where it came from (`entry.bearingDeg` in
+  `data/scenario.yaml` for the first version). The approach vector is chosen
+  from the ship, looking at the star: the YAW and PITCH dials aim it off the
+  star, and a slider sets the entry speed.
 - **Realistic scale.** Distances are real: a system is billions of km across,
   and light takes minutes to cross it.
 - **Light delay.** Sensors show where a contact was when its light left it,
@@ -129,8 +132,11 @@ E. **Set weapon rules**: laser point defence, laser auto-fire at target,
 - The gravity of stars and planets affects ships, torpedoes, and slugs.
   **(interpretation)** Stars and planets follow fixed circular orbits and are
   not moved by anything.
-- **(interpretation)** Fixed defences and bases hold station next to a
-  planet: they move with it and are not moved by gravity or burns.
+- Fixed defences are not necessarily attached to anything: they lack the
+  engines to move much and only keep their orbit. **(interpretation)**
+  Fixed defences and bases start in a circular orbit of a planet or the star
+  (`orbits` in `data/scenario.yaml`) and follow it under gravity, like any
+  ship that is not burning.
 
 ## Sensors
 
@@ -167,6 +173,12 @@ The first-version system is defined in `data/scenario.yaml`.
 
 - AI only in the first version.
 - An opponent may be a single ship or a fleet.
+- **First-version enemy: the raider** — a simple, easy ship with 1 laser,
+  2–4 torpedoes, and a cannon (`raider` in `data/ships.yaml`).
+- **Balance rule:** the probe must be able to beat four raiders at once
+  without significant strategy (all weapon rules on, facing the nearest
+  enemy). `BalanceTest` checks this against the data: it must win and keep at
+  least half its hull.
 - **(interpretation)** First-version AI:
   - Fixed defences and bases fire at the player whenever in range.
   - Enemy ships close on the player and match velocity at weapon range, then

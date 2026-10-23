@@ -17,20 +17,20 @@ import neumann.core.world.World
 class OrderDesk(private val world: World) {
     private val player get() = world.player
 
-    /** Turn to a direction (and, for FIXED, the roll [up]) and hold it. Cancels any burn. */
-    fun face(mode: HeadingMode, vector: Vec3 = Vec3.ZERO, up: Vec3? = null): String? {
+    /** Turn to a direction and hold it. Cancels any burn. */
+    fun face(mode: HeadingMode, vector: Vec3 = Vec3.ZERO): String? {
         headingProblem(mode, vector)?.let { return it }
-        player.heading = Heading(mode, vector, up.takeIf { mode == HeadingMode.FIXED })
+        player.heading = Heading(mode, vector)
         player.burn = null
         return null
     }
 
     /** Turn to a direction, then thrust along it for [seconds] of thrusting. */
-    fun burn(mode: HeadingMode, vector: Vec3, throttle: Double, seconds: Double, up: Vec3? = null): String? {
+    fun burn(mode: HeadingMode, vector: Vec3, throttle: Double, seconds: Double): String? {
         headingProblem(mode, vector)?.let { return it }
         if (player.fuel <= 0.0) return "No fuel"
         if (throttle <= 0.0) return "Throttle is zero"
-        player.heading = Heading(mode, vector, up.takeIf { mode == HeadingMode.FIXED })
+        player.heading = Heading(mode, vector)
         player.burn = Burn(throttle.coerceAtMost(1.0), seconds)
         return null
     }

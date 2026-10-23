@@ -11,8 +11,8 @@ class PlayerWatch {
     var lowTorpedoes = false
 }
 
-/** The player's entry choice: bearing from the star, and speed. */
-data class ApproachVector(val azimuthDeg: Double, val elevationDeg: Double, val speedKmS: Double)
+/** The player's entry choice, from the ship looking at the star: aim (yaw, pitch) off the star, and speed. */
+data class ApproachVector(val yawDeg: Double, val pitchDeg: Double, val speedKmS: Double)
 
 /** The whole state of one battle. */
 class World(

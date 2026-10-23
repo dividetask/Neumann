@@ -174,6 +174,8 @@ data class PlanetConfig(
 @Serializable
 data class EntryConfig(
     val radiusAu: Double,
+    /** Bearing of the arrival point from the star: azimuth, elevation. */
+    val bearingDeg: List<Double>,
     val minSpeedKmS: Double,
     val maxSpeedKmS: Double,
     val defaultSpeedKmS: Double,
@@ -186,7 +188,8 @@ data class PlayerPlacement(val name: String, val design: String)
 data class EnemyPlacement(
     val name: String,
     val design: String,
-    val planet: String,
+    /** The planet or star it starts in a circular orbit of. */
+    val orbits: String,
     val offsetKm: List<Double>,
     val ambush: Boolean = false,
     val ambushRangeKm: Double = 0.0,

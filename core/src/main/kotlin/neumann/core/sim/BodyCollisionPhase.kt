@@ -7,7 +7,7 @@ import neumann.core.world.World
 class BodyCollisionPhase(private val damage: DamageResolver) {
     fun run(world: World) {
         for (v in world.vessels) {
-            if (!v.alive || v.station != null) continue
+            if (!v.alive) continue
             bodyHit(world, v.position)?.let { damage.destroy(world, v, "crashing into $it") }
         }
         for (t in world.torpedoes) if (t.alive && bodyHit(world, t.position) != null) t.alive = false

@@ -12,10 +12,11 @@
 - **Contact** — Any object the ship's sensors have detected.
 - **Design** — A ship's list of modules; fixed defences and bases are designs
   too.
-- **Direction circles** — The YAW, PITCH, and ROLL dials used to turn the
-  ship, relative to its facing.
+- **Direction circles** — The YAW and PITCH dials used to pick a direction
+  relative to the ship.
 - **Facing** — Which way a ship's front and top point.
-- **Fixed defence** — A stationary weapon installation in a star system.
+- **Fixed defence** — A weapon installation without real engines; it only
+  keeps its orbit.
 - **Light delay** — The time light takes to reach the ship; sensors show
   contacts as they were, not as they are.
 - **Mineral estimate** — The predicted mineral resources at a destination

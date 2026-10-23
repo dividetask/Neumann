@@ -54,9 +54,7 @@ on load into the world.
 - `Vessel` — a ship, fixed defence, or base. `VesselRole`, `Faction`.
 - `ModuleKind`, `ModuleState` — one fitted module: hit points, and for
   cannons and missile bays their cooldown (and torpedoes held).
-- `Station` — the planet and offset a fixed vessel holds station at.
-- `Heading`, `HeadingMode` — the direction a vessel turns to and holds, and
-  for FIXED headings an optional up (roll).
+- `Heading`, `HeadingMode` — the direction a vessel turns to and holds.
 - `Burn` — an active burn along the heading.
 - `WeaponRules` — the weapon-rule toggles. `WeaponKind` — laser, cannon, torpedo.
 - `Torpedo`, `Slug` — projectiles.
@@ -77,16 +75,15 @@ Run in this order by `SimulationStep`:
 |---|---|
 | `EnemyAi` | Sets enemy targets, headings, and burns. |
 | `PowerPhase` | Generators charge batteries; scanners draw power. |
-| `TurnPhase` | Turns vessels toward their heading (then roll) at their turn rate; uses turning fuel. |
+| `TurnPhase` | Turns vessels toward their heading at their turn rate; uses turning fuel. |
 | `BurnPhase` | Thrusts once facing the heading (fuel use, burn end). |
 | `TorpedoGuidance` | Steers and thrusts torpedoes. |
 | `LaserPhase` | Fires lasers (point defence first). |
 | `CannonPhase` | Fires cannon slugs. Uses `InterceptSolver`. |
 | `TorpedoLaunchPhase` | Launches torpedoes. |
-| `MotionPhase` | Gravity and movement of free ships, torpedoes, and slugs. Uses `GravityField`. |
+| `MotionPhase` | Gravity and movement of vessels, torpedoes, and slugs. Uses `GravityField`. |
 | *(time advances)* | |
 | `PlanetMover` | Moves planets to the new time. |
-| `StationKeeping` | Keeps fixed defences and bases at their station. |
 | `ImpactPhase` | Slug hits and torpedo detonations. Uses `ClosestApproach`. |
 | `BodyCollisionPhase` | Anything inside a star or planet is destroyed. |
 | `SensorPhase` | Updates every vessel's contacts. Uses `LightDelay`. |
@@ -105,8 +102,8 @@ capacities, sensor and threat range from the working modules).
 - `ScenarioBuilder` — builds a `World` from the scenario and the approach
   vector.
 - `VesselFactory` — builds a vessel from its design, fully loaded.
-- `DirectionDials` — turns YAW, PITCH, and ROLL dial angles into an
-  orientation in space, and an orientation back into the turn still to go.
+- `DirectionDials` — turns YAW and PITCH dial angles into a direction in
+  space, and a direction back into the turn still to go.
 - `AutoPauseMonitor` — decides which new events stop a time skip (with repeat
   suppression).
 - `TimeSkip` — runs steps until the time is up or a pause.
@@ -118,9 +115,10 @@ capacities, sensor and threat range from the working modules).
 
 - `MainActivity` — hosts the screens.
 - `AssetDataSource` — `DataSource` over the APK's assets.
-- `ApproachScreen` — choose the approach vector.
+- `ApproachScreen` — choose the approach vector, from the ship's view of
+  the star.
 - `BridgeScreen` — status, plot, contacts, orders, time skips, event log.
-- `DirectionPad` — the three direction dials.
+- `DirectionPad` — the two direction dials.
 - `SystemPlot` — top and side views of the system. `PlotZoom` — its zoom
   levels.
 - `Controls` — `ConsoleButton`, `ChoiceRow`, `Section`, `Line`.

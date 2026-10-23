@@ -23,9 +23,9 @@ object Fixture {
         GameDataLoader { File(System.getProperty("neumann.dataDir"), it).readText() }.load()
     }
 
-    /** One enemy frigate lying in ambush that never springs: it never moves or targets. */
+    /** One enemy raider lying in ambush that never springs: it never moves or targets. */
     fun world(): World {
-        val dummy = EnemyPlacement("Dummy", "frigate", "Shale", listOf(0.0, 200000.0, 0.0), ambush = true, ambushRangeKm = 0.0)
+        val dummy = EnemyPlacement("Dummy", "raider", orbits = "Shale", offsetKm = listOf(0.0, 200000.0, 0.0), ambush = true, ambushRangeKm = 0.0)
         val d = data.copy(scenario = data.scenario.copy(enemies = listOf(dummy)))
         return ScenarioBuilder(d).build(ApproachVector(0.0, 0.0, 50.0))
     }

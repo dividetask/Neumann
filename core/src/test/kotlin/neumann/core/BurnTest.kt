@@ -1,6 +1,5 @@
 package neumann.core
 
-import neumann.core.game.DirectionDials
 import neumann.core.game.OrderDesk
 import neumann.core.math.Vec3
 import neumann.core.sim.SimulationStep
@@ -56,18 +55,6 @@ class BurnTest {
         val expected = w.data.rules.ships.turnFuelKgPerTonneDeg * massT * 90.0 / 1000
         assertEquals(expected, fuel - p.fuel, expected * 0.01)
         assertTrue((p.forward - Vec3(1.0, 0.0, 0.0)).length() < 1e-6)
-    }
-
-    @Test
-    fun `a ship rolls to a fixed heading's up after turning its front`() {
-        val w = Fixture.world()
-        val p = w.player
-        Fixture.place(w, p, Fixture.openSpace, Vec3.ZERO, forward = Vec3(0.0, 1.0, 0.0))
-        val o = DirectionDials.orientation(p.forward, p.up, DirectionDials.Angles(30.0, 0.0, 90.0))
-        OrderDesk(w).face(HeadingMode.FIXED, o.forward, o.up)
-        Fixture.runFor(w, 600.0)
-        assertTrue((p.forward - o.forward).length() < 1e-6)
-        assertTrue((p.up - o.up).length() < 1e-6)
     }
 
     @Test

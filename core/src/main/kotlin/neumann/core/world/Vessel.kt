@@ -17,14 +17,8 @@ class ModuleState(val typeId: String, val type: ModuleType) {
     var torpedoes = 0
 }
 
-/** The planet and offset a fixed vessel holds station at. */
-class Station(val planet: Planet, val offset: Vec3)
-
-/**
- * The direction a vessel turns to and holds. [vector] is used by FIXED;
- * [up], if set, is the roll a FIXED heading turns to as well.
- */
-class Heading(val mode: HeadingMode, val vector: Vec3 = Vec3.ZERO, val up: Vec3? = null)
+/** The direction a vessel turns to and holds. [vector] is used by FIXED. */
+class Heading(val mode: HeadingMode, val vector: Vec3 = Vec3.ZERO)
 
 /** An active burn along the heading. [remainingSeconds] counts thrusting time. */
 class Burn(val throttle: Double, var remainingSeconds: Double)
@@ -47,7 +41,6 @@ class Vessel(
     override var velocity: Vec3,
     var forward: Vec3,
     var up: Vec3,
-    val station: Station?,
 ) : Tracked {
     override val history = PositionHistory(existedBefore = true)
     override var alive = true

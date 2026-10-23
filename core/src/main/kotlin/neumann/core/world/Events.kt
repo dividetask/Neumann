@@ -28,7 +28,11 @@ class GameEvent(
     val subjectId: String? = null,
     var amount: Double = 0.0,
 ) {
-    val message: String get() = if (amount > 0.0) "$text: ${amount.toInt()} damage" else text
+    val message: String get() = when {
+        amount <= 0.0 -> text
+        amount < 1.0 -> "$text: <1 damage"
+        else -> "$text: ${amount.toInt()} damage"
+    }
 }
 
 class EventLog {

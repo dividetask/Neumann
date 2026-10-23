@@ -9,14 +9,16 @@ planets:
   - { name: Haven, orbitAu: 1.0, inclinationDeg: 0, phaseDeg: 120, massEarth: 1.2, radiusKm: 6800 }
   - { name: Shale, orbitAu: 1.7, inclinationDeg: 4, phaseDeg: 250, massEarth: 15, radiusKm: 25000 }
 
-entry: { radiusAu: 1.3, minSpeedKmS: 20, maxSpeedKmS: 300, defaultSpeedKmS: 80 }
+# The ship arrives at bearingDeg [azimuth, elevation] from the star (where it came from).
+entry: { radiusAu: 1.3, bearingDeg: [0, 5], minSpeedKmS: 20, maxSpeedKmS: 300, defaultSpeedKmS: 80 }
 
 player: { name: Neumann, design: probe }
 
-# offsetKm is from the planet's centre. Fixed defences and bases hold station
-# there; ships start in a circular orbit of the planet at that offset.
+# Each enemy starts in a circular orbit of `orbits` (a planet or the star) at
+# offsetKm from its centre.
 enemies:
-  - { name: Haven Base, design: base, planet: Haven, offsetKm: [40000, 0, 0] }
-  - { name: Haven Platform, design: defencePlatform, planet: Haven, offsetKm: [-40000, 0, 5000] }
-  - { name: Picket, design: frigate, planet: Haven, offsetKm: [0, 150000, 0] }
-  - { name: Lurker, design: frigate, planet: Cinder, offsetKm: [0, 80000, 0], ambush: true, ambushRangeKm: 2000000 }
+  - { name: Haven Platform, design: defencePlatform, orbits: Haven, offsetKm: [-40000, 0, 5000] }
+  - { name: Raider 1, design: raider, orbits: Haven, offsetKm: [0, 150000, 0] }
+  - { name: Raider 2, design: raider, orbits: Haven, offsetKm: [0, -150000, 0] }
+  - { name: Raider 3, design: raider, orbits: Cinder, offsetKm: [0, 80000, 0], ambush: true, ambushRangeKm: 2000000 }
+  - { name: Raider 4, design: raider, orbits: Arden, offsetKm: [0, -180000000, 0] }

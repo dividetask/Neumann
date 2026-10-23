@@ -17,27 +17,28 @@ designs:
       fuelTank: 3
       longRangeScanner: 1
       laserTurret: 2
-      cannon: 1
-      ammoContainer: 2
+      cannon: 2
+      ammoContainer: 3
       missileBay: 2
 
-  frigate:
-    name: Frigate
+  # The first-version enemy: simple and easy. One laser, a few torpedoes, a cannon.
+  raider:
+    name: Raider
     role: SHIP
     sizeM: 80
     signature: 0.05
     burningSignature: 4.0
     modules:
-      frigateHull: 1
+      raiderHull: 1
       plasmaDrive: 1
       reactor: 1
       battery: 1
       fuelTank: 2
       shortRangeScanner: 1
-      laserTurret: 1
-      cannon: 1
+      lightLaserTurret: 1
+      lightCannon: 1
       ammoContainer: 1
-      missileBay: 1
+      smallMissileBay: 1
 
   defencePlatform:
     name: Defence platform

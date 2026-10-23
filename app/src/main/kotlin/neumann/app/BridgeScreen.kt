@@ -175,18 +175,16 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
                 DirectionPad(dials, session.turnToGo()) { dials = it; mode = HeadingMode.FIXED }
                 ChoiceRow(throttles, throttle) { throttle = it }
                 ChoiceRow(durations, duration) { duration = it }
-                // Dial angles are turned into an orientation fixed in space when the order is given.
-                fun target() = dials?.let { DirectionDials.orientation(player.forward, player.up, it) }
+                // Dial angles become a direction fixed in space when the order is given.
+                fun target() = dials?.let { DirectionDials.direction(player.forward, player.up, it) } ?: Vec3.ZERO
                 Row(Modifier.fillMaxWidth()) {
                     ConsoleButton("FACE", enabled = !world.over) {
-                        val t = target()
-                        val problem = session.orders.face(mode, t?.forward ?: Vec3.ZERO, t?.up)
+                        val problem = session.orders.face(mode, target())
                         if (problem == null) dials = null
                         changed(problem)
                     }
                     ConsoleButton("BURN", enabled = !world.over) {
-                        val t = target()
-                        val problem = session.orders.burn(mode, t?.forward ?: Vec3.ZERO, throttle, duration, t?.up)
+                        val problem = session.orders.burn(mode, target(), throttle, duration)
                         if (problem == null) dials = null
                         changed(problem)
                     }

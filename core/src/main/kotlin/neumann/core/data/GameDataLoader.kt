@@ -1,6 +1,7 @@
 package neumann.core.data
 
 import com.charleskorn.kaml.Yaml
+import neumann.core.math.Vec3
 import neumann.core.world.ModuleKind
 
 /** Parses the YAML data files into GameData. */
@@ -36,11 +37,12 @@ class GameDataLoader(private val source: DataSource) {
     }
 
     private fun checkScenario(designs: Map<String, ShipDesign>, scenario: ScenarioConfig) {
-        val planets = scenario.planets.map { it.name }.toSet()
+        val bodies = scenario.planets.map { it.name }.toSet() + scenario.star.name
         require(scenario.player.design in designs) { "unknown design ${scenario.player.design}" }
         for (e in scenario.enemies) {
             require(e.design in designs) { "${e.name}: unknown design ${e.design}" }
-            require(e.planet in planets) { "${e.name}: unknown planet ${e.planet}" }
+            require(e.orbits in bodies) { "${e.name}: unknown body ${e.orbits}" }
+            require(Vec3.of(e.offsetKm).length() > 0.0) { "${e.name}: offsetKm must not be zero" }
         }
     }
 }

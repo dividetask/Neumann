@@ -23,13 +23,13 @@ class DamageTest {
             ModuleState(id, if (id in weightless) t.copy(massT = 0.0) else t)
         }
         val design = ShipDesign("Test", VesselRole.SHIP, 10.0, 1.0, 1.0, emptyMap())
-        return Vessel("X", "Test", Faction.PLAYER, design, states, Vec3.ZERO, Vec3.ZERO, Vec3(1.0, 0.0, 0.0), Vec3(0.0, 0.0, 1.0), null)
+        return Vessel("X", "Test", Faction.PLAYER, design, states, Vec3.ZERO, Vec3.ZERO, Vec3(1.0, 0.0, 0.0), Vec3(0.0, 0.0, 1.0))
     }
 
     @Test
     fun `a destroyed fuel tank loses its fuel and extra damage goes to the hull`() {
         val w = Fixture.world()
-        val v = vessel(listOf("frigateHull", "fuelTank"), weightless = setOf("frigateHull"))
+        val v = vessel(listOf("raiderHull", "fuelTank"), weightless = setOf("raiderHull"))
         v.fuel = 20.0
         val tank = v.modules.first { it.kind == ModuleKind.FUEL_TANK }
         DamageResolver().hit(w, v, tank.type.hitPoints + 30.0, "E-0", "test")
@@ -41,7 +41,7 @@ class DamageTest {
     @Test
     fun `a destroyed fuel tank loses only its share of the fuel`() {
         val w = Fixture.world()
-        val v = vessel(listOf("frigateHull", "fuelTank", "fuelTank"), weightless = setOf("frigateHull"))
+        val v = vessel(listOf("raiderHull", "fuelTank", "fuelTank"), weightless = setOf("raiderHull"))
         v.fuel = 40.0
         DamageResolver().hit(w, v, modules.getValue("fuelTank").hitPoints, "E-0", "test")
         assertEquals(20.0, v.fuel, 1e-9)
@@ -50,7 +50,7 @@ class DamageTest {
     @Test
     fun `a destroyed missile bay loses its torpedoes`() {
         val w = Fixture.world()
-        val v = vessel(listOf("frigateHull", "missileBay"), weightless = setOf("frigateHull"))
+        val v = vessel(listOf("raiderHull", "missileBay"), weightless = setOf("raiderHull"))
         v.modules[1].torpedoes = 6
         DamageResolver().hit(w, v, modules.getValue("missileBay").hitPoints, "E-0", "test")
         assertEquals(0, v.torpedoes)
@@ -59,8 +59,8 @@ class DamageTest {
     @Test
     fun `a ship is destroyed only when every hull module is destroyed`() {
         val w = Fixture.world()
-        val v = vessel(listOf("frigateHull", "frigateHull"))
-        val hp = modules.getValue("frigateHull").hitPoints
+        val v = vessel(listOf("raiderHull", "raiderHull"))
+        val hp = modules.getValue("raiderHull").hitPoints
         DamageResolver().hit(w, v, hp * 1.5, "E-0", "test")
         assertTrue(v.alive)
         DamageResolver().hit(w, v, hp, "E-0", "test")

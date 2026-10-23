@@ -52,7 +52,7 @@ class World(
 
     fun vessel(id: String?): Vessel? = vessels.firstOrNull { it.id == id && it.alive }
 
-    fun tracked(): List<Tracked> = vessels.filter { it.alive } + torpedoes.filter { it.alive }
+    fun tracked(): List<Tracked> = vessels.filter { it.alive } + torpedoes.filter { it.alive } + slugs.filter { it.alive }
 
     fun event(kind: EventKind, sourceId: String?, message: String) {
         log.add(GameEvent(time, kind, sourceId, message))

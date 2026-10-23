@@ -9,7 +9,7 @@ untuned.
 | Type | Active? | Detects | Accuracy |
 |---|---|---|---|
 | **Telescope** (infrared/optical) | Passive | Anything within `rangeAu × signature`: an engine plume is visible across the system, a cold hull only up close | Direction very precise; distance poor |
-| **Radar** (microwave) | Active | Anything within `rangeAu × (sizeM ÷ 100 m)^¼`, hot or cold | Good direction, good distance and speed |
+| **Radar** (microwave) | Active | Anything within `rangeAu × √(sizeM ÷ 100 m)`, hot or cold (radar range goes as the fourth root of radar cross-section, which goes as size²) | Good direction, good distance and speed |
 | **Lidar** (laser ranging) | Active | Only the vessel's current target, if already known and within `rangeAu` | Very precise distance and speed |
 | **Emission receiver** | Passive | Any vessel using an active sensor, within `rangeAu` | Direction only |
 
@@ -32,6 +32,15 @@ Every sensor has:
   delayed) values plus random errors of the sensor's size, drawn again every
   step. **(interpretation)** Position error = `bearingErrorDeg` × distance
   across the line of sight and `rangeErrorFraction` × distance along it.
+- **Passive tracking improves with time.** **(interpretation)** A sensor with
+  `trackTimeConstantSeconds` (the telescope) narrows its distance and speed
+  errors the longer it follows the same contact: error = base ÷
+  (1 + seconds tracked ÷ `trackTimeConstantSeconds`)^1.5, down to
+  `minRangeErrorFraction` / `minVelocityErrorKmS`. This is passive bearing
+  tracking: a sequence of bearings over minutes gives a range; for a target
+  on a steady course, a tracking filter's velocity error falls roughly as
+  time^-1.5. A ship can aim its cannons without emitting, given about an
+  hour of quiet tracking.
 - Each contact carries its **uncertainty** (the position error size). The plot
   shows it as an error circle and the contact list as "±".
 - A contact seen only by an emission receiver is **bearing only**: its
@@ -39,10 +48,21 @@ Every sensor has:
   targeted (torpedoes can be launched toward it; their seekers do the rest),
   but cannons will not fire at it.
 
+## Slugs
+
+- Slugs give off no heat, so telescopes never see them.
+- Radar can see them, but they are tiny (`sizeM` 0.1 m), so only at short
+  range: about 3% of radar's range against a 100 m ship.
+- A detected slug heading for the ship (its straight-line path passes within
+  `slugAlertKm` of the ship, allowing three times the estimate's errors)
+  raises **slug inbound**, an auto-pause event.
+  Seeing slugs coming therefore means emitting.
+
 ## Who uses the estimates
 
 - **Cannons** aim at the estimate, so long-range shots miss unless the target
-  is well tracked (lidar).
+  is well tracked: by lidar (which emits), or by a long passive telescope
+  track (which does not, but is less precise).
 - **Torpedoes** are launched toward the estimate, then steer by their own
   seekers.
 - **Lasers** **(interpretation)** have their own fine tracking within weapon

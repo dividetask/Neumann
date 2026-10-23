@@ -12,6 +12,8 @@ sim:
   seed: 1
 
 ships:
+  jinkIntervalSeconds: 20         # evasive manoeuvres pick a new sideways direction this often
+  slugAlertKm: 1                  # a detected slug passing this close raises slug inbound
   alignToleranceDeg: 2          # a burn thrusts once the front is this close to its direction
   turnFuelKgPerTonneDeg: 0.0005 # turning fuel: kg per tonne of ship per degree
 
@@ -21,6 +23,7 @@ autoPause:
   pauseOn:
     - NEW_CONTACT
     - TORPEDO_INBOUND
+    - SLUG_INBOUND
     - ENTERED_WEAPON_RANGE
     - DAMAGE_TAKEN
     - DESTROYED
@@ -30,6 +33,7 @@ autoPause:
     - SHIP_LOST
 
 ai:
+  jinkRangeKm: 30000           # ships with thrusters jink while a hostile ship is this close
   standoffKm: 2000             # enemy ships try to hold this distance
   combatDvKmS: 0.5             # inside weapon range, burn only for course errors bigger than this
   maxClosingSpeedKmS: 10

@@ -40,7 +40,7 @@ modules:
     massT: 3
     buildHours: 8
     hitPoints: 300
-    propulsion: { thrustKN: 2, fuelKgS: 0.05, turnAuthority: 600 }
+    propulsion: { thrustKN: 2, fuelKgS: 0.05, turnAuthority: 600, translates: true }
 
   # --- Power ---------------------------------------------------------------
   reactor:
@@ -95,7 +95,7 @@ modules:
     massT: 3
     buildHours: 16
     hitPoints: 200
-    sensor: { type: TELESCOPE, rangeAu: 1.0, bearingErrorDeg: 0.0005, rangeErrorFraction: 0.2, velocityErrorKmS: 0.5, powerMW: 0.1 }
+    sensor: { type: TELESCOPE, rangeAu: 1.0, bearingErrorDeg: 0.0005, rangeErrorFraction: 0.2, velocityErrorKmS: 0.5, powerMW: 0.1, trackTimeConstantSeconds: 60, minRangeErrorFraction: 0.0005, minVelocityErrorKmS: 0.001 }
   radar:
     name: Radar
     kind: SENSOR
@@ -191,7 +191,7 @@ modules:
     missileBay: { capacity: 2, cooldownSeconds: 20, launchRangeKm: 100000, arcDeg: 180 }
 
 munitions:
-  slug: { massKg: 2, cost: 0.5, buildHours: 0.1 }   # damage = kinetic energy at impact
+  slug: { massKg: 2, sizeM: 0.1, cost: 0.5, buildHours: 0.1 }   # damage = kinetic energy at impact; cold, tiny
   torpedo:                           # nuclear-thermal motor, fragmentation warhead, ablative armour
     launchSpeedKmS: 0.05
     accelerationMS2: 50

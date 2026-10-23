@@ -27,6 +27,10 @@ class EnemyAi(private val config: AiConfig, private val performance: ShipPerform
             val active = world.player.id in v.contacts.everSeen && !v.ambush
             v.sensorRules.radarActive = active
             v.sensorRules.lidarActive = active
+            // Jink while a hostile ship is close, if it has thrusters that can translate.
+            v.evasive = !v.ambush && v.contacts.current.values.any {
+                it.kind.isVessel && it.distance <= config.jinkRangeKm * Units.KM
+            } && v.working(ModuleKind.PROPULSION).any { it.type.propulsion!!.translates }
             val player = v.contacts[world.player.id] ?: continue
             if (v.ambush) {
                 if (player.distance > v.ambushRange) continue

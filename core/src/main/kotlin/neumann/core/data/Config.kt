@@ -37,6 +37,7 @@ data class AutoPauseConfig(
 
 @Serializable
 data class AiConfig(
+    val jinkRangeKm: Double,
     val standoffKm: Double,
     val maxClosingSpeedKmS: Double,
     val combatDvKmS: Double,
@@ -45,6 +46,9 @@ data class AiConfig(
 @Serializable
 data class ShipRules(
     val alignToleranceDeg: Double,
+    val jinkIntervalSeconds: Double,
+    /** A slug whose straight-line path passes this close raises slug inbound. */
+    val slugAlertKm: Double,
     val turnFuelKgPerTonneDeg: Double,
 )
 
@@ -72,7 +76,13 @@ data class ModuleType(
 )
 
 @Serializable
-data class PropulsionConfig(val thrustKN: Double, val fuelKgS: Double, val turnAuthority: Double)
+data class PropulsionConfig(
+    val thrustKN: Double,
+    val fuelKgS: Double,
+    val turnAuthority: Double,
+    /** Can push sideways without turning (for jinking). */
+    val translates: Boolean = false,
+)
 
 @Serializable
 data class GeneratorConfig(val powerMW: Double)
@@ -94,6 +104,10 @@ data class SensorConfig(
     val rangeErrorFraction: Double,
     val velocityErrorKmS: Double,
     val powerMW: Double,
+    /** Passive tracking: errors shrink with tracking time on this scale (0 = no improvement). */
+    val trackTimeConstantSeconds: Double = 0.0,
+    val minRangeErrorFraction: Double = 0.0,
+    val minVelocityErrorKmS: Double = 0.0,
 )
 
 @Serializable
@@ -133,7 +147,7 @@ data class MunitionsConfig(val slug: SlugConfig, val torpedo: TorpedoConfig)
 
 /** Slug damage is its kinetic energy at impact, so it has no damage field. */
 @Serializable
-data class SlugConfig(val massKg: Double, val cost: Double, val buildHours: Double)
+data class SlugConfig(val massKg: Double, val sizeM: Double, val cost: Double, val buildHours: Double)
 
 @Serializable
 data class TorpedoConfig(

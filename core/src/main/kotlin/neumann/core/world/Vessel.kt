@@ -91,6 +91,11 @@ class Vessel(
     var fireCannonNow = false
     var launchTorpedoNow = false
 
+    /** Evasive manoeuvres: jink sideways with translating thrusters. */
+    var evasive = false
+    var jinkDirection: Vec3 = Vec3.ZERO
+    var jinkTimeLeft = 0.0
+
     var ambush = false
     var ambushRange = 0.0
 

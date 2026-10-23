@@ -4,6 +4,7 @@ import neumann.core.data.SlugConfig
 import neumann.core.math.Units
 import neumann.core.world.ContactKind
 import neumann.core.world.EventKind
+import neumann.core.world.HistorySample
 import neumann.core.world.ModuleKind
 import neumann.core.world.Slug
 import neumann.core.world.World
@@ -21,7 +22,7 @@ class CannonPhase(private val solver: InterceptSolver, private val slug: SlugCon
             if (!v.alive) continue
             val cannons = v.working(ModuleKind.CANNON)
             for (c in cannons) c.cooldown = max(0.0, c.cooldown - dt)
-            val target = v.contacts[v.targetId]?.takeIf { it.kind != ContactKind.TORPEDO && !it.bearingOnly }
+            val target = v.contacts[v.targetId]?.takeIf { it.kind.isVessel && !it.bearingOnly }
             if (v.fireCannonNow && (target == null || v.slugs <= 0 || cannons.isEmpty())) {
                 v.fireCannonNow = false
                 if (v === world.player) world.event(EventKind.INFO, v.id, "Cannon cannot fire: " + when {
@@ -41,7 +42,9 @@ class CannonPhase(private val solver: InterceptSolver, private val slug: SlugCon
                 val speed = cfg.muzzleSpeedKmS * Units.KM
                 val aim = solver.aim(r, target.observedVelocity - v.velocity, speed) ?: r.normalized()
                 if (v.forward.angleTo(aim) > cfg.arcDeg * Units.DEGREE) continue
-                world.slugs.add(Slug(v.id, v.faction, v.position, v.velocity + aim * speed, slug.massKg, world.time))
+                val s = Slug(world.newId("S"), v.id, v.faction, v.position, v.velocity + aim * speed, slug.massKg, slug.sizeM, world.time)
+                s.history.record(HistorySample(world.time, s.position, s.velocity, false))
+                world.slugs.add(s)
                 v.energy -= cfg.shotEnergyMJ
                 v.slugs--
                 c.cooldown = cfg.cooldownSeconds

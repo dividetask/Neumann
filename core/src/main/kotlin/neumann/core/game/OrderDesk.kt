@@ -44,6 +44,13 @@ class OrderDesk(private val world: World) {
         player.burn = null
     }
 
+    /** Evasive manoeuvres: jink sideways with the translating thrusters. */
+    fun setEvasive(on: Boolean): String? {
+        if (on && player.working(ModuleKind.PROPULSION).none { it.type.propulsion!!.translates }) return "No working thrusters to jink with"
+        player.evasive = on
+        return null
+    }
+
     private fun headingProblem(mode: HeadingMode, vector: Vec3): String? {
         if (!player.has(ModuleKind.PROPULSION)) return "No working propulsion"
         if (mode == HeadingMode.FIXED && vector.lengthSquared() == 0.0) return "No direction chosen"
@@ -55,7 +62,7 @@ class OrderDesk(private val world: World) {
 
     fun setTarget(id: String): String? {
         val c = player.contacts[id] ?: return "Not a current contact"
-        if (c.kind == ContactKind.TORPEDO) return "Torpedoes can't be targeted"
+        if (!c.kind.isVessel) return "Only ships, defences, and bases can be targeted"
         player.targetId = id
         return null
     }

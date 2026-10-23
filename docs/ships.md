@@ -66,6 +66,13 @@ Worked out from the modules that are still working:
 - Turning uses a small amount of fuel: `turnFuelKgPerTonneDeg`
   (`data/rules.yaml`) × mass in tonnes × degrees turned. **(interpretation)**
   Heavier ships use more fuel to turn the same angle.
+- **Evasive manoeuvres (jinking):** with evasion on, propulsion modules that
+  can translate (`translates`, the manoeuvring thrusters) push the ship
+  sideways in a new random direction every `jinkIntervalSeconds`
+  (`data/rules.yaml`), without turning it. A slug flies for minutes at long
+  range, so even a small sideways push carries the ship hundreds of metres
+  off the aim point. Jinking uses the thrusters' fuel and counts as burning,
+  so it raises the ship's signature. **(interpretation)**
 - The main engines push only toward the front, so a burn turns the ship to
   its direction first and thrusts once the front is within
   `alignToleranceDeg` (`data/rules.yaml`) of it. A burn uses fuel only while

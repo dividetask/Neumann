@@ -40,3 +40,14 @@ class TimeSkipTest {
         assertEquals(1, hit(15 * gap + gap, "E-1"), "a hit after a quiet gap is new")
     }
 }
+
+class EventLogTest {
+    @Test
+    fun `repeated damage merges only with the same weapon`() {
+        val log = neumann.core.world.EventLog()
+        fun hit(t: Double, weapon: String) = log.addMerging(GameEvent(t, EventKind.DAMAGE_DEALT, "P", "Raider hit by $weapon", "E-1", 10.0))
+        hit(0.0, "laser"); hit(5.0, "laser"); hit(6.0, "cannon")
+        assertEquals(2, log.events.size)
+        assertEquals(20.0, log.events[0].amount, 1e-9)
+    }
+}

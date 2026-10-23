@@ -3,6 +3,7 @@ package neumann.core.world
 enum class EventKind {
     NEW_CONTACT,
     TORPEDO_INBOUND,
+    SLUG_INBOUND,
     ENTERED_WEAPON_RANGE,
     DAMAGE_TAKEN,
     DAMAGE_DEALT,
@@ -43,14 +44,14 @@ class EventLog {
     }
 
     /**
-     * Adds damage to a recent matching event (same kind, source, and subject,
-     * started within MERGE_SECONDS) instead of logging a new one, so a steady
+     * Adds damage to a recent matching event (same kind, source, subject, and
+     * text — so the same weapon — started within MERGE_SECONDS) instead of logging a new one, so a steady
      * beam makes one entry a minute, not one per step.
      */
     fun addMerging(event: GameEvent) {
         for (i in events.indices.reversed().take(MERGE_LOOKBACK)) {
             val e = events[i]
-            if (e.kind == event.kind && e.sourceId == event.sourceId && e.subjectId == event.subjectId &&
+            if (e.kind == event.kind && e.sourceId == event.sourceId && e.subjectId == event.subjectId && e.text == event.text &&
                 event.time - e.time <= MERGE_SECONDS
             ) {
                 e.amount += event.amount

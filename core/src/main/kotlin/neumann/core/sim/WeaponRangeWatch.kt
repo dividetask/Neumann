@@ -12,7 +12,7 @@ class WeaponRangeWatch(private val performance: ShipPerformance) {
         val watch = world.playerWatch
         val inside = HashSet<String>()
         for (c in player.contacts.current.values) {
-            if (c.kind == ContactKind.TORPEDO) continue
+            if (!c.kind.isVessel) continue
             val enemy = world.vessel(c.id) ?: continue
             if (c.distance > performance.threatRange(enemy)) continue
             inside.add(c.id)

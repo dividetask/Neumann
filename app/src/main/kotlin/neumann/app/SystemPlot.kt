@@ -94,12 +94,13 @@ private fun DrawScope.draw(world: World, view: View, showContacts: Boolean, meas
         for (c in world.player.contacts.current.values) {
             val o = view.point(c.observedPosition)
             if (!view.visible(o)) continue
-            val color = if (c.kind == ContactKind.TORPEDO && c.targetsObserver) Theme.alert else Theme.enemy
+            val color = if (c.targetsObserver) Theme.alert else Theme.enemy
             when (c.kind) {
                 ContactKind.TORPEDO -> {
                     drawLine(color, o + Offset(-4f, -4f), o + Offset(4f, 4f), 2f)
                     drawLine(color, o + Offset(-4f, 4f), o + Offset(4f, -4f), 2f)
                 }
+                ContactKind.SLUG -> drawCircle(color, 2f, o)
                 ContactKind.SHIP -> drawCircle(color, 5f, o)
                 ContactKind.DEFENCE -> drawRect(color, o - Offset(4f, 4f), Size(8f, 8f))
                 ContactKind.BASE -> drawRect(color, o - Offset(7f, 7f), Size(14f, 14f))
@@ -111,7 +112,7 @@ private fun DrawScope.draw(world: World, view: View, showContacts: Boolean, meas
             if (c.bearingOnly) {
                 drawLine(color.copy(alpha = 0.6f), view.point(world.player.position), o, 1f)
             }
-            if (c.kind != ContactKind.TORPEDO) label(measurer, c.name, o + Offset(8f, 4f), color)
+            if (c.kind.isVessel) label(measurer, c.name, o + Offset(8f, 4f), color)
         }
     }
 

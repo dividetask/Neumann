@@ -21,7 +21,7 @@ class TorpedoLaunchPhase(private val torpedo: TorpedoConfig) {
             if (!v.alive) continue
             val bays = v.working(ModuleKind.MISSILE_BAY)
             for (b in bays) b.cooldown = max(0.0, b.cooldown - dt)
-            val target = v.contacts[v.targetId]?.takeIf { it.kind != ContactKind.TORPEDO }
+            val target = v.contacts[v.targetId]?.takeIf { it.kind.isVessel }
             if (v.launchTorpedoNow && (target == null || v.torpedoes <= 0)) {
                 v.launchTorpedoNow = false
                 if (v === world.player) world.event(EventKind.INFO, v.id, "Torpedo cannot launch: " +

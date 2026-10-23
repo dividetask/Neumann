@@ -31,8 +31,10 @@ The bare minimum to test the game.
   damage, but a slug is slow, so a
   target that changes course after the shot can be missed. The gun aims at
   where the target will be if it keeps its current velocity. A slug hits if it
-  passes within a ship's `sizeM`. **(interpretation)** Slugs are too small
-  to show up on sensors.
+  passes within a ship's `sizeM`. The cannon's advantage is **stealth**:
+  slugs give off no heat, firing does not raise the shooter's signature, and
+  only radar can see a slug, at short range (see [sensors.md](sensors.md#slugs)).
+  Lasers do not shoot at slugs. **(interpretation)**
 - **Guided exploding torpedo** — launched from a missile bay (each bay holds
   its own) at `launchSpeed`, then accelerates
   at `acceleration` until only `terminalReserveFraction` of its `deltaV` is
@@ -41,6 +43,10 @@ The bare minimum to test the game.
   ship in that radius. Has `hitPoints` and can be shot down.
   **(interpretation)** It steers by its own seeker, so its guidance has no
   light delay. If its target is destroyed first, it self-destructs.
+  Torpedoes give off heat (their motors), so they are easy to see. They
+  cannot be dodged: they out-accelerate any ship many times over and keep a
+  reserve for the final approach. The defences are point defence and
+  staying out of reach of their delta-v.
 - **(interpretation)** Slugs and torpedoes that hit nothing are removed after
   `slugLifetimeSeconds` / `torpedoLifetimeSeconds` (`data/rules.yaml`).
 

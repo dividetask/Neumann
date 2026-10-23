@@ -204,6 +204,19 @@ After every push:
 - Never force-push a `claude/*` branch: the build commits and APKs live on
   it. Always pull before pushing.
 
+### Play-by-play — every 8 of my messages
+
+- Every 8 of my messages, give me a play-by-play of the balance fight (every
+  player command and event), so I can see how the game plays as it changes.
+- Generate it with:
+
+```bash
+PBP_OUT=/path/play-by-play.txt ./gradlew :core:test --tests 'neumann.core.PlayByPlay' --rerun
+ruby tools/compress-play-by-play.rb /path/play-by-play.txt > /path/play-by-play-short.txt
+```
+
+  Send the short version, and summarise it as a timeline table.
+
 ### Tests
 
 - Tests name the **rule** they protect, not the method they call. A failing
@@ -253,6 +266,7 @@ After every push:
 │   ├── architecture.md
 │   └── glossary.md
 ├── core/        # Game rules (plain Kotlin, unit-tested)
+├── tools/       # Helper scripts (Ruby)
 ├── app/         # Android app (Kotlin, Compose)
 ├── versions/    # APKs committed by build_branches.sh
 └── build-logs/  # Build output committed by build_branches.sh

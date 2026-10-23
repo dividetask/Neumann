@@ -29,4 +29,4 @@ enum class SensorType(val active: Boolean) { TELESCOPE(false), RADAR(true), LIDA
 
 enum class WeaponKind { LASER, CANNON, TORPEDO }
 
-enum class ContactKind { SHIP, DEFENCE, BASE, TORPEDO }
+enum class ContactKind(val isVessel: Boolean) { SHIP(true), DEFENCE(true), BASE(true), TORPEDO(false), SLUG(false) }

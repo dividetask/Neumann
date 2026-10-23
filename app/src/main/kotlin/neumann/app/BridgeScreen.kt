@@ -151,7 +151,7 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
                         targeted -> Theme.alert
                         else -> Theme.text
                     }
-                    Column(Modifier.fillMaxWidth().clickable(enabled = c.kind != ContactKind.TORPEDO) {
+                    Column(Modifier.fillMaxWidth().clickable(enabled = c.kind.isVessel) {
                         changed(session.orders.setTarget(c.id))
                     }.padding(vertical = 3.dp)) {
                         Line("${if (targeted) ">" else " "} ${c.name} (${c.kind.name.lowercase()})", color)
@@ -186,6 +186,13 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
                 Rule("Radar on (active: can be detected)", sr.radarActive) { sr.radarActive = it; changed() }
                 Rule("Lidar on target (active: can be detected)", sr.lidarActive) { sr.lidarActive = it; changed() }
                 Line("Telescope and emission receiver are passive and always on.", Theme.dim)
+                Line("Only radar can see slugs, and only close in.", Theme.dim)
+            }
+
+            Section("EVASION") {
+                Rule("Evasive manoeuvres (jink with thrusters)", player.evasive) { changed(session.orders.setEvasive(it)) }
+                Line("Spoils cannon fire. Uses fuel; the thrusters' heat makes you visible.", Theme.dim)
+                Line("Torpedoes cannot be dodged: point defence or out-run their fuel.", Theme.dim)
             }
 
             Section("MANOEUVRE") {

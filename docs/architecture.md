@@ -60,7 +60,8 @@ on load into the world.
 - `SensorType` — telescope, radar, lidar, emission receiver.
   `SensorRules` — the radar and lidar switches.
 - `WeaponRules` — the weapon-rule toggles. `WeaponKind` — laser, cannon, torpedo.
-- `Torpedo`, `Slug` — projectiles.
+- `Torpedo`, `Slug` — projectiles. Both are `Tracked`: torpedoes are hot,
+  slugs cold and tiny (radar only).
 - `Tracked` — interface for anything sensors can see (vessels, torpedoes).
 - `PositionHistory`, `HistorySample` — past positions, for light delay.
 - `Contact`, `ContactKind`, `ContactBook` — what one vessel's sensors see:
@@ -82,6 +83,7 @@ Run in this order by `SimulationStep`:
 | `PowerPhase` | Generators charge batteries; decides which sensors are on (powered) and whether the vessel is emitting. |
 | `TurnPhase` | Turns vessels toward their heading at their turn rate; uses turning fuel. |
 | `BurnPhase` | Runs burn stages (accelerate, coast, brake); thrusts once facing the right way; fuel use; burn end. |
+| `JinkPhase` | Evasive manoeuvres: sideways pushes from translating thrusters. |
 | `TorpedoGuidance` | Steers and thrusts torpedoes. |
 | `LaserPhase` | Fires lasers (point defence first). |
 | `CannonPhase` | Fires cannon slugs. Uses `InterceptSolver`. |

@@ -26,10 +26,11 @@ class Contact(
     val predictedPosition: Vec3 get() = observedPosition + observedVelocity * lightDelaySeconds
 }
 
-/** A vessel's current contacts, and every id it has ever seen. */
+/** A vessel's current contacts, every id it has ever seen, and when each current track began. */
 class ContactBook {
     val current = LinkedHashMap<String, Contact>()
     val everSeen = HashSet<String>()
+    val trackedSince = HashMap<String, Double>()
 
     operator fun get(id: String?): Contact? = id?.let { current[it] }
 }

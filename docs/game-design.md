@@ -55,6 +55,8 @@ once.
 - A new contact is detected.
 - A torpedo is launched at the player's ship (the player detects a torpedo
   aimed at them).
+- A slug is heading for the player's ship (only radar can see slugs; see
+  [sensors.md](sensors.md#slugs)).
 - The player's ship enters an enemy's weapon range.
 - The player's ship takes damage.
 - A target is destroyed.
@@ -120,6 +122,12 @@ E. **Set weapon rules**: laser point defence, laser auto-fire at target,
    when the target is in that weapon's range and arc.
 F. **Set sensor rules**: radar on/off, lidar on/off (see
    [sensors.md](sensors.md)).
+G. **Evasive manoeuvres** on/off: jink sideways with the thrusters to spoil
+   cannon fire (see [ships.md](ships.md#facing-and-turning)).
+
+Skill lies in these choices: when to emit and when to stay dark, when to
+jink (it costs fuel and shows you), how to face so weapon arcs bear, and how
+to spend torpedoes against point defence.
 
 ## Space
 
@@ -207,6 +215,8 @@ The first-version system is defined in `data/scenario.yaml`.
   - Ships in ambush lie still (not burning) until the player comes within
     their `ambushRange`.
   - Enemy lasers always do point defence.
+  - Enemy ships with translating thrusters jink while a hostile ship is
+    within `jinkRangeKm` (`data/rules.yaml`). The raider has none.
 
 ## Travel
 

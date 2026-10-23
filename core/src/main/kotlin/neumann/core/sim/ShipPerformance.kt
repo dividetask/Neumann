@@ -20,6 +20,13 @@ class ShipPerformance(private val munitions: MunitionsConfig) {
 
     fun accelerationMS2(v: Vessel): Double = thrustN(v) / massKg(v)
 
+    /** Sideways thrust from modules that can translate (for jinking), N. */
+    fun translationThrustN(v: Vessel): Double =
+        v.working(ModuleKind.PROPULSION).filter { it.type.propulsion!!.translates }.sumOf { it.type.propulsion!!.thrustKN } * 1000.0
+
+    fun translationFuelKgS(v: Vessel): Double =
+        v.working(ModuleKind.PROPULSION).filter { it.type.propulsion!!.translates }.sumOf { it.type.propulsion!!.fuelKgS }
+
     /** Turn rate in radians per second: total turn authority / mass in tonnes, in degrees. */
     fun turnRate(v: Vessel): Double =
         v.working(ModuleKind.PROPULSION).sumOf { it.type.propulsion!!.turnAuthority } / (massKg(v) / 1000.0) * Units.DEGREE

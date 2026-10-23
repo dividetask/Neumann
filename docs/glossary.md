@@ -29,6 +29,8 @@
 - **Focus range** — How far a laser keeps its beam tight enough for full
   damage.
 - **Hit point** — One megajoule of damage a module can absorb.
+- **Jinking** — Evasive manoeuvres: random sideways pushes from the
+  thrusters that spoil cannon fire.
 - **Lidar** — Laser ranging: an active sensor that tracks the target very
   precisely.
 - **Light delay** — The time light takes to reach the ship; sensors show
@@ -45,6 +47,7 @@
 - **Signature** — How easy an object is for telescopes to see; higher while
   burning.
 - **Sublight** — Slower than light; no ship in the game exceeds light speed.
+- **Slug inbound** — A detected slug heading for the ship.
 - **Telescope** — A passive infrared/optical sensor.
 - **Time skip** — A player control that moves the game forward by a set time.
 - **Turn rate** — How fast a ship can change its facing.

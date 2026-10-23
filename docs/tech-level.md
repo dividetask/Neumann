@@ -91,6 +91,14 @@ balance rule in [game-design.md](game-design.md#opponents).
 
 ## Sensors
 
+- **Passive tracking:** following a target's bearing for minutes, while the
+  ship moves, gives its range and velocity (as submarines do). Assumed: a
+  telescope's errors shrink with tracking time as t^-1.5 (a tracking filter
+  on a steady target), to 0.05% of the distance and 1 m/s.
+- **Slugs on radar:** a ~10 cm slug has a radar cross-section a million
+  times smaller than a 100 m ship, so radar sees it at about 3% of the
+  range (range goes as cross-section^¼).
+
 | Sensor | Basis |
 |---|---|
 | Telescope | A GW-class drive plume is visible across a system; a 300 K hull only to a few million km. |

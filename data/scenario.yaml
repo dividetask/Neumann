@@ -17,6 +17,7 @@ player: { name: Neumann, design: probe }
 # Each enemy starts in a circular orbit of `orbits` (a planet or the star) at
 # offsetKm from its centre.
 enemies:
+  - { name: Haven Base, design: base, orbits: Haven, offsetKm: [40000, 0, 0] }
   - { name: Haven Platform, design: defencePlatform, orbits: Haven, offsetKm: [-40000, 0, 5000] }
   - { name: Raider 1, design: raider, orbits: Haven, offsetKm: [0, 150000, 0] }
   - { name: Raider 2, design: raider, orbits: Haven, offsetKm: [0, -150000, 0] }

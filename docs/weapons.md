@@ -29,7 +29,8 @@ The bare minimum to test the game.
   to show up on sensors.
 - **Guided exploding torpedo** — launched from a missile bay (each bay holds
   its own) at `launchSpeed`, then accelerates
-  at `acceleration` until its `deltaV` is used up. Steers itself toward its
+  at `acceleration` until only `terminalReserveFraction` of its `deltaV` is
+  left, which it keeps for steering on the final approach. Steers itself toward its
   target and explodes when it passes within `blastRadius`, damaging every
   ship in that radius. Has `hitPoints` and can be shot down.
   **(interpretation)** It steers by its own seeker, so its guidance has no

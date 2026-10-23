@@ -17,7 +17,7 @@ class TurnPhase(
     fun run(world: World, dt: Double) {
         for (v in world.vessels) {
             if (!v.alive || !v.has(ModuleKind.PROPULSION) || v.fuel <= 0.0) continue
-            val dir = resolver.resolve(v) ?: continue
+            val dir = resolver.facing(v) ?: continue
             val degrees = turnFront(v, dir, performance.turnRate(v) * dt) / Units.DEGREE
             v.fuel = (v.fuel - rules.turnFuelKgPerTonneDeg * performance.massKg(v) / 1000.0 * degrees / 1000.0).coerceAtLeast(0.0)
         }

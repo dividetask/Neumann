@@ -76,8 +76,20 @@ The end of a burn does not pause; it is logged.
 Between time skips the player can:
 
 A. **Face** a direction: the ship turns to it and holds it.
-B. **Burn** in a direction: throttle (fraction of full thrust) and duration.
-   The ship turns to the direction first (see [ships.md](ships.md#facing-and-turning)).
+B. **Burn** in a direction: throttle (fraction of full thrust), and a
+   **desired speed**, a **desired distance**, or both (two sliders). The ship
+   turns to the direction first (see [ships.md](ships.md#facing-and-turning)).
+   - **Speed only:** burn until moving at the desired speed, then coast.
+   - **Distance only:** speed up until halfway there, then brake the rest of
+     the way and stop.
+   - **Both:** speed up until at the desired speed or halfway, whichever comes
+     first; coast until it is time to slow down; then brake and stop.
+
+   Braking turns the ship around (it thrusts only forward), so braking starts
+   early enough to cover the turn. **(interpretation)** Speed and distance are
+   measured along the burn direction, from the ship's position and velocity
+   when the order is given (the ship's point of view). Match target velocity
+   ignores both and stops itself.
 
 All directions are relative to the ship. They are chosen with:
 
@@ -177,8 +189,9 @@ The first-version system is defined in `data/scenario.yaml`.
   2–4 torpedoes, and a cannon (`raider` in `data/ships.yaml`).
 - **Balance rule:** the probe must be able to beat four raiders at once
   without significant strategy (all weapon rules on, facing the nearest
-  enemy). `BalanceTest` checks this against the data: it must win and keep at
-  least half its hull.
+  enemy), at medium difficulty. **(interpretation)** Medium means it wins with
+  40–80% of its hull left. `BalanceTest` checks this against the data.
+- The first-version system has four raiders, a base, and a defence platform.
 - **(interpretation)** First-version AI:
   - Fixed defences and bases fire at the player whenever in range.
   - Enemy ships close on the player and match velocity at weapon range, then

@@ -27,6 +27,7 @@ import neumann.core.game.GameSession
 import neumann.core.game.TimeSkipResult
 import neumann.core.game.DirectionDials
 import neumann.core.math.Vec3
+import neumann.core.world.BurnStage
 import neumann.core.world.HeadingMode
 import neumann.core.world.ContactKind
 import neumann.core.world.EventKind
@@ -42,7 +43,6 @@ private val modes = listOf(
     HeadingMode.MATCH_TARGET to "MATCH",
 )
 private val throttles = listOf(0.25 to "25%", 0.5 to "50%", 1.0 to "100%")
-private val durations = listOf(60.0 to "1m", 600.0 to "10m", 3600.0 to "1h", 4 * 3600.0 to "4h", 86400.0 to "1d")
 
 /** The main game screen: status, plot, contacts, orders, time skips, event log. */
 @Composable
@@ -57,7 +57,8 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
     var mode by remember { mutableStateOf(HeadingMode.FIXED) }
     var dials by remember { mutableStateOf<DirectionDials.Angles?>(null) }
     var throttle by remember { mutableStateOf(1.0) }
-    var duration by remember { mutableStateOf(600.0) }
+    var desiredSpeed by remember { mutableStateOf<Double?>(null) }
+    var desiredDistance by remember { mutableStateOf<Double?>(null) }
     val scope = rememberCoroutineScope()
 
     fun changed(problem: String? = null) {
@@ -174,7 +175,8 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
                 ChoiceRow(modes, mode) { mode = it }
                 DirectionPad(dials, session.turnToGo()) { dials = it; mode = HeadingMode.FIXED }
                 ChoiceRow(throttles, throttle) { throttle = it }
-                ChoiceRow(durations, duration) { duration = it }
+                LogSlider("Desired speed   ", desiredSpeed, 0.01, 300.0, { "%.2f km/s".format(it) }) { desiredSpeed = it }
+                LogSlider("Desired distance", desiredDistance, 100.0, 1e8, { DisplayFormat.distance(it * 1000) }) { desiredDistance = it }
                 // Dial angles become a direction fixed in space when the order is given.
                 fun target() = dials?.let { DirectionDials.direction(player.forward, player.up, it) } ?: Vec3.ZERO
                 Row(Modifier.fillMaxWidth()) {
@@ -184,7 +186,7 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
                         changed(problem)
                     }
                     ConsoleButton("BURN", enabled = !world.over) {
-                        val problem = session.orders.burn(mode, target(), throttle, duration)
+                        val problem = session.orders.burn(mode, target(), throttle, desiredSpeed, desiredDistance)
                         if (problem == null) dials = null
                         changed(problem)
                     }
@@ -192,7 +194,8 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
                 }
                 Line("Directions are relative to the ship. The ship turns first, then burns.", Theme.dim)
                 Line("Top of each dial: where the ship points now. Ring: turn still to go.", Theme.dim)
-                Line("MATCH stops itself when velocity matches.", Theme.dim)
+                Line("Speed only: burn to it, then coast. Distance only: speed up to halfway, then brake and stop.", Theme.dim)
+                Line("Both: up to the speed (or halfway), coast, then brake and stop. MATCH needs neither.", Theme.dim)
             }
 
             Section("LOG") {
@@ -217,7 +220,7 @@ private fun Rule(label: String, on: Boolean, onChange: (Boolean) -> Unit) {
     }
 }
 
-/** Burn and turn state, e.g. "Burn 100% 9.5 min left: turning, 40° to go". */
+/** Burn and turn state, e.g. "Burn 100% accelerate: turning, 40° to go". */
 private fun manoeuvreStatus(session: GameSession): String {
     val p = session.world.player
     val dir = session.headingDirection()
@@ -225,8 +228,8 @@ private fun manoeuvreStatus(session: GameSession): String {
     val turning = if (toGo > session.data.rules.ships.alignToleranceDeg) "turning, %.0f° to go".format(toGo) else null
     val burn = p.burn
     return when {
-        burn != null -> "Burn       ${(burn.throttle * 100).toInt()}% ${DisplayFormat.duration(burn.remainingSeconds)} left: " +
-            (turning ?: "thrusting")
+        burn != null -> "Burn       ${(burn.throttle * 100).toInt()}% ${burn.stage.name.lowercase()}: " +
+            (turning ?: if (burn.stage == BurnStage.COAST) "coasting" else "thrusting")
         turning != null -> "Heading    $turning"
         else -> "Burn       none"
     }

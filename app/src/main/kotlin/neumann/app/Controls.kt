@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -53,4 +55,17 @@ fun Section(title: String, content: @Composable () -> Unit) {
 @Composable
 fun Line(text: String, color: Color = Theme.text, modifier: Modifier = Modifier) {
     Text(text, style = Theme.body.copy(color = color), modifier = modifier)
+}
+
+/**
+ * A slider on a log scale from [min] to [max], with its far left meaning
+ * "off" (null). Shows [label] and the value via [format].
+ */
+@Composable
+fun LogSlider(label: String, value: Double?, min: Double, max: Double, format: (Double) -> String, onChange: (Double?) -> Unit) {
+    val position = value?.let { (Math.log(it / min) / Math.log(max / min)).toFloat().coerceIn(0f, 1f) * 0.95f + 0.05f } ?: 0f
+    Line("$label ${value?.let(format) ?: "off"}", if (value == null) Theme.dim else Theme.text)
+    Slider(position, { p ->
+        onChange(if (p < 0.05f) null else min * Math.pow(max / min, ((p - 0.05f) / 0.95f).toDouble()))
+    }, colors = SliderDefaults.colors(thumbColor = Theme.alert, activeTrackColor = Theme.text, inactiveTrackColor = Theme.dim))
 }

@@ -55,7 +55,8 @@ on load into the world.
 - `ModuleKind`, `ModuleState` — one fitted module: hit points, and for
   cannons and missile bays their cooldown (and torpedoes held).
 - `Heading`, `HeadingMode` — the direction a vessel turns to and holds.
-- `Burn` — an active burn along the heading.
+- `Burn`, `BurnStage` — an active burn along the heading toward a desired
+  speed and/or distance: accelerate, coast, brake.
 - `WeaponRules` — the weapon-rule toggles. `WeaponKind` — laser, cannon, torpedo.
 - `Torpedo`, `Slug` — projectiles.
 - `Tracked` — interface for anything sensors can see (vessels, torpedoes).
@@ -76,7 +77,7 @@ Run in this order by `SimulationStep`:
 | `EnemyAi` | Sets enemy targets, headings, and burns. |
 | `PowerPhase` | Generators charge batteries; scanners draw power. |
 | `TurnPhase` | Turns vessels toward their heading at their turn rate; uses turning fuel. |
-| `BurnPhase` | Thrusts once facing the heading (fuel use, burn end). |
+| `BurnPhase` | Runs burn stages (accelerate, coast, brake); thrusts once facing the right way; fuel use; burn end. |
 | `TorpedoGuidance` | Steers and thrusts torpedoes. |
 | `LaserPhase` | Fires lasers (point defence first). |
 | `CannonPhase` | Fires cannon slugs. Uses `InterceptSolver`. |

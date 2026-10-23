@@ -24,7 +24,7 @@ class SensorTest {
         // burning, so visible far off
         Fixture.place(w, d, d.position, d.velocity, forward = Vec3(0.0, 1.0, 0.0))
         d.heading = Heading(HeadingMode.FIXED, Vec3(0.0, 1.0, 0.0))
-        d.burn = Burn(0.003, 1e9)
+        d.burn = Burn(0.003, 1e9, null, w.time, d.position, d.velocity)
         Fixture.runFor(w, 1000.0)
         val c = assertNotNull(w.player.contacts[d.id])
         assertEquals(100.0, c.lightDelaySeconds, 1.0)

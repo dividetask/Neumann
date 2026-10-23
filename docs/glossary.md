@@ -12,6 +12,9 @@
 - **Contact** — Any object the ship's sensors have detected.
 - **Design** — A ship's list of modules; fixed defences and bases are designs
   too.
+- **Desired distance** — How far a burn should take the ship before it
+  brakes to a stop.
+- **Desired speed** — The speed a burn should reach before the ship coasts.
 - **Direction circles** — The YAW and PITCH dials used to pick a direction
   relative to the ship.
 - **Facing** — Which way a ship's front and top point.

@@ -25,13 +25,18 @@ class OrderDesk(private val world: World) {
         return null
     }
 
-    /** Turn to a direction, then thrust along it for [seconds] of thrusting. */
-    fun burn(mode: HeadingMode, vector: Vec3, throttle: Double, seconds: Double): String? {
+    /**
+     * Turn to a direction, then burn toward a desired speed (km/s), a desired
+     * distance (km), or both. Match target velocity needs neither.
+     */
+    fun burn(mode: HeadingMode, vector: Vec3, throttle: Double, speedKmS: Double?, distanceKm: Double?): String? {
         headingProblem(mode, vector)?.let { return it }
         if (player.fuel <= 0.0) return "No fuel"
         if (throttle <= 0.0) return "Throttle is zero"
+        if (mode != HeadingMode.MATCH_TARGET && speedKmS == null && distanceKm == null) return "Set a speed, a distance, or both"
         player.heading = Heading(mode, vector)
-        player.burn = Burn(throttle.coerceAtMost(1.0), seconds)
+        player.burn = Burn(throttle.coerceAtMost(1.0), speedKmS?.times(Units.KM), distanceKm?.times(Units.KM),
+            world.time, player.position, player.velocity)
         return null
     }
 

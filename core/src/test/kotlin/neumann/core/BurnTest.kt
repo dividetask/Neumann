@@ -3,73 +3,132 @@ package neumann.core
 import neumann.core.game.OrderDesk
 import neumann.core.math.Vec3
 import neumann.core.sim.SimulationStep
+import neumann.core.world.BurnStage
 import neumann.core.world.EventKind
 import neumann.core.world.HeadingMode
+import neumann.core.world.World
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class BurnTest {
     private val perf = Fixture.performance
+    // North: at right angles to the star's pull on the test spot, so gravity does not add speed along the burn.
+    private val north = Vec3(0.0, 0.0, 1.0)
+
+    /** Player at rest in open space, facing north. */
+    private fun still(): World = Fixture.world().also { Fixture.place(it, it.player, Fixture.openSpace, Vec3.ZERO, forward = north) }
+
+    /** Speed and distance travelled northward, from the start. */
+    private fun along(w: World) = Pair(w.player.velocity.dot(north), (w.player.position - Fixture.openSpace).dot(north))
 
     @Test
-    fun `a retrograde burn slows the ship by thrust over mass and uses fuel at the engines' rate`() {
-        val w = Fixture.world()
+    fun `a desired speed burns until that speed, then coasts`() {
+        val w = still()
         val p = w.player
-        Fixture.place(w, p, Fixture.openSpace, Vec3(0.0, 10_000.0, 0.0), forward = Vec3(0.0, -1.0, 0.0))
+        assertNull(OrderDesk(w).burn(HeadingMode.FIXED, north, 1.0, 2.0, null))
+        Fixture.runFor(w, 3600.0)
+        assertNull(p.burn)
+        assertEquals(2_000.0, along(w).first, 5.0)
         val fuel = p.fuel
-        val accel = perf.accelerationMS2(p)
-        assertNull(OrderDesk(w).burn(HeadingMode.RETROGRADE, Vec3.ZERO, 1.0, 100.0))
-        val r = Fixture.timeSkip(w).run(w, 3600.0)
-        assertEquals(3600.0, r.elapsedSeconds, 1e-6, "the end of a burn does not pause")
-        assertTrue(w.log.events.any { it.kind == EventKind.BURN_COMPLETE })
-        assertEquals(10_000.0 - accel * 100, p.velocity.length(), 25.0)
-        assertEquals(fuel - perf.fuelKgS(p) * 100 / 1000, p.fuel, 1e-4, "burn fuel, plus a few grams for tracking retrograde")
+        Fixture.runFor(w, 3600.0)
+        assertEquals(fuel, p.fuel, 1e-9, "coasting uses no fuel")
+        assertTrue(w.log.events.any { it.kind == EventKind.BURN_COMPLETE && it.message.contains("reached") })
     }
 
     @Test
-    fun `a ship turns at its turn rate before it thrusts`() {
-        val w = Fixture.world()
+    fun `a desired distance speeds up to halfway, then brakes and stops there`() {
+        val w = still()
         val p = w.player
-        Fixture.place(w, p, Fixture.openSpace, Vec3(0.0, 10_000.0, 0.0), forward = Vec3(0.0, 1.0, 0.0))
-        OrderDesk(w).burn(HeadingMode.RETROGRADE, Vec3.ZERO, 1.0, 100.0)
-        val turnTime = Math.PI / perf.turnRate(p)
+        OrderDesk(w).burn(HeadingMode.FIXED, north, 1.0, null, 10_000.0)
         val step = SimulationStep(w.data)
-        val dt = 0.5
-        while (w.time + dt < turnTime * 0.9) step.run(w, dt)
-        assertEquals(10_000.0, p.velocity.length(), 1.0, "no thrust while still turning")
-        repeat((turnTime * 0.2 / dt).toInt() + 20) { step.run(w, dt) }
-        assertTrue(p.velocity.length() < 9_990.0, "thrusting once facing the burn direction")
+        var braked = false
+        while (p.burn != null && w.time < 86400.0) {
+            if (p.burn?.stage == BurnStage.BRAKE) braked = true
+            step.run(w, 1.0)
+        }
+        assertTrue(braked)
+        val (speed, distance) = along(w)
+        assertEquals(0.0, speed, 1.0, "stopped")
+        assertEquals(10_000_000.0, distance, 600_000.0, "near the desired distance")
     }
 
     @Test
-    fun `turning uses a little fuel, in proportion to mass and angle`() {
-        val w = Fixture.world()
+    fun `speed and distance together accelerate to the speed, coast, then stop at the distance`() {
+        val w = still()
         val p = w.player
-        Fixture.place(w, p, Fixture.openSpace, Vec3.ZERO, forward = Vec3(0.0, 1.0, 0.0))
-        val fuel = p.fuel
-        val massT = perf.massKg(p) / 1000
-        OrderDesk(w).face(HeadingMode.FIXED, Vec3(1.0, 0.0, 0.0))
-        Fixture.runFor(w, 600.0)
-        val expected = w.data.rules.ships.turnFuelKgPerTonneDeg * massT * 90.0 / 1000
-        assertEquals(expected, fuel - p.fuel, expected * 0.01)
-        assertTrue((p.forward - Vec3(1.0, 0.0, 0.0)).length() < 1e-6)
+        OrderDesk(w).burn(HeadingMode.FIXED, north, 1.0, 1.0, 50_000.0)
+        val step = SimulationStep(w.data)
+        var coasted = false
+        var top = 0.0
+        while (p.burn != null && w.time < 3 * 86400.0) {
+            if (p.burn?.stage == BurnStage.COAST) coasted = true
+            top = maxOf(top, along(w).first)
+            step.run(w, 2.0)
+        }
+        assertTrue(coasted)
+        assertEquals(1_000.0, top, 15.0, "never faster than the desired speed")
+        val (speed, distance) = along(w)
+        assertEquals(0.0, speed, 1.0)
+        assertEquals(50_000_000.0, distance, 1_500_000.0)
+    }
+
+    @Test
+    fun `braking turns the ship around before it thrusts`() {
+        val w = still()
+        val p = w.player
+        OrderDesk(w).burn(HeadingMode.FIXED, north, 1.0, null, 10_000.0)
+        val step = SimulationStep(w.data)
+        while (p.burn?.stage != BurnStage.BRAKE) step.run(w, 1.0)
+        repeat(60) { step.run(w, 1.0) }
+        assertTrue(p.forward.dot(north) < 0.0, "facing back the way it came")
     }
 
     @Test
     fun `a burn ends when the fuel runs out`() {
-        val w = Fixture.world()
+        val w = still()
         val p = w.player
-        Fixture.place(w, p, Fixture.openSpace, Vec3(0.0, 10_000.0, 0.0), forward = Vec3(0.0, -1.0, 0.0))
         p.fuel = 0.001
         val accel = perf.accelerationMS2(p)
-        OrderDesk(w).burn(HeadingMode.RETROGRADE, Vec3.ZERO, 1.0, 1000.0)
+        OrderDesk(w).burn(HeadingMode.FIXED, north, 1.0, 100.0, null)
         Fixture.runFor(w, 3600.0)
         assertEquals(0.0, p.fuel, 1e-12)
         assertNull(p.burn)
-        assertEquals(10_000.0 - accel * (1.0 / perf.fuelKgS(p)), p.velocity.length(), 5.0)
+        assertEquals(accel * (1.0 / perf.fuelKgS(p)), along(w).first, 5.0)
         assertTrue(w.log.events.any { it.message.contains("out of fuel") })
+    }
+
+    @Test
+    fun `a burn needs a speed or a distance`() {
+        val w = still()
+        assertNotNull(OrderDesk(w).burn(HeadingMode.FIXED, north, 1.0, null, null))
+    }
+
+    @Test
+    fun `a ship turns at its turn rate before it thrusts`() {
+        val w = still()
+        val p = w.player
+        OrderDesk(w).burn(HeadingMode.FIXED, -north, 1.0, 1.0, null)
+        val turnTime = Math.PI / perf.turnRate(p)
+        val step = SimulationStep(w.data)
+        while (w.time + 0.5 < turnTime * 0.9) step.run(w, 0.5)
+        assertEquals(0.0, p.velocity.dot(-north), 1.0, "no thrust while still turning")
+        repeat((turnTime * 0.2 / 0.5).toInt() + 20) { step.run(w, 0.5) }
+        assertTrue(p.velocity.dot(-north) > 10.0, "thrusting once facing the burn direction")
+    }
+
+    @Test
+    fun `turning uses a little fuel, in proportion to mass and angle`() {
+        val w = still()
+        val p = w.player
+        val fuel = p.fuel
+        val massT = perf.massKg(p) / 1000
+        OrderDesk(w).face(HeadingMode.FIXED, Vec3(0.0, 1.0, 0.0))
+        Fixture.runFor(w, 600.0)
+        val expected = w.data.rules.ships.turnFuelKgPerTonneDeg * massT * 90.0 / 1000
+        assertEquals(expected, fuel - p.fuel, expected * 0.01)
     }
 
     @Test

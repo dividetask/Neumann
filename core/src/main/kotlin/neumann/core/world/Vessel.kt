@@ -20,8 +20,23 @@ class ModuleState(val typeId: String, val type: ModuleType) {
 /** The direction a vessel turns to and holds. [vector] is used by FIXED. */
 class Heading(val mode: HeadingMode, val vector: Vec3 = Vec3.ZERO)
 
-/** An active burn along the heading. [remainingSeconds] counts thrusting time. */
-class Burn(val throttle: Double, var remainingSeconds: Double)
+enum class BurnStage { ACCELERATE, COAST, BRAKE }
+
+/**
+ * An active burn along the heading, toward a desired speed (m/s), a desired
+ * distance (m), or both, measured along the burn direction from where the
+ * ship was ([startPosition], [startVelocity] at [startTime]).
+ */
+class Burn(
+    val throttle: Double,
+    val targetSpeed: Double?,
+    val targetDistance: Double?,
+    val startTime: Double,
+    val startPosition: Vec3,
+    val startVelocity: Vec3,
+) {
+    var stage = BurnStage.ACCELERATE
+}
 
 class WeaponRules(
     var laserPointDefence: Boolean = true,

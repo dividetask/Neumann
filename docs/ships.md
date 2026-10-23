@@ -70,8 +70,8 @@ Worked out from the modules that are still working:
 - The main engines push only toward the front, so a burn turns the ship to
   its direction first and thrusts once the front is within
   `alignToleranceDeg` (`data/rules.yaml`) of it. A burn uses fuel only while
-  it is thrusting, speeding the ship up or slowing it down; its duration
-  counts thrusting time only, not the turn before it.
+  it is thrusting, speeding the ship up or slowing it down; not while turning
+  or coasting.
 - All player controls are relative to the ship (see
   [game-design.md](game-design.md#orders)).
 - Fixed defences and bases have no propulsion, so they do not turn.

@@ -12,7 +12,7 @@ designs:
       probeHull: 1
       fusionDrive: 1
       manoeuvringThrusters: 2
-      reactor: 1
+      reactor: 2
       battery: 2
       fuelTank: 3
       longRangeScanner: 1

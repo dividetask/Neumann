@@ -38,6 +38,7 @@ data class AutoPauseConfig(
 data class AiConfig(
     val standoffKm: Double,
     val maxClosingSpeedKmS: Double,
+    val combatDvKmS: Double,
 )
 
 @Serializable
@@ -124,6 +125,7 @@ data class TorpedoConfig(
     val launchSpeedKmS: Double,
     val accelerationMS2: Double,
     val deltaVKmS: Double,
+    val terminalReserveFraction: Double,
     val hitPoints: Double,
     val damage: Double,
     val blastRadiusKm: Double,

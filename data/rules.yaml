@@ -13,7 +13,6 @@ sim:
 
 ships:
   alignToleranceDeg: 2          # a burn thrusts once the front is this close to its direction
-  unpoweredSensorFraction: 0.1  # sensor range left when scanners have no power
   turnFuelKgPerTonneDeg: 0.0005 # turning fuel: kg per tonne of ship per degree
 
 autoPause:

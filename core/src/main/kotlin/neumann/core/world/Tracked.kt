@@ -13,5 +13,13 @@ interface Tracked {
     val history: PositionHistory
     val alive: Boolean
     val burning: Boolean
+
+    /** Size, for radar. */
+    val sizeM: Double
+
+    /** Using an active sensor, so emission receivers can find it. */
+    val emitting: Boolean
+
+    /** How easily telescopes see it. */
     fun signature(burning: Boolean): Double
 }

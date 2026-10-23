@@ -11,7 +11,7 @@ enum class ModuleKind {
     BATTERY,
     FUEL_TANK,
     AMMO_CONTAINER,
-    SCANNER,
+    SENSOR,
     LASER_TURRET,
     CANNON,
     MISSILE_BAY,
@@ -23,6 +23,9 @@ enum class ModuleKind {
  * things move.
  */
 enum class HeadingMode { FIXED, PROGRADE, RETROGRADE, TOWARD_TARGET, AWAY_FROM_TARGET, MATCH_TARGET }
+
+/** Telescope and emission receiver are passive; radar and lidar are active. */
+enum class SensorType(val active: Boolean) { TELESCOPE(false), RADAR(true), LIDAR(true), EMISSION_RECEIVER(false) }
 
 enum class WeaponKind { LASER, CANNON, TORPEDO }
 

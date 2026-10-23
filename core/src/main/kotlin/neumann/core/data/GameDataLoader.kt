@@ -28,7 +28,7 @@ class GameDataLoader(private val source: DataSource) {
             ModuleKind.BATTERY -> m.battery != null
             ModuleKind.FUEL_TANK -> m.fuelTank != null
             ModuleKind.AMMO_CONTAINER -> m.ammoContainer != null
-            ModuleKind.SCANNER -> m.scanner != null
+            ModuleKind.SENSOR -> m.sensor != null
             ModuleKind.LASER_TURRET -> m.laser != null
             ModuleKind.CANNON -> m.cannon != null
             ModuleKind.MISSILE_BAY -> m.missileBay != null

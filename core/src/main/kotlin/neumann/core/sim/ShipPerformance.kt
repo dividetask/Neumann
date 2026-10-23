@@ -1,14 +1,13 @@
 package neumann.core.sim
 
 import neumann.core.data.MunitionsConfig
-import neumann.core.data.ShipRules
 import neumann.core.math.Units
 import neumann.core.world.ModuleKind
 import neumann.core.world.Vessel
 import kotlin.math.max
 
 /** What a vessel can do, worked out from its working modules and what it carries. */
-class ShipPerformance(private val munitions: MunitionsConfig, private val rules: ShipRules) {
+class ShipPerformance(private val munitions: MunitionsConfig) {
     /** Modules (working or not) plus fuel, slugs, and torpedoes, in kg. */
     fun massKg(v: Vessel): Double =
         v.modules.sumOf { it.type.massT } * 1000.0 + v.fuel * 1000.0 +
@@ -34,14 +33,6 @@ class ShipPerformance(private val munitions: MunitionsConfig, private val rules:
     fun energyCapacity(v: Vessel): Double = v.working(ModuleKind.BATTERY).sumOf { it.type.battery!!.capacityMJ }
 
     fun generatorMW(v: Vessel): Double = v.working(ModuleKind.GENERATOR).sumOf { it.type.generator!!.powerMW }
-
-    fun scannerDrawMW(v: Vessel): Double = v.working(ModuleKind.SCANNER).sumOf { it.type.scanner!!.powerMW }
-
-    /** Longest working scanner range, cut to the unpowered fraction without power; 0 with no scanner. */
-    fun sensorRange(v: Vessel): Double {
-        val best = v.working(ModuleKind.SCANNER).maxOfOrNull { it.type.scanner!!.rangeAu } ?: return 0.0
-        return best * Units.AU * (if (v.scannersPowered) 1.0 else rules.unpoweredSensorFraction)
-    }
 
     /** Longest range at which its working weapons fire on their own, in metres. */
     fun threatRange(v: Vessel): Double {

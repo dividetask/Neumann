@@ -247,6 +247,7 @@ After every push:
 │   ├── README.md
 │   ├── game-design.md
 │   ├── ships.md
+│   ├── sensors.md
 │   ├── weapons.md
 │   ├── architecture.md
 │   └── glossary.md

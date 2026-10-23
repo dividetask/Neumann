@@ -6,7 +6,7 @@ import neumann.core.world.World
 /** Runs one simulation step: every phase, in order. */
 class SimulationStep(data: GameData) {
     private val rules = data.rules
-    val performance = ShipPerformance(data.munitions, rules.ships)
+    val performance = ShipPerformance(data.munitions)
     private val damage = DamageResolver()
     private val headings = HeadingResolver()
     private val planetMover = PlanetMover()
@@ -21,7 +21,7 @@ class SimulationStep(data: GameData) {
     private val motion = MotionPhase(GravityField(), rules.sim)
     private val impacts = ImpactPhase(damage)
     private val collisions = BodyCollisionPhase(damage)
-    val sensors = SensorPhase(LightDelay(), performance)
+    val sensors = SensorPhase(LightDelay())
     private val rangeWatch = WeaponRangeWatch(performance)
     private val supplyWatch = SupplyWatch(rules.autoPause, performance)
     private val claimCheck = ClaimCheck()

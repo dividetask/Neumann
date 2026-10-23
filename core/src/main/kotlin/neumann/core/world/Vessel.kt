@@ -15,6 +15,9 @@ class ModuleState(val typeId: String, val type: ModuleType) {
 
     /** Missile bays: torpedoes held. */
     var torpedoes = 0
+
+    /** Laser turrets: seconds left in the current shot. */
+    var shotRemaining = 0.0
 }
 
 /** The direction a vessel turns to and holds. [vector] is used by FIXED. */
@@ -37,6 +40,9 @@ class Burn(
 ) {
     var stage = BurnStage.ACCELERATE
 }
+
+/** Switches for the active sensors. Passive sensors are always on. */
+class SensorRules(var radarActive: Boolean = true, var lidarActive: Boolean = true)
 
 class WeaponRules(
     var laserPointDefence: Boolean = true,
@@ -73,7 +79,12 @@ class Vessel(
 
     /** Stored power, in MJ. */
     var energy = 0.0
-    var scannersPowered = true
+
+    /** Sensors working and powered this step. */
+    var sensorsOn: List<ModuleState> = emptyList()
+    override var emitting = false
+    override val sizeM: Double get() = design.sizeM
+    val sensorRules = SensorRules()
 
     var heading: Heading? = null
     var burn: Burn? = null

@@ -3,6 +3,7 @@ package neumann.core.game
 import neumann.core.data.GameData
 import neumann.core.math.Frame
 import neumann.core.math.Vec3
+import neumann.core.sim.PowerPhase
 import neumann.core.world.Faction
 import neumann.core.world.ModuleKind
 import neumann.core.world.ModuleState
@@ -29,6 +30,8 @@ class VesselFactory(private val data: GameData) {
         v.fuel = modules.sumOf { it.type.fuelTank?.capacityT ?: 0.0 }
         v.slugs = modules.sumOf { it.type.ammoContainer?.capacity ?: 0 }
         v.energy = modules.sumOf { it.type.battery?.capacityMJ ?: 0.0 }
+        v.sensorsOn = PowerPhase.wanted(v)
+        v.emitting = v.sensorsOn.any { it.type.sensor!!.type.active }
         return v
     }
 }

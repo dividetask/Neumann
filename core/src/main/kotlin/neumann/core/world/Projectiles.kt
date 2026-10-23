@@ -30,6 +30,8 @@ class Torpedo(
     override val contactKind = ContactKind.TORPEDO
     override var alive = true
     override var burning = false
+    override val sizeM: Double get() = config.sizeM
+    override val emitting = false
     var previousPosition: Vec3 = position
     var deltaVLeft: Double = config.deltaVKmS * 1000.0
     var hitPoints: Double = config.hitPoints

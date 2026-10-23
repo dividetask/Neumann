@@ -15,12 +15,16 @@ The bare minimum to test the game.
 
 - **Laser** — a beam weapon. Hits at the speed of light, so it cannot be
   dodged. Damage per second falls off linearly from `damagePerSecond` at
-  point blank to zero at `range`. Draws `powerMW` while firing. Also serves
+  point blank to zero at `range`. Fires in shots: each shot lasts
+  `shotSeconds`, then the turret cools for `cooldownSeconds` before the next,
+  so lasers do not fire constantly. Draws `powerMW` during a shot. Also serves
   as point defence: with point
   defence on, it fires at the nearest torpedo aimed at its ship before any
   other target. **(interpretation)** Beam travel time is ignored (at laser
   range it is a fraction of a second).
-- **Cannon** — fires solid slugs (railgun-style) at `muzzleSpeed` relative to
+- **Cannon** — aims with the target's sensor estimate (see
+  [sensors.md](sensors.md)), so it needs good tracking at range. Fires solid
+  slugs (railgun-style) at `muzzleSpeed` relative to
   the ship, one per `cooldownSeconds`, taken from the ship's ammo containers
   (shared by all cannons). Heavy damage, but a slug is slow, so a
   target that changes course after the shot can be missed. The gun aims at

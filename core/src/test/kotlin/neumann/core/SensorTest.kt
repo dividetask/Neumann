@@ -28,8 +28,9 @@ class SensorTest {
         Fixture.runFor(w, 1000.0)
         val c = assertNotNull(w.player.contacts[d.id])
         assertEquals(100.0, c.lightDelaySeconds, 1.0)
-        assertTrue((d.position - c.observedPosition).length() > 4_000 * Units.KM)
-        assertTrue((d.position - c.predictedPosition).length() < 100 * Units.KM)
+        val then = d.history.at(w.time - c.lightDelaySeconds)!!.position
+        assertTrue((then - c.observedPosition).length() < 5 * c.uncertaintyM, "the estimate is of where it was")
+        assertTrue((d.position - then).length() > 4_000 * Units.KM, "and it has moved since")
     }
 
     @Test
@@ -46,5 +47,61 @@ class SensorTest {
         assertNull(w.player.contacts[t.id])
         repeat(12) { step.run(w, 10.0) }
         assertNotNull(w.player.contacts[t.id])
+    }
+}
+
+class SensorTypesTest {
+    private fun setup(offsetKm: Double): neumann.core.world.World {
+        val w = Fixture.world()
+        Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO)
+        Fixture.place(w, Fixture.dummy(w), Fixture.openSpace + Vec3(offsetKm * Units.KM, 0.0, 0.0), Vec3.ZERO)
+        return w
+    }
+
+    private fun sweep(w: neumann.core.world.World) {
+        for (v in w.vessels) v.sensorsOn = neumann.core.sim.PowerPhase.wanted(v)
+        for (v in w.vessels) v.emitting = v.sensorsOn.any { it.type.sensor!!.type.active }
+        SimulationStep(w.data).sensors.run(w)
+    }
+
+    @Test
+    fun `radar finds a cold ship that a telescope cannot`() {
+        val w = setup(5_000_000.0) // 0.033 AU: beyond a telescope's reach for a cold raider, inside radar's
+        val d = Fixture.dummy(w)
+        d.sensorRules.radarActive = false // silent, so the emission receiver cannot find it either
+        d.sensorRules.lidarActive = false
+        w.player.sensorRules.radarActive = false
+        sweep(w)
+        assertNull(w.player.contacts[d.id], "telescope alone misses it")
+        w.player.sensorRules.radarActive = true
+        sweep(w)
+        assertEquals(neumann.core.world.SensorType.RADAR, w.player.contacts[d.id]?.sensor)
+    }
+
+    @Test
+    fun `an emission receiver finds a ship using radar, bearing only, and not one that is silent`() {
+        val w = setup(100_000_000.0) // far beyond telescope and radar reach
+        val d = Fixture.dummy(w)
+        d.sensorRules.radarActive = true
+        sweep(w)
+        val c = assertNotNull(w.player.contacts[d.id])
+        assertTrue(c.bearingOnly)
+        d.sensorRules.radarActive = false
+        d.sensorRules.lidarActive = false
+        sweep(w)
+        assertNull(w.player.contacts[d.id])
+    }
+
+    @Test
+    fun `lidar tracks the target far more accurately than radar`() {
+        val w = setup(10_000.0)
+        val d = Fixture.dummy(w)
+        sweep(w)
+        val radar = w.player.contacts[d.id]!!.uncertaintyM
+        w.player.targetId = d.id
+        sweep(w)
+        val c = w.player.contacts[d.id]!!
+        assertEquals(neumann.core.world.SensorType.LIDAR, c.sensor)
+        assertTrue(c.uncertaintyM * 100 < radar)
     }
 }

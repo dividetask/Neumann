@@ -34,7 +34,7 @@ Module kinds and what they do:
 | Electrical engine | Generates power (`powerMW`) into the batteries. |
 | Battery | Stores power (`capacityMJ`). |
 | Fuel tank | Holds fuel (`capacityT`). |
-| Scanner | Sensor range (`rangeAu`); draws power (`powerMW`) all the time. |
+| Sensor | Telescope, radar, lidar, or emission receiver; see [sensors.md](sensors.md). Draws `powerMW` while on. |
 | Laser turret | A laser (see [weapons.md](weapons.md)); draws power (`powerMW`) while firing. |
 | Cannon | Fires slugs from the ammo containers. |
 | Ammo container | Holds cannon slugs (`capacity`). |
@@ -53,9 +53,7 @@ Worked out from the modules that are still working:
   ammunition are used.
 - **Acceleration** = total thrust × throttle ÷ mass.
 - **Turn rate** (°/s) = total `turnAuthority` ÷ mass in tonnes.
-- **Sensor range** = the longest `rangeAu` of the working scanners, if they
-  have power. Without power, range drops to `unpoweredSensorFraction`
-  (`data/rules.yaml`). With no working scanner, the ship sees nothing.
+- **Sensors**: see [sensors.md](sensors.md).
 - **Signature** (`signature`, `burningSignature`) and **size** (`sizeM`)
   belong to the design.
 
@@ -82,8 +80,10 @@ Worked out from the modules that are still working:
 
 - Electrical engines charge the batteries; anything beyond battery capacity
   is lost.
-- Scanners draw their power every step. Lasers draw theirs while firing; a
-  laser with too little stored power does not fire.
+- Sensors draw their power every step they are on. Lasers draw theirs only
+  during a shot; a laser with too little stored power does not fire. The
+  generator only needs to cover the average, since batteries cover each
+  shot.
 - A destroyed battery loses its share of the stored power.
 
 ## Damage

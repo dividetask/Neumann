@@ -6,16 +6,19 @@ designs:
     name: Von Neumann probe
     role: SHIP
     sizeM: 100
-    signature: 1.0
+    signature: 0.02
     burningSignature: 4.0
     modules:
       probeHull: 1
       fusionDrive: 1
       manoeuvringThrusters: 2
-      reactor: 2
+      reactor: 1
       battery: 2
       fuelTank: 3
-      longRangeScanner: 1
+      telescope: 1
+      radar: 1
+      lidar: 1
+      emissionReceiver: 1
       laserTurret: 2
       cannon: 2
       ammoContainer: 3
@@ -26,7 +29,7 @@ designs:
     name: Raider
     role: SHIP
     sizeM: 80
-    signature: 0.05
+    signature: 0.01
     burningSignature: 4.0
     modules:
       raiderHull: 1
@@ -34,7 +37,9 @@ designs:
       reactor: 1
       battery: 1
       fuelTank: 2
-      shortRangeScanner: 1
+      telescope: 1
+      radar: 1
+      lidar: 1
       lightLaserTurret: 1
       lightCannon: 1
       ammoContainer: 1
@@ -44,13 +49,15 @@ designs:
     name: Defence platform
     role: DEFENCE
     sizeM: 60
-    signature: 0.3
+    signature: 0.05
     burningSignature: 0.3
     modules:
       platformHull: 1
       reactor: 1
       battery: 1
-      longRangeScanner: 1
+      telescope: 1
+      radar: 1
+      lidar: 1
       heavyLaserTurret: 1
       cannonTurret: 2
       ammoContainer: 3
@@ -59,13 +66,16 @@ designs:
     name: Base
     role: BASE
     sizeM: 500
-    signature: 2.0
+    signature: 0.5
     burningSignature: 2.0
     modules:
       baseHull: 1
       reactor: 2
       battery: 3
-      longRangeScanner: 1
+      telescope: 1
+      radar: 1
+      lidar: 1
+      emissionReceiver: 1
       heavyLaserTurret: 2
       cannonTurret: 2
       ammoContainer: 4

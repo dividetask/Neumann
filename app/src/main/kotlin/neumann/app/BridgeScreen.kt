@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import neumann.core.game.GameSession
 import neumann.core.game.TimeSkipResult
+import neumann.core.sim.SensorPhase
 import neumann.core.game.DirectionDials
 import neumann.core.math.Vec3
 import neumann.core.world.BurnStage
@@ -123,7 +124,10 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
                     perf.massKg(player) / 1000, perf.accelerationMS2(player), Math.toDegrees(perf.turnRate(player))))
                 Line("Fuel       ${DisplayFormat.bar(if (fuelCap > 0) player.fuel / fuelCap else 0.0)} %.2f/%.0f t".format(player.fuel, fuelCap))
                 Line("Power      ${DisplayFormat.bar(if (energyCap > 0) player.energy / energyCap else 0.0)} %.0f/%.0f MJ +%.1f MW".format(
-                    player.energy, energyCap, perf.generatorMW(player)), if (player.scannersPowered) Theme.text else Theme.danger)
+                    player.energy, energyCap, perf.generatorMW(player)))
+                val sensorsOn = player.sensorsOn.joinToString(", ") { SensorPhase.sensorName(it.type.sensor!!.type) }
+                Line("Sensors    ${sensorsOn.ifEmpty { "none" }}${if (player.emitting) "  EMITTING" else ""}",
+                    if (player.emitting) Theme.alert else Theme.text)
                 Line("Slugs      ${player.slugs}/${perf.slugCapacity(player)}")
                 Line("Torpedoes  ${player.torpedoes}/${perf.torpedoCapacity(player)}")
                 Line(manoeuvreStatus(session), if (player.burn == null) Theme.dim else Theme.alert)
@@ -151,7 +155,13 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
                         changed(session.orders.setTarget(c.id))
                     }.padding(vertical = 3.dp)) {
                         Line("${if (targeted) ">" else " "} ${c.name} (${c.kind.name.lowercase()})", color)
-                        Line("   ${DisplayFormat.distance(c.distance)}  closing ${DisplayFormat.speed(c.closingSpeed)}  delay ${DisplayFormat.duration(c.lightDelaySeconds)}", Theme.dim)
+                        val sensor = SensorPhase.sensorName(c.sensor)
+                        if (c.bearingOnly) {
+                            Line("   bearing only ($sensor)  delay ${DisplayFormat.duration(c.lightDelaySeconds)}", Theme.dim)
+                        } else {
+                            Line("   ${DisplayFormat.distance(c.distance)} ±${DisplayFormat.distance(c.uncertaintyM)} ($sensor)", Theme.dim)
+                            Line("   closing ${DisplayFormat.speed(c.closingSpeed)}  delay ${DisplayFormat.duration(c.lightDelaySeconds)}", Theme.dim)
+                        }
                     }
                 }
                 Line("Tap a contact to target it.", Theme.dim)
@@ -169,6 +179,13 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
                 Rule("Laser auto-fire at target", rules.laserAutoFire) { rules.laserAutoFire = it; changed() }
                 Rule("Cannon auto-fire at target", rules.cannonAutoFire) { rules.cannonAutoFire = it; changed() }
                 Rule("Torpedo auto-launch at target", rules.torpedoAutoLaunch) { rules.torpedoAutoLaunch = it; changed() }
+            }
+
+            Section("SENSORS") {
+                val sr = player.sensorRules
+                Rule("Radar on (active: can be detected)", sr.radarActive) { sr.radarActive = it; changed() }
+                Rule("Lidar on target (active: can be detected)", sr.lidarActive) { sr.lidarActive = it; changed() }
+                Line("Telescope and emission receiver are passive and always on.", Theme.dim)
             }
 
             Section("MANOEUVRE") {

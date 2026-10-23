@@ -3,6 +3,7 @@ package neumann.core.data
 import kotlinx.serialization.Serializable
 import neumann.core.world.EventKind
 import neumann.core.world.ModuleKind
+import neumann.core.world.SensorType
 import neumann.core.world.VesselRole
 
 // Config holders loaded from data/. Numbers and enums only; no logic.
@@ -44,7 +45,6 @@ data class AiConfig(
 @Serializable
 data class ShipRules(
     val alignToleranceDeg: Double,
-    val unpoweredSensorFraction: Double,
     val turnFuelKgPerTonneDeg: Double,
 )
 
@@ -65,7 +65,7 @@ data class ModuleType(
     val battery: BatteryConfig? = null,
     val fuelTank: FuelTankConfig? = null,
     val ammoContainer: AmmoContainerConfig? = null,
-    val scanner: ScannerConfig? = null,
+    val sensor: SensorConfig? = null,
     val laser: LaserConfig? = null,
     val cannon: CannonConfig? = null,
     val missileBay: MissileBayConfig? = null,
@@ -87,13 +87,22 @@ data class FuelTankConfig(val capacityT: Double)
 data class AmmoContainerConfig(val capacity: Int)
 
 @Serializable
-data class ScannerConfig(val rangeAu: Double, val powerMW: Double)
+data class SensorConfig(
+    val type: SensorType,
+    val rangeAu: Double,
+    val bearingErrorDeg: Double,
+    val rangeErrorFraction: Double,
+    val velocityErrorKmS: Double,
+    val powerMW: Double,
+)
 
 @Serializable
 data class LaserConfig(
     val rangeKm: Double,
     val damagePerSecond: Double,
     val powerMW: Double,
+    val shotSeconds: Double,
+    val cooldownSeconds: Double,
     val burstSeconds: Double,
     val arcDeg: Double,
 )
@@ -126,6 +135,7 @@ data class TorpedoConfig(
     val accelerationMS2: Double,
     val deltaVKmS: Double,
     val terminalReserveFraction: Double,
+    val sizeM: Double,
     val hitPoints: Double,
     val damage: Double,
     val blastRadiusKm: Double,

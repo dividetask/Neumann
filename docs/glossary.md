@@ -6,6 +6,8 @@
   into repairs.
 - **Auto-pause event** — Something that stops a time skip before its time is
   up.
+- **Bearing only** — A contact whose direction is known but not its
+  distance.
 - **Burn** — Firing the ship's engine to change its velocity.
 - **Claimed** — A star system with every enemy ship, fixed defence, and base
   destroyed.
@@ -17,9 +19,15 @@
 - **Desired speed** — The speed a burn should reach before the ship coasts.
 - **Direction circles** — The YAW and PITCH dials used to pick a direction
   relative to the ship.
+- **Emission receiver** — A passive sensor that detects active sensors.
+- **Emitting** — Using an active sensor (radar or lidar); enemy emission
+  receivers can detect it.
+- **Estimate** — A contact's sensed position and velocity, with its errors.
 - **Facing** — Which way a ship's front and top point.
 - **Fixed defence** — A weapon installation without real engines; it only
   keeps its orbit.
+- **Lidar** — Laser ranging: an active sensor that tracks the target very
+  precisely.
 - **Light delay** — The time light takes to reach the ship; sensors show
   contacts as they were, not as they are.
 - **Mineral estimate** — The predicted mineral resources at a destination
@@ -28,11 +36,16 @@
 - **Module** — One component of a ship, with a cost, weight, and
   manufacturing time.
 - **Pending** — Designed or suggested, but held back for a later version.
+- **Radar** — An active microwave sensor that finds hot and cold objects.
+- **Sensor rules** — The radar and lidar on/off switches.
 - **Ship state** — Damage, fuel, and ammunition, kept between battles.
-- **Signature** — How easy an object is to detect; higher while burning.
+- **Signature** — How easy an object is for telescopes to see; higher while
+  burning.
 - **Sublight** — Slower than light; no ship in the game exceeds light speed.
+- **Telescope** — A passive infrared/optical sensor.
 - **Time skip** — A player control that moves the game forward by a set time.
 - **Turn rate** — How fast a ship can change its facing.
+- **Uncertainty** — The size of a contact's position error.
 - **Von Neumann probe** — A self-repairing ship that mines and manufactures
   what it needs. The player's ship is one.
 - **Weapon rules** — Standing orders for when weapons fire on their own.

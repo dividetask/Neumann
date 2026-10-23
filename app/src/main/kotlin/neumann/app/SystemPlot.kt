@@ -62,6 +62,8 @@ private class View(val centre: Vec3, val radius: Double, val size: Size, val top
     }
 
     fun visible(o: Offset) = o.x in 0f..size.width && o.y in 0f..size.height
+
+    fun pixels(metres: Double) = (metres * scale).toFloat().coerceAtMost(size.width)
 }
 
 @Suppress("UNUSED_PARAMETER")
@@ -103,6 +105,12 @@ private fun DrawScope.draw(world: World, view: View, showContacts: Boolean, meas
                 ContactKind.BASE -> drawRect(color, o - Offset(7f, 7f), Size(14f, 14f))
             }
             if (c.id == world.player.targetId) drawCircle(Theme.alert, 12f, o, style = Stroke(2f))
+            // Error circle: the size of the position uncertainty, when big enough to see.
+            val err = view.pixels(c.uncertaintyM)
+            if (!c.bearingOnly && err > 3f) drawCircle(color.copy(alpha = 0.6f), err, o, style = Stroke(1f))
+            if (c.bearingOnly) {
+                drawLine(color.copy(alpha = 0.6f), view.point(world.player.position), o, 1f)
+            }
             if (c.kind != ContactKind.TORPEDO) label(measurer, c.name, o + Offset(8f, 4f), color)
         }
     }

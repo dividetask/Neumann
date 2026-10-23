@@ -118,6 +118,8 @@ D. **Fire a weapon now** at the target. **(interpretation)** One cannon fires
 E. **Set weapon rules**: laser point defence, laser auto-fire at target,
    cannon auto-fire at target, torpedo auto-launch at target. Each fires only
    when the target is in that weapon's range and arc.
+F. **Set sensor rules**: radar on/off, lidar on/off (see
+   [sensors.md](sensors.md)).
 
 ## Space
 
@@ -152,9 +154,10 @@ E. **Set weapon rules**: laser point defence, laser auto-fire at target,
 
 ## Sensors
 
-- Each ship has a sensor range (from its scanners). An object is detected
-  when its light-delayed distance is within `sensorRange × signature`.
-- An object's signature is higher while it is burning its engine.
+- Ships carry several kinds of sensor with different range and accuracy;
+  see [sensors.md](sensors.md).
+- An object's signature (what telescopes see) is higher while it is burning
+  its engine.
   **(interpretation)** A ship lying in ambush is not burning, so it is hard to
   see until close.
 

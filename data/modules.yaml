@@ -76,23 +76,40 @@ modules:
     hitPoints: 60
     ammoContainer: { capacity: 100 }
 
-  # --- Scanners ------------------------------------------------------------
-  longRangeScanner:
-    name: Long-range scanner
-    kind: SCANNER
-    cost: 90
-    massT: 4
+  # --- Sensors (see docs/sensors.md) --------------------------------------
+  # Errors are 1 sigma. Radar range is for a 100 m target.
+  telescope:
+    name: Telescope
+    kind: SENSOR
+    cost: 60
+    massT: 3
+    buildHours: 16
+    hitPoints: 60
+    sensor: { type: TELESCOPE, rangeAu: 1.0, bearingErrorDeg: 0.0005, rangeErrorFraction: 0.2, velocityErrorKmS: 0.5, powerMW: 0.1 }
+  radar:
+    name: Radar
+    kind: SENSOR
+    cost: 80
+    massT: 6
     buildHours: 20
     hitPoints: 80
-    scanner: { rangeAu: 1.0, powerMW: 1 }
-  shortRangeScanner:
-    name: Short-range scanner
-    kind: SCANNER
-    cost: 40
-    massT: 2
-    buildHours: 10
+    sensor: { type: RADAR, rangeAu: 0.05, bearingErrorDeg: 0.05, rangeErrorFraction: 0.002, velocityErrorKmS: 0.02, powerMW: 2 }
+  lidar:
+    name: Lidar
+    kind: SENSOR
+    cost: 70
+    massT: 3
+    buildHours: 18
     hitPoints: 60
-    scanner: { rangeAu: 0.5, powerMW: 0.5 }
+    sensor: { type: LIDAR, rangeAu: 0.01, bearingErrorDeg: 0.0001, rangeErrorFraction: 0.00001, velocityErrorKmS: 0.0001, powerMW: 1 }
+  emissionReceiver:
+    name: Emission receiver
+    kind: SENSOR
+    cost: 30
+    massT: 1
+    buildHours: 8
+    hitPoints: 40
+    sensor: { type: EMISSION_RECEIVER, rangeAu: 3.0, bearingErrorDeg: 0.1, rangeErrorFraction: 1.0, velocityErrorKmS: 1.0, powerMW: 0.05 }
 
   # --- Weapons -------------------------------------------------------------
   # arcDeg: largest angle from the ship's front the weapon can fire at.
@@ -103,7 +120,7 @@ modules:
     massT: 8
     buildHours: 24
     hitPoints: 120
-    laser: { rangeKm: 5000, damagePerSecond: 4, powerMW: 5, burstSeconds: 60, arcDeg: 150 }
+    laser: { rangeKm: 5000, damagePerSecond: 4, powerMW: 5, shotSeconds: 10, cooldownSeconds: 20, burstSeconds: 60, arcDeg: 150 }
   lightLaserTurret:
     name: Light laser turret
     kind: LASER_TURRET
@@ -111,7 +128,7 @@ modules:
     massT: 5
     buildHours: 12
     hitPoints: 80
-    laser: { rangeKm: 4000, damagePerSecond: 2, powerMW: 4, burstSeconds: 60, arcDeg: 150 }
+    laser: { rangeKm: 4000, damagePerSecond: 2, powerMW: 4, shotSeconds: 10, cooldownSeconds: 30, burstSeconds: 60, arcDeg: 150 }
   heavyLaserTurret:
     name: Heavy laser turret
     kind: LASER_TURRET
@@ -119,7 +136,7 @@ modules:
     massT: 15
     buildHours: 40
     hitPoints: 200
-    laser: { rangeKm: 8000, damagePerSecond: 6, powerMW: 12, burstSeconds: 60, arcDeg: 150 }
+    laser: { rangeKm: 8000, damagePerSecond: 6, powerMW: 12, shotSeconds: 10, cooldownSeconds: 20, burstSeconds: 60, arcDeg: 150 }
   cannon:
     name: Cannon
     kind: CANNON
@@ -169,7 +186,8 @@ munitions:
     accelerationMS2: 100
     deltaVKmS: 40
     terminalReserveFraction: 0.25   # delta-v kept for steering on the final approach
-    hitPoints: 66
+    sizeM: 5
+    hitPoints: 30
     damage: 250
     blastRadiusKm: 1
     signature: 0.1

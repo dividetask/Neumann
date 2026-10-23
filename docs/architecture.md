@@ -27,6 +27,7 @@ on load into the world.
 - `Vec3` — 3D vector (data).
 - `Frame` — rotation, choosing an "up", ship-relative ↔ space directions.
 - `Units` — unit constants (AU, km, G, c, solar and Earth mass).
+- `Noise` — random measurement errors (normal distribution).
 - `ClosestApproach` — nearest distance between two objects moving in straight
   lines over one step.
 
@@ -34,11 +35,10 @@ on load into the world.
 
 - `GameData` — everything loaded from `data/`.
 - `RulesFile` → `SimConfig`, `AutoPauseConfig`, `AiConfig`.
-- `RulesFile` also holds `ShipRules` (align tolerance, unpowered sensor
-  fraction).
+- `RulesFile` also holds `ShipRules` (align tolerance, turning fuel).
 - `ModulesFile` → `ModuleType` (one per module type) → `PropulsionConfig`,
   `GeneratorConfig`, `BatteryConfig`, `FuelTankConfig`, `AmmoContainerConfig`,
-  `ScannerConfig`, `LaserConfig`, `CannonConfig`, `MissileBayConfig`; and
+  `SensorConfig`, `LaserConfig`, `CannonConfig`, `MissileBayConfig`; and
   `MunitionsConfig` → `SlugConfig`, `TorpedoConfig`.
 - `ShipsFile` → `ShipDesign` (modules and counts).
 - `ScenarioConfig` → `StarConfig`, `PlanetConfig`, `EntryConfig`,
@@ -57,11 +57,14 @@ on load into the world.
 - `Heading`, `HeadingMode` — the direction a vessel turns to and holds.
 - `Burn`, `BurnStage` — an active burn along the heading toward a desired
   speed and/or distance: accelerate, coast, brake.
+- `SensorType` — telescope, radar, lidar, emission receiver.
+  `SensorRules` — the radar and lidar switches.
 - `WeaponRules` — the weapon-rule toggles. `WeaponKind` — laser, cannon, torpedo.
 - `Torpedo`, `Slug` — projectiles.
 - `Tracked` — interface for anything sensors can see (vessels, torpedoes).
 - `PositionHistory`, `HistorySample` — past positions, for light delay.
-- `Contact`, `ContactKind`, `ContactBook` — what one vessel's sensors see.
+- `Contact`, `ContactKind`, `ContactBook` — what one vessel's sensors see:
+  estimates with an uncertainty, possibly bearing only.
 - `PlayerWatch` — what the player has already been warned about (weapon
   ranges entered, low supplies).
 - `GameEvent`, `EventKind`, `EventLog` — things that happened. Repeated
@@ -75,7 +78,7 @@ Run in this order by `SimulationStep`:
 | Class | Job |
 |---|---|
 | `EnemyAi` | Sets enemy targets, headings, and burns. |
-| `PowerPhase` | Generators charge batteries; scanners draw power. |
+| `PowerPhase` | Generators charge batteries; decides which sensors are on (powered) and whether the vessel is emitting. |
 | `TurnPhase` | Turns vessels toward their heading at their turn rate; uses turning fuel. |
 | `BurnPhase` | Runs burn stages (accelerate, coast, brake); thrusts once facing the right way; fuel use; burn end. |
 | `TorpedoGuidance` | Steers and thrusts torpedoes. |
@@ -87,7 +90,7 @@ Run in this order by `SimulationStep`:
 | `PlanetMover` | Moves planets to the new time. |
 | `ImpactPhase` | Slug hits and torpedo detonations. Uses `ClosestApproach`. |
 | `BodyCollisionPhase` | Anything inside a star or planet is destroyed. |
-| `SensorPhase` | Updates every vessel's contacts. Uses `LightDelay`. |
+| `SensorPhase` | Updates every vessel's contacts from its sensors that are on, with errors. Uses `LightDelay`. |
 | `WeaponRangeWatch` | Warns when the player enters an enemy's weapon range. |
 | `SupplyWatch` | Warns when the player's fuel or ammunition runs low. |
 | `ClaimCheck` | Detects a claimed system or a lost ship. |

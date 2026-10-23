@@ -2,7 +2,11 @@ package neumann.core.world
 
 import neumann.core.math.Vec3
 
-/** What one vessel's sensors show of another object, as of its light delay. */
+/**
+ * What one vessel's sensors show of another object, as of its light delay.
+ * Position and velocity are estimates, with [uncertaintyM] the size of the
+ * position error. A [bearingOnly] contact's distance is not known.
+ */
 class Contact(
     val id: String,
     val name: String,
@@ -14,6 +18,9 @@ class Contact(
     val distance: Double,
     val closingSpeed: Double,
     val targetsObserver: Boolean,
+    val sensor: SensorType,
+    val uncertaintyM: Double,
+    val bearingOnly: Boolean,
 ) {
     /** Where it is now if it kept its observed velocity. */
     val predictedPosition: Vec3 get() = observedPosition + observedVelocity * lightDelaySeconds

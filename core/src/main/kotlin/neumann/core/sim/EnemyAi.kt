@@ -23,6 +23,10 @@ class EnemyAi(private val config: AiConfig, private val performance: ShipPerform
     fun run(world: World, dt: Double) {
         for (v in world.vessels) {
             if (!v.alive || v.faction != Faction.ENEMY) continue
+            // Active sensors on once the player has been seen, unless lying in ambush.
+            val active = world.player.id in v.contacts.everSeen && !v.ambush
+            v.sensorRules.radarActive = active
+            v.sensorRules.lidarActive = active
             val player = v.contacts[world.player.id] ?: continue
             if (v.ambush) {
                 if (player.distance > v.ambushRange) continue

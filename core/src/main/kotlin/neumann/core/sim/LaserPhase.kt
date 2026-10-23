@@ -4,13 +4,15 @@ import neumann.core.math.Units
 import neumann.core.math.Vec3
 import neumann.core.world.EventKind
 import neumann.core.world.ModuleKind
+import neumann.core.world.ModuleState
 import neumann.core.world.Torpedo
 import neumann.core.world.Vessel
 import neumann.core.world.World
 import kotlin.math.max
 
 /**
- * Fires each laser turret: point defence against torpedoes first (spreading
+ * Fires each laser turret in shots: a shot lasts shotSeconds, then the turret
+ * cools for cooldownSeconds. Point defence against torpedoes first (spreading
  * turrets over different torpedoes), then the target. A turret fires only at
  * things in its range and arc, and only with enough stored power.
  */
@@ -23,27 +25,44 @@ class LaserPhase(private val damage: DamageResolver) {
             val engaged = HashSet<String>()
             for (turret in v.working(ModuleKind.LASER_TURRET)) {
                 val laser = turret.type.laser!!
+                if (turret.cooldown > 0.0) {
+                    turret.cooldown = max(0.0, turret.cooldown - dt)
+                    continue
+                }
                 val power = laser.powerMW * dt
-                if (v.energy < power) continue
                 val range = laser.rangeKm * Units.KM
                 val torpedo = if (v.rules.laserPointDefence) torpedoFor(world, v, range, laser.arcDeg, engaged) else null
+                val target = if (torpedo == null && (v.rules.laserAutoFire || bursting)) vesselTarget(world, v, range, laser.arcDeg) else null
+                if ((torpedo == null && target == null) || v.energy < power) {
+                    if (turret.shotRemaining > 0.0) endShot(turret, laser.cooldownSeconds)
+                    continue
+                }
+                v.energy -= power
+                if (turret.shotRemaining <= 0.0) turret.shotRemaining = laser.shotSeconds
+                turret.shotRemaining -= dt
                 if (torpedo != null) {
                     engaged.add(torpedo.id)
-                    v.energy -= power
                     val d = (torpedo.position - v.position).length()
                     torpedo.hitPoints -= laser.damagePerSecond * (1 - d / range) * dt
                     if (torpedo.hitPoints <= 0.0 && torpedo.alive) shotDown(world, v, torpedo)
-                    continue
+                } else if (target != null) {
+                    val d = (target.position - v.position).length()
+                    damage.hit(world, target, laser.damagePerSecond * (1 - d / range) * dt, v.id, "laser")
                 }
-                if (!(v.rules.laserAutoFire || bursting)) continue
-                val target = world.vessel(v.targetId) ?: continue
-                if (target.faction == v.faction || v.contacts[target.id] == null) continue
-                if (!inReach(v, target.position, range, laser.arcDeg)) continue
-                v.energy -= power
-                val d = (target.position - v.position).length()
-                damage.hit(world, target, laser.damagePerSecond * (1 - d / range) * dt, v.id, "laser")
+                if (turret.shotRemaining <= 0.0) endShot(turret, laser.cooldownSeconds)
             }
         }
+    }
+
+    private fun endShot(turret: ModuleState, cooldown: Double) {
+        turret.shotRemaining = 0.0
+        turret.cooldown = cooldown
+    }
+
+    private fun vesselTarget(world: World, v: Vessel, range: Double, arcDeg: Double): Vessel? {
+        val target = world.vessel(v.targetId) ?: return null
+        if (target.faction == v.faction || v.contacts[target.id] == null) return null
+        return target.takeIf { inReach(v, it.position, range, arcDeg) }
     }
 
     private fun inReach(v: Vessel, at: Vec3, range: Double, arcDeg: Double): Boolean {

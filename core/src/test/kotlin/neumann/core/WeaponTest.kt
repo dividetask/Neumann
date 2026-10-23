@@ -6,6 +6,7 @@ import neumann.core.math.Units
 import neumann.core.math.Vec3
 import neumann.core.sim.SimulationStep
 import neumann.core.world.ModuleKind
+import neumann.core.world.SensorType
 import neumann.core.world.Torpedo
 import neumann.core.world.WeaponKind
 import neumann.core.world.World
@@ -24,6 +25,14 @@ class WeaponTest {
         Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO, forward = facing)
         Fixture.place(w, Fixture.dummy(w), Fixture.openSpace + Vec3(offsetKm * Units.KM, 0.0, 0.0), dummyVelocity, forward = -toDummy)
         SimulationStep(w.data).sensors.run(w)
+    }
+
+    /** Target the dummy and let the lidar lock on (it needs a known contact first). */
+    private fun lockOn(w: World): OrderDesk {
+        val orders = OrderDesk(w)
+        assertNull(orders.setTarget(Fixture.dummy(w).id))
+        SimulationStep(w.data).sensors.run(w)
+        return orders
     }
 
     private fun incomingTorpedo(w: World): Torpedo {
@@ -72,11 +81,31 @@ class WeaponTest {
     fun `a cannon slug hits a target moving at constant velocity`() {
         val w = duel(2_000.0, Vec3(0.0, 3_000.0, 0.0))
         val d = Fixture.dummy(w)
-        val orders = OrderDesk(w)
-        orders.setTarget(d.id)
+        val orders = lockOn(w)
+        assertEquals(SensorType.LIDAR, w.player.contacts[d.id]!!.sensor)
         assertNull(orders.fireNow(WeaponKind.CANNON))
         Fixture.runFor(w, 600.0)
         assertEquals(munitions.slug.damage, damageTaken(d), 1e-6)
+    }
+
+    @Test
+    fun `a laser fires in shots with a cooldown between them`() {
+        val w = duel(2_000.0)
+        val p = w.player
+        lockOn(w)
+        p.rules.laserAutoFire = true
+        val turret = p.working(ModuleKind.LASER_TURRET).first()
+        val laser = turret.type.laser!!
+        val step = SimulationStep(w.data)
+        var firing = 0
+        var total = 0
+        repeat(600) {
+            step.run(w, 1.0)
+            total++
+            if (turret.shotRemaining > 0.0 || turret.cooldown == laser.cooldownSeconds) firing++
+        }
+        val duty = laser.shotSeconds / (laser.shotSeconds + laser.cooldownSeconds)
+        assertEquals(duty, firing.toDouble() / total, 0.05, "fires about shot / (shot + cooldown) of the time")
     }
 
     @Test

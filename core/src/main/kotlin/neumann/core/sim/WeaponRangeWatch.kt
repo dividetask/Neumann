@@ -5,7 +5,7 @@ import neumann.core.world.EventKind
 import neumann.core.world.World
 
 /** Warns when the player enters a known enemy's weapon range. */
-class WeaponRangeWatch {
+class WeaponRangeWatch(private val performance: ShipPerformance) {
     fun run(world: World) {
         val player = world.player
         if (!player.alive) return
@@ -14,7 +14,7 @@ class WeaponRangeWatch {
         for (c in player.contacts.current.values) {
             if (c.kind == ContactKind.TORPEDO) continue
             val enemy = world.vessel(c.id) ?: continue
-            if (c.distance > ThreatRange.of(enemy.shipClass)) continue
+            if (c.distance > performance.threatRange(enemy)) continue
             inside.add(c.id)
             if (c.id !in watch.inRangeOf) {
                 world.event(EventKind.ENTERED_WEAPON_RANGE, c.id, "Entered weapon range of ${c.name}")

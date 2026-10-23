@@ -1,0 +1,57 @@
+package neumann.core.sim
+
+import neumann.core.data.MunitionsConfig
+import neumann.core.data.ShipRules
+import neumann.core.math.Units
+import neumann.core.world.ModuleKind
+import neumann.core.world.Vessel
+import kotlin.math.max
+
+/** What a vessel can do, worked out from its working modules and what it carries. */
+class ShipPerformance(private val munitions: MunitionsConfig, private val rules: ShipRules) {
+    /** Modules (working or not) plus fuel, slugs, and torpedoes, in kg. */
+    fun massKg(v: Vessel): Double =
+        v.modules.sumOf { it.type.massT } * 1000.0 + v.fuel * 1000.0 +
+            v.slugs * munitions.slug.massKg + v.torpedoes * munitions.torpedo.massKg
+
+    fun thrustN(v: Vessel): Double = v.working(ModuleKind.PROPULSION).sumOf { it.type.propulsion!!.thrustKN } * 1000.0
+
+    /** Fuel use at full throttle, kg/s. */
+    fun fuelKgS(v: Vessel): Double = v.working(ModuleKind.PROPULSION).sumOf { it.type.propulsion!!.fuelKgS }
+
+    fun accelerationMS2(v: Vessel): Double = thrustN(v) / massKg(v)
+
+    /** Turn rate in radians per second: total turn authority / mass in tonnes, in degrees. */
+    fun turnRate(v: Vessel): Double =
+        v.working(ModuleKind.PROPULSION).sumOf { it.type.propulsion!!.turnAuthority } / (massKg(v) / 1000.0) * Units.DEGREE
+
+    fun fuelCapacity(v: Vessel): Double = v.working(ModuleKind.FUEL_TANK).sumOf { it.type.fuelTank!!.capacityT }
+
+    fun slugCapacity(v: Vessel): Int = v.working(ModuleKind.AMMO_CONTAINER).sumOf { it.type.ammoContainer!!.capacity }
+
+    fun torpedoCapacity(v: Vessel): Int = v.working(ModuleKind.MISSILE_BAY).sumOf { it.type.missileBay!!.capacity }
+
+    fun energyCapacity(v: Vessel): Double = v.working(ModuleKind.BATTERY).sumOf { it.type.battery!!.capacityMJ }
+
+    fun generatorMW(v: Vessel): Double = v.working(ModuleKind.GENERATOR).sumOf { it.type.generator!!.powerMW }
+
+    fun scannerDrawMW(v: Vessel): Double = v.working(ModuleKind.SCANNER).sumOf { it.type.scanner!!.powerMW }
+
+    /** Longest working scanner range, cut to the unpowered fraction without power; 0 with no scanner. */
+    fun sensorRange(v: Vessel): Double {
+        val best = v.working(ModuleKind.SCANNER).maxOfOrNull { it.type.scanner!!.rangeAu } ?: return 0.0
+        return best * Units.AU * (if (v.scannersPowered) 1.0 else rules.unpoweredSensorFraction)
+    }
+
+    /** Longest range at which its working weapons fire on their own, in metres. */
+    fun threatRange(v: Vessel): Double {
+        var r = 0.0
+        for (m in v.modules) {
+            if (m.destroyed) continue
+            r = max(r, m.type.laser?.rangeKm ?: 0.0)
+            r = max(r, m.type.cannon?.autoRangeKm ?: 0.0)
+            r = max(r, m.type.missileBay?.launchRangeKm ?: 0.0)
+        }
+        return r * Units.KM
+    }
+}

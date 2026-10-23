@@ -33,7 +33,11 @@ object Fixture {
     fun dummy(world: World): Vessel = world.vessels.first { it.name == "Dummy" }
 
     /** Moves an object and resets its history, as if it had always been there. */
-    fun place(world: World, t: Tracked, position: Vec3, velocity: Vec3) {
+    fun place(world: World, t: Tracked, position: Vec3, velocity: Vec3, forward: Vec3? = null) {
+        if (t is Vessel && forward != null) {
+            t.forward = forward.normalized()
+            t.up = neumann.core.math.Frame.upFor(t.forward)
+        }
         when (t) {
             is Vessel -> { t.position = position; t.velocity = velocity; t.previousPosition = position }
             is neumann.core.world.Torpedo -> { t.position = position; t.velocity = velocity; t.previousPosition = position }
@@ -54,4 +58,9 @@ object Fixture {
         val end = world.time + seconds
         while (world.time < end - 1e-9 && !world.over) skip.run(world, end - world.time)
     }
+
+    /** Total damage a vessel's modules have taken. */
+    fun damageTaken(v: Vessel) = v.modules.sumOf { it.type.hitPoints - it.hitPoints }
+
+    val performance by lazy { SimulationStep(data).performance }
 }

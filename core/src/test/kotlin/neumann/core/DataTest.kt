@@ -7,7 +7,7 @@ class DataTest {
     @Test
     fun `data files load and every reference resolves`() {
         val d = Fixture.data
-        assertTrue(d.ships.isNotEmpty())
+        assertTrue(d.designs.isNotEmpty() && d.modules.isNotEmpty())
         assertTrue(d.scenario.enemies.isNotEmpty())
     }
 }

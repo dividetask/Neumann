@@ -2,7 +2,7 @@ package neumann.core.data
 
 import kotlinx.serialization.Serializable
 import neumann.core.world.EventKind
-import neumann.core.world.PartKind
+import neumann.core.world.ModuleKind
 import neumann.core.world.VesselRole
 
 // Config holders loaded from data/. Numbers and enums only; no logic.
@@ -10,6 +10,7 @@ import neumann.core.world.VesselRole
 @Serializable
 data class RulesFile(
     val sim: SimConfig,
+    val ships: ShipRules,
     val autoPause: AutoPauseConfig,
     val ai: AiConfig,
 )
@@ -40,46 +41,79 @@ data class AiConfig(
 )
 
 @Serializable
-data class ShipsFile(val ships: Map<String, ShipClass>)
+data class ShipRules(val alignToleranceDeg: Double, val unpoweredSensorFraction: Double)
 
 @Serializable
-data class ShipClass(
+data class ModulesFile(val modules: Map<String, ModuleType>, val munitions: MunitionsConfig)
+
+/** One kind of module. Exactly the sub-config matching [kind] is set. */
+@Serializable
+data class ModuleType(
     val name: String,
-    val role: VesselRole,
-    val sizeM: Double,
-    val parts: List<PartConfig>,
-    val sensor: SensorConfig,
-    val drive: DriveConfig? = null,
+    val kind: ModuleKind,
+    val cost: Double,
+    val massT: Double,
+    val buildHours: Double,
+    val hitPoints: Double,
+    val propulsion: PropulsionConfig? = null,
+    val generator: GeneratorConfig? = null,
+    val battery: BatteryConfig? = null,
+    val fuelTank: FuelTankConfig? = null,
+    val ammoContainer: AmmoContainerConfig? = null,
+    val scanner: ScannerConfig? = null,
     val laser: LaserConfig? = null,
     val cannon: CannonConfig? = null,
-    val torpedo: TorpedoConfig? = null,
+    val missileBay: MissileBayConfig? = null,
 )
 
 @Serializable
-data class PartConfig(val kind: PartKind, val hitPoints: Double, val hitWeight: Double)
+data class PropulsionConfig(val thrustKN: Double, val fuelKgS: Double, val turnAuthority: Double)
 
 @Serializable
-data class DriveConfig(val accelerationMS2: Double, val fuelCapacity: Double, val fuelPerKmS: Double)
+data class GeneratorConfig(val powerMW: Double)
 
 @Serializable
-data class SensorConfig(
-    val rangeAu: Double,
-    val signature: Double,
-    val burningSignature: Double,
-    val damagedFraction: Double,
+data class BatteryConfig(val capacityMJ: Double)
+
+@Serializable
+data class FuelTankConfig(val capacityT: Double)
+
+@Serializable
+data class AmmoContainerConfig(val capacity: Int)
+
+@Serializable
+data class ScannerConfig(val rangeAu: Double, val powerMW: Double)
+
+@Serializable
+data class LaserConfig(
+    val rangeKm: Double,
+    val damagePerSecond: Double,
+    val powerMW: Double,
+    val burstSeconds: Double,
+    val arcDeg: Double,
 )
-
-@Serializable
-data class LaserConfig(val rangeKm: Double, val damagePerSecond: Double, val burstSeconds: Double)
 
 @Serializable
 data class CannonConfig(
     val muzzleSpeedKmS: Double,
     val cooldownSeconds: Double,
-    val ammo: Int,
-    val damage: Double,
     val autoRangeKm: Double,
+    val arcDeg: Double,
 )
+
+@Serializable
+data class MissileBayConfig(
+    val capacity: Int,
+    val cooldownSeconds: Double,
+    val launchRangeKm: Double,
+    val arcDeg: Double,
+)
+
+@Serializable
+data class MunitionsConfig(val slug: SlugConfig, val torpedo: TorpedoConfig)
+
+@Serializable
+data class SlugConfig(val damage: Double, val massKg: Double, val cost: Double, val buildHours: Double)
 
 @Serializable
 data class TorpedoConfig(
@@ -89,11 +123,25 @@ data class TorpedoConfig(
     val hitPoints: Double,
     val damage: Double,
     val blastRadiusKm: Double,
-    val ammo: Int,
-    val cooldownSeconds: Double,
-    val launchRangeKm: Double,
     val signature: Double,
     val burningSignature: Double,
+    val massKg: Double,
+    val cost: Double,
+    val buildHours: Double,
+)
+
+@Serializable
+data class ShipsFile(val designs: Map<String, ShipDesign>)
+
+/** A ship design: its modules (type id to count) and design-level values. */
+@Serializable
+data class ShipDesign(
+    val name: String,
+    val role: VesselRole,
+    val sizeM: Double,
+    val signature: Double,
+    val burningSignature: Double,
+    val modules: Map<String, Int>,
 )
 
 @Serializable
@@ -128,12 +176,12 @@ data class EntryConfig(
 )
 
 @Serializable
-data class PlayerPlacement(val name: String, val shipClass: String)
+data class PlayerPlacement(val name: String, val design: String)
 
 @Serializable
 data class EnemyPlacement(
     val name: String,
-    val shipClass: String,
+    val design: String,
     val planet: String,
     val offsetKm: List<Double>,
     val ambush: Boolean = false,
@@ -143,6 +191,8 @@ data class EnemyPlacement(
 /** Everything loaded from data/. */
 data class GameData(
     val rules: RulesFile,
-    val ships: Map<String, ShipClass>,
+    val modules: Map<String, ModuleType>,
+    val munitions: MunitionsConfig,
+    val designs: Map<String, ShipDesign>,
     val scenario: ScenarioConfig,
 )

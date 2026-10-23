@@ -1,5 +1,6 @@
 package neumann.core.math
 
+import kotlin.math.acos
 import kotlin.math.sqrt
 
 /** A 3D vector. */
@@ -14,6 +15,12 @@ data class Vec3(val x: Double, val y: Double, val z: Double) {
     fun cross(o: Vec3) = Vec3(y * o.z - z * o.y, z * o.x - x * o.z, x * o.y - y * o.x)
     fun lengthSquared() = dot(this)
     fun length() = sqrt(lengthSquared())
+
+    /** Angle to another vector, in radians (0 if either is zero). */
+    fun angleTo(o: Vec3): Double {
+        val l = length() * o.length()
+        return if (l == 0.0) 0.0 else acos((dot(o) / l).coerceIn(-1.0, 1.0))
+    }
 
     /** Unit vector in the same direction, or ZERO for a zero vector. */
     fun normalized(): Vec3 {

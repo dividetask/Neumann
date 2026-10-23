@@ -1,6 +1,13 @@
 # Weapons
 
-All weapon numbers live in `data/ships.yaml`. Starting values are untuned.
+Weapons are modules (see [ships.md](ships.md)): laser turrets, cannons, and
+missile bays. Their numbers live in `data/modules.yaml`. Starting values are
+untuned.
+
+Each weapon module fires on its own and has a firing arc: `arcDeg`, the
+largest angle from the ship's front it can fire at. **(interpretation)**
+Starting arcs: laser turrets wide, cannons a narrow cone forward, missile bays
+any direction (180°).
 
 ## First version
 
@@ -8,17 +15,20 @@ The bare minimum to test the game.
 
 - **Laser** — a beam weapon. Hits at the speed of light, so it cannot be
   dodged. Damage per second falls off linearly from `damagePerSecond` at
-  point blank to zero at `range`. Also serves as point defence: with point
+  point blank to zero at `range`. Draws `powerMW` while firing. Also serves
+  as point defence: with point
   defence on, it fires at the nearest torpedo aimed at its ship before any
   other target. **(interpretation)** Beam travel time is ignored (at laser
   range it is a fraction of a second).
 - **Cannon** — fires solid slugs (railgun-style) at `muzzleSpeed` relative to
-  the ship, one per `cooldownSeconds`. Heavy damage, but a slug is slow, so a
+  the ship, one per `cooldownSeconds`, taken from the ship's ammo containers
+  (shared by all cannons). Heavy damage, but a slug is slow, so a
   target that changes course after the shot can be missed. The gun aims at
   where the target will be if it keeps its current velocity. A slug hits if it
   passes within a ship's `sizeM`. **(interpretation)** Slugs are too small
   to show up on sensors.
-- **Guided exploding torpedo** — launched at `launchSpeed`, then accelerates
+- **Guided exploding torpedo** — launched from a missile bay (each bay holds
+  its own) at `launchSpeed`, then accelerates
   at `acceleration` until its `deltaV` is used up. Steers itself toward its
   target and explodes when it passes within `blastRadius`, damaging every
   ship in that radius. Has `hitPoints` and can be shot down.

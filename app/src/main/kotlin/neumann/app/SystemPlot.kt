@@ -111,9 +111,11 @@ private fun DrawScope.draw(world: World, view: View, showContacts: Boolean, meas
     if (p.alive) {
         val o = view.point(p.position)
         drawCircle(Theme.player, 5f, o)
-        val dir = p.velocity.normalized()
-        val tip = view.point(p.position + dir * (view.radius * 0.15))
+        // Velocity (green) and facing (amber).
+        val tip = view.point(p.position + p.velocity.normalized() * (view.radius * 0.15))
         drawLine(Theme.player, o, tip, 2f)
+        val front = view.point(p.position + p.forward * (view.radius * 0.08))
+        drawLine(Theme.alert, o, front, 3f)
     }
 }
 

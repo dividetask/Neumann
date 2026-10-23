@@ -1,0 +1,153 @@
+# Module types and munitions. See docs/ships.md and docs/weapons.md.
+# Starting values are untuned.
+# Every module: cost (resources), massT (tonnes), buildHours, hitPoints.
+
+modules:
+  # --- Hulls -------------------------------------------------------------
+  probeHull:
+    { name: Probe hull, kind: HULL, cost: 200, massT: 60, buildHours: 48, hitPoints: 2500 }
+  frigateHull:
+    { name: Frigate hull, kind: HULL, cost: 100, massT: 40, buildHours: 24, hitPoints: 1200 }
+  platformHull:
+    { name: Platform hull, kind: HULL, cost: 80, massT: 50, buildHours: 24, hitPoints: 1200 }
+  baseHull:
+    { name: Base hull, kind: HULL, cost: 400, massT: 400, buildHours: 120, hitPoints: 6000 }
+
+  # --- Propulsion ----------------------------------------------------------
+  # Ship turn rate (deg/s) = total turnAuthority / ship mass in tonnes.
+  fusionDrive:
+    name: Fusion drive
+    kind: PROPULSION
+    cost: 150
+    massT: 30
+    buildHours: 36
+    hitPoints: 200
+    propulsion: { thrustKN: 1000, fuelKgS: 0.2, turnAuthority: 800 }
+  plasmaDrive:
+    name: Plasma drive
+    kind: PROPULSION
+    cost: 80
+    massT: 15
+    buildHours: 20
+    hitPoints: 150
+    propulsion: { thrustKN: 400, fuelKgS: 0.2, turnAuthority: 1500 }
+  manoeuvringThrusters:
+    name: Manoeuvring thrusters
+    kind: PROPULSION
+    cost: 30
+    massT: 4
+    buildHours: 8
+    hitPoints: 60
+    propulsion: { thrustKN: 50, fuelKgS: 0.05, turnAuthority: 1000 }
+
+  # --- Power ---------------------------------------------------------------
+  reactor:
+    name: Electrical engine
+    kind: GENERATOR
+    cost: 120
+    massT: 12
+    buildHours: 30
+    hitPoints: 120
+    generator: { powerMW: 5 }
+  battery:
+    name: Battery
+    kind: BATTERY
+    cost: 40
+    massT: 3
+    buildHours: 10
+    hitPoints: 60
+    battery: { capacityMJ: 2000 }
+
+  # --- Storage -------------------------------------------------------------
+  fuelTank:
+    name: Fuel tank
+    kind: FUEL_TANK
+    cost: 20
+    massT: 3
+    buildHours: 6
+    hitPoints: 100
+    fuelTank: { capacityT: 20 }
+  ammoContainer:
+    name: Ammo container
+    kind: AMMO_CONTAINER
+    cost: 10
+    massT: 1
+    buildHours: 4
+    hitPoints: 60
+    ammoContainer: { capacity: 100 }
+
+  # --- Scanners ------------------------------------------------------------
+  longRangeScanner:
+    name: Long-range scanner
+    kind: SCANNER
+    cost: 90
+    massT: 4
+    buildHours: 20
+    hitPoints: 80
+    scanner: { rangeAu: 1.0, powerMW: 1 }
+  shortRangeScanner:
+    name: Short-range scanner
+    kind: SCANNER
+    cost: 40
+    massT: 2
+    buildHours: 10
+    hitPoints: 60
+    scanner: { rangeAu: 0.5, powerMW: 0.5 }
+
+  # --- Weapons -------------------------------------------------------------
+  # arcDeg: largest angle from the ship's front the weapon can fire at.
+  laserTurret:
+    name: Laser turret
+    kind: LASER_TURRET
+    cost: 100
+    massT: 8
+    buildHours: 24
+    hitPoints: 120
+    laser: { rangeKm: 5000, damagePerSecond: 4, powerMW: 8, burstSeconds: 60, arcDeg: 150 }
+  heavyLaserTurret:
+    name: Heavy laser turret
+    kind: LASER_TURRET
+    cost: 180
+    massT: 15
+    buildHours: 40
+    hitPoints: 200
+    laser: { rangeKm: 8000, damagePerSecond: 6, powerMW: 12, burstSeconds: 60, arcDeg: 150 }
+  cannon:
+    name: Cannon
+    kind: CANNON
+    cost: 80
+    massT: 10
+    buildHours: 20
+    hitPoints: 120
+    cannon: { muzzleSpeedKmS: 20, cooldownSeconds: 30, autoRangeKm: 20000, arcDeg: 10 }
+  cannonTurret:
+    name: Cannon turret
+    kind: CANNON
+    cost: 120
+    massT: 15
+    buildHours: 30
+    hitPoints: 150
+    cannon: { muzzleSpeedKmS: 20, cooldownSeconds: 20, autoRangeKm: 30000, arcDeg: 150 }
+  missileBay:
+    name: Missile bay
+    kind: MISSILE_BAY
+    cost: 60
+    massT: 6
+    buildHours: 16
+    hitPoints: 100
+    missileBay: { capacity: 6, cooldownSeconds: 120, launchRangeKm: 300000, arcDeg: 180 }
+
+munitions:
+  slug: { damage: 40, massKg: 50, cost: 0.5, buildHours: 0.1 }
+  torpedo:
+    launchSpeedKmS: 0.05
+    accelerationMS2: 100
+    deltaVKmS: 15
+    hitPoints: 100
+    damage: 250
+    blastRadiusKm: 1
+    signature: 0.1
+    burningSignature: 3.0
+    massKg: 1000
+    cost: 20
+    buildHours: 6

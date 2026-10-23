@@ -75,19 +75,31 @@ The end of a burn does not pause; it is logged.
 
 Between time skips the player can:
 
-A. **Set a burn:** direction, throttle (fraction of full thrust), and
-   duration. **(interpretation)** Directions are presets: prograde,
-   retrograde, toward target, away from target, and match target velocity
-   (burns against the velocity relative to the target and stops itself when
-   that reaches zero).
-B. **Pick a target** from the contact list.
-C. **Fire a weapon now** at the target. **(interpretation)** The cannon
-   fires one slug and the torpedo launcher one torpedo, as soon as each is
-   ready. The laser fires a burst of `burstSeconds`, and only if the target is
-   in range.
-D. **Set weapon rules**: laser point defence, laser auto-fire at target,
+A. **Face** a direction: the ship turns to it and holds it.
+B. **Burn** in a direction: throttle (fraction of full thrust) and duration.
+   The ship turns to the direction first (see [ships.md](ships.md#facing-and-turning)).
+
+All directions are relative to the ship. They are chosen with:
+
+- **Direction circles** — two circles, each with a dot that can be dragged.
+  **(interpretation)** The FRONT circle is the half of space ahead of the
+  ship: its centre is straight ahead and its edge is 90° off, with right on
+  the right and up at the top. The REAR circle is the half behind: its centre
+  is straight back and its edge 90° off, drawn as seen from the front (right
+  still on the right). The dot sits in one circle at a time. The chosen
+  direction is fixed in space when the order is given.
+- **Presets** **(interpretation)**: prograde, retrograde, toward target, away
+  from target, and match target velocity (burns against the velocity relative
+  to the target and stops itself when that reaches zero). Presets keep
+  tracking as things move.
+C. **Pick a target** from the contact list.
+D. **Fire a weapon now** at the target. **(interpretation)** One cannon fires
+   one slug and one missile bay launches one torpedo, as soon as one is ready
+   with the target in its arc. The laser turrets fire a burst of
+   `burstSeconds`, each while the target is in its range and arc.
+E. **Set weapon rules**: laser point defence, laser auto-fire at target,
    cannon auto-fire at target, torpedo auto-launch at target. Each fires only
-   when its weapon is in range.
+   when the target is in that weapon's range and arc.
 
 ## Space
 
@@ -106,8 +118,8 @@ D. **Set weapon rules**: laser point defence, laser auto-fire at target,
 
 - Real Newtonian movement. A ship keeps its velocity until it burns its
   engine; to stop, it turns around and burns against its motion.
-- Burns use fuel. **(interpretation)** Fuel used is proportional to the
-  change in speed (`fuelPerKmPerSecond`); the rocket equation is not modelled.
+- Burns use fuel at the engines' `fuelKgS`. The ship gets lighter as it
+  burns fuel, so the same thrust gives more acceleration.
 - The gravity of stars and planets affects ships, torpedoes, and slugs.
   **(interpretation)** Stars and planets follow fixed circular orbits and are
   not moved by anything.
@@ -116,26 +128,16 @@ D. **Set weapon rules**: laser point defence, laser auto-fire at target,
 
 ## Sensors
 
-- Each ship has a sensor range. An object is detected when its light-delayed
-  distance is within `sensorRange × signature`.
+- Each ship has a sensor range (from its scanners). An object is detected
+  when its light-delayed distance is within `sensorRange × signature`.
 - An object's signature is higher while it is burning its engine.
   **(interpretation)** A ship lying in ambush is not burning, so it is hard to
   see until close.
 
-## Damage
+## Ships and damage
 
-The ship has damageable parts. Each hit lands on one part, chosen at random by
-the part's hit weight. Damage beyond what a part has left goes to the hull.
-
-| Part | When destroyed |
-|---|---|
-| Hull | The ship is destroyed. |
-| Engine | No burns. |
-| Sensors | Sensor range drops to `damagedSensorFraction`. |
-| Laser | Laser cannot fire. |
-| Cannon | Cannon cannot fire. |
-| Torpedo launcher | Torpedoes cannot launch. |
-| Fuel tank | All fuel is lost. |
+Ships are modular; see [ships.md](ships.md) for modules, performance, facing,
+power, and damage.
 
 ## Star systems
 
@@ -162,7 +164,7 @@ The first-version system is defined in `data/scenario.yaml`.
 - **(interpretation)** First-version AI:
   - Fixed defences and bases fire at the player whenever in range.
   - Enemy ships close on the player and match velocity at weapon range, then
-    fire everything that is in range.
+    face the player and fire everything that is in range and arc.
   - Ships in ambush lie still (not burning) until the player comes within
     their `ambushRange`.
   - Enemy lasers always do point defence.

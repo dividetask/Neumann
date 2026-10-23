@@ -11,12 +11,12 @@ planets:
 
 entry: { radiusAu: 1.3, minSpeedKmS: 20, maxSpeedKmS: 300, defaultSpeedKmS: 80 }
 
-player: { name: Neumann, shipClass: probe }
+player: { name: Neumann, design: probe }
 
 # offsetKm is from the planet's centre. Fixed defences and bases hold station
 # there; ships start in a circular orbit of the planet at that offset.
 enemies:
-  - { name: Haven Base, shipClass: base, planet: Haven, offsetKm: [40000, 0, 0] }
-  - { name: Haven Platform, shipClass: defencePlatform, planet: Haven, offsetKm: [-40000, 0, 5000] }
-  - { name: Picket, shipClass: frigate, planet: Haven, offsetKm: [0, 150000, 0] }
-  - { name: Lurker, shipClass: frigate, planet: Cinder, offsetKm: [0, 80000, 0], ambush: true, ambushRangeKm: 2000000 }
+  - { name: Haven Base, design: base, planet: Haven, offsetKm: [40000, 0, 0] }
+  - { name: Haven Platform, design: defencePlatform, planet: Haven, offsetKm: [-40000, 0, 5000] }
+  - { name: Picket, design: frigate, planet: Haven, offsetKm: [0, 150000, 0] }
+  - { name: Lurker, design: frigate, planet: Cinder, offsetKm: [0, 80000, 0], ambush: true, ambushRangeKm: 2000000 }

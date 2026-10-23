@@ -11,6 +11,10 @@ sim:
   torpedoLifetimeSeconds: 43200
   seed: 1
 
+ships:
+  alignToleranceDeg: 2          # a burn thrusts once the front is this close to its direction
+  unpoweredSensorFraction: 0.1  # sensor range left when scanners have no power
+
 autoPause:
   lowSupplyFraction: 0.25
   repeatSuppressionSeconds: 600

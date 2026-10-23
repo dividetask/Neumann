@@ -7,7 +7,7 @@ Two Gradle modules:
 - `app/` — the Android app. Screens only; it drives `core` through
   `GameSession`.
 
-`data/` (YAML: `rules.yaml`, `ships.yaml`, `scenario.yaml`) is loaded by
+`data/` (YAML: `rules.yaml`, `modules.yaml`, `ships.yaml`, `scenario.yaml`) is loaded by
 `GameDataLoader`. The app packages `data/` as its assets.
 
 `settings.gradle.kts` includes `app/` only when an Android SDK is found
@@ -25,6 +25,7 @@ on load into the world.
 ### `neumann.core.math`
 
 - `Vec3` — 3D vector (data).
+- `Frame` — rotation, choosing an "up", ship-relative ↔ space directions.
 - `Units` — unit constants (AU, km, G, c, solar and Earth mass).
 - `ClosestApproach` — nearest distance between two objects moving in straight
   lines over one step.
@@ -33,8 +34,13 @@ on load into the world.
 
 - `GameData` — everything loaded from `data/`.
 - `RulesFile` → `SimConfig`, `AutoPauseConfig`, `AiConfig`.
-- `ShipsFile` → `ShipClass` → `PartConfig`, `DriveConfig`, `SensorConfig`,
-  `LaserConfig`, `CannonConfig`, `TorpedoConfig`.
+- `RulesFile` also holds `ShipRules` (align tolerance, unpowered sensor
+  fraction).
+- `ModulesFile` → `ModuleType` (one per module type) → `PropulsionConfig`,
+  `GeneratorConfig`, `BatteryConfig`, `FuelTankConfig`, `AmmoContainerConfig`,
+  `ScannerConfig`, `LaserConfig`, `CannonConfig`, `MissileBayConfig`; and
+  `MunitionsConfig` → `SlugConfig`, `TorpedoConfig`.
+- `ShipsFile` → `ShipDesign` (modules and counts).
 - `ScenarioConfig` → `StarConfig`, `PlanetConfig`, `EntryConfig`,
   `PlayerPlacement`, `EnemyPlacement`.
 - `DataSource` — interface: read a data file's text by name (platform
@@ -46,10 +52,11 @@ on load into the world.
 - `World` — the whole state of one battle.
 - `Star`, `Planet` — bodies on fixed orbits.
 - `Vessel` — a ship, fixed defence, or base. `VesselRole`, `Faction`.
-- `PartKind`, `PartState` — damageable parts.
+- `ModuleKind`, `ModuleState` — one fitted module: hit points, and for
+  cannons and missile bays their cooldown (and torpedoes held).
 - `Station` — the planet and offset a fixed vessel holds station at.
-- `Burn`, `BurnDirection` — an active burn order. `BurnDirection.VECTOR` is
-  used only by the AI.
+- `Heading`, `HeadingMode` — the direction a vessel turns to and holds.
+- `Burn` — an active burn along the heading.
 - `WeaponRules` — the weapon-rule toggles. `WeaponKind` — laser, cannon, torpedo.
 - `Torpedo`, `Slug` — projectiles.
 - `Tracked` — interface for anything sensors can see (vessels, torpedoes).
@@ -67,9 +74,10 @@ Run in this order by `SimulationStep`:
 
 | Class | Job |
 |---|---|
-| `PlanetMover` | Puts planets where their orbits say at the current time. |
-| `EnemyAi` | Sets enemy targets, weapon rules, and burns. |
-| `BurnPhase` | Applies burns (thrust, fuel use, burn end). Uses `BurnDirectionResolver`. |
+| `EnemyAi` | Sets enemy targets, headings, and burns. |
+| `PowerPhase` | Generators charge batteries; scanners draw power. |
+| `TurnPhase` | Turns vessels toward their heading at their turn rate. |
+| `BurnPhase` | Thrusts once facing the heading (fuel use, burn end). |
 | `TorpedoGuidance` | Steers and thrusts torpedoes. |
 | `LaserPhase` | Fires lasers (point defence first). |
 | `CannonPhase` | Fires cannon slugs. Uses `InterceptSolver`. |
@@ -87,13 +95,17 @@ Run in this order by `SimulationStep`:
 | `HistoryPhase` | Records positions for light delay. |
 
 Helpers: `StepSizer` (step length; short steps when projectiles are near
-targets), `DamageResolver` (applies a hit to a part), `ThreatRange` (an enemy
-class's longest weapon range).
+targets), `DamageResolver` (applies a hit to a module), `HeadingResolver`
+(where a heading points now), `ShipPerformance` (mass, thrust, turn rate,
+capacities, sensor and threat range from the working modules).
 
 ### `neumann.core.game` — orchestration
 
 - `ScenarioBuilder` — builds a `World` from the scenario and the approach
   vector.
+- `VesselFactory` — builds a vessel from its design, fully loaded.
+- `DirectionCircles` — maps a dot in the FRONT or REAR circle to a
+  ship-relative direction, and back.
 - `AutoPauseMonitor` — decides which new events stop a time skip (with repeat
   suppression).
 - `TimeSkip` — runs steps until the time is up or a pause.
@@ -107,6 +119,7 @@ class's longest weapon range).
 - `AssetDataSource` — `DataSource` over the APK's assets.
 - `ApproachScreen` — choose the approach vector.
 - `BridgeScreen` — status, plot, contacts, orders, time skips, event log.
+- `DirectionPad` — the two direction circles.
 - `SystemPlot` — top and side views of the system. `PlotZoom` — its zoom
   levels.
 - `Controls` — `ConsoleButton`, `ChoiceRow`, `Section`, `Line`.

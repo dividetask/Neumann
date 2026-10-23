@@ -10,7 +10,6 @@ import neumann.core.world.HistorySample
 import neumann.core.world.Planet
 import neumann.core.world.Star
 import neumann.core.world.Station
-import neumann.core.world.Vessel
 import neumann.core.world.VesselRole
 import neumann.core.world.World
 import kotlin.math.cos
@@ -32,21 +31,23 @@ class ScenarioBuilder(private val data: GameData) {
 
         val bearing = bearing(approach)
         val speed = approach.speedKmS.coerceIn(s.entry.minSpeedKmS, s.entry.maxSpeedKmS) * Units.KM
-        val player = Vessel("P", s.player.name, Faction.PLAYER, data.ships.getValue(s.player.shipClass),
-            bearing * (s.entry.radiusAu * Units.AU), -bearing * speed, null)
+        val factory = VesselFactory(data)
+        val player = factory.build("P", s.player.name, Faction.PLAYER, s.player.design,
+            bearing * (s.entry.radiusAu * Units.AU), -bearing * speed, -bearing)
         val world = World(data, star, planets, player)
         world.vessels.add(player)
 
         for (e in s.enemies) {
-            val shipClass = data.ships.getValue(e.shipClass)
+            val design = data.designs.getValue(e.design)
             val planet = planets.first { it.name == e.planet }
             val offset = Vec3.of(e.offsetKm) * Units.KM
-            val v = if (shipClass.role == VesselRole.SHIP) {
-                Vessel(world.newId("E"), e.name, Faction.ENEMY, shipClass, planet.position + offset,
-                    planet.velocity + orbitVelocity(planet, offset), null)
+            val v = if (design.role == VesselRole.SHIP) {
+                val orbit = orbitVelocity(planet, offset)
+                factory.build(world.newId("E"), e.name, Faction.ENEMY, e.design, planet.position + offset,
+                    planet.velocity + orbit, orbit)
             } else {
-                Vessel(world.newId("E"), e.name, Faction.ENEMY, shipClass, planet.position + offset,
-                    planet.velocity, Station(planet, offset))
+                factory.build(world.newId("E"), e.name, Faction.ENEMY, e.design, planet.position + offset,
+                    planet.velocity, offset, Station(planet, offset))
             }
             v.rules.laserPointDefence = true
             v.rules.laserAutoFire = true

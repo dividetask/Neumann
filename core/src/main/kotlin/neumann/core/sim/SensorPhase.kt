@@ -1,25 +1,22 @@
 package neumann.core.sim
 
-import neumann.core.math.Units
 import neumann.core.world.Contact
 import neumann.core.world.ContactKind
 import neumann.core.world.EventKind
-import neumann.core.world.PartKind
 import neumann.core.world.Torpedo
 import neumann.core.world.Tracked
 import neumann.core.world.Vessel
 import neumann.core.world.World
 
 /** Updates every vessel's contacts, with light delay. */
-class SensorPhase(private val lightDelay: LightDelay) {
+class SensorPhase(private val lightDelay: LightDelay, private val performance: ShipPerformance) {
     fun run(world: World) {
         val tracked = world.tracked()
         for (v in world.vessels) if (v.alive) sweep(world, v, tracked)
     }
 
     private fun sweep(world: World, observer: Vessel, tracked: List<Tracked>) {
-        val sensor = observer.shipClass.sensor
-        val range = sensor.rangeAu * Units.AU * (if (observer.working(PartKind.SENSORS)) 1.0 else sensor.damagedFraction)
+        val range = performance.sensorRange(observer)
         val seen = LinkedHashMap<String, Contact>()
         for (t in tracked) {
             if (t.faction == observer.faction) continue

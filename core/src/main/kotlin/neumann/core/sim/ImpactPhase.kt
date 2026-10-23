@@ -12,7 +12,7 @@ class ImpactPhase(private val damage: DamageResolver) {
             for (v in world.vessels) {
                 if (!v.alive || v.faction == s.faction) continue
                 val ca = ClosestApproach.between(s.previousPosition, s.position, v.previousPosition, v.position)
-                if (ca.distance <= v.shipClass.sizeM) {
+                if (ca.distance <= v.design.sizeM) {
                     s.alive = false
                     damage.hit(world, v, s.damage, s.ownerId, "cannon")
                     break

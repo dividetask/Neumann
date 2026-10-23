@@ -20,7 +20,7 @@ android {
         // hand; the hash is added at build time because a commit can't contain
         // its own hash.
         versionCode = (System.currentTimeMillis() / 60000).toInt()
-        val versionBase = "v0.001 b"
+        val versionBase = "v0.001 c"
         val commitHash = try {
             val process = Runtime.getRuntime().exec(arrayOf("git", "rev-parse", "--short=4", "HEAD"))
             process.inputStream.bufferedReader().readText().trim().ifEmpty { "unknown" }

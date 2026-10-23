@@ -19,74 +19,85 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import neumann.core.game.DirectionCircles
-import neumann.core.math.Vec3
-import kotlin.math.asin
+import neumann.core.game.DirectionDials.Angles
+import kotlin.math.abs
 import kotlin.math.atan2
-import kotlin.math.sqrt
+import kotlin.math.cos
+import kotlin.math.sin
+
+private enum class Axis(val label: String, val top: String) { YAW("YAW", "front"), PITCH("PITCH", "front"), ROLL("ROLL", "up") }
 
 /**
- * The FRONT and REAR direction circles. Drag or tap to place the dot.
- * [dot] is the chosen direction; [heading] marks where the ship is turning
- * to now (hollow ring). Both are relative to the ship.
+ * The YAW, PITCH, and ROLL dials. The top of each dial is the ship's current
+ * facing. [pending] (filled dot) is the turn being set; [toGo] (ring) is the
+ * turn the ship still has to make, which moves to the top as it turns.
  */
 @Composable
-fun DirectionPad(dot: DirectionCircles.Dot?, heading: DirectionCircles.Dot?, onDot: (DirectionCircles.Dot) -> Unit) {
+fun DirectionPad(pending: Angles?, toGo: Angles?, onChange: (Angles) -> Unit) {
     Row(Modifier.fillMaxWidth().padding(top = 6.dp)) {
-        for (rear in listOf(false, true)) {
-            Column(Modifier.weight(1f).padding(4.dp)) {
-                Line(if (rear) "REAR" else "FRONT", Theme.dim)
-                Circle(rear, dot?.takeIf { it.rear == rear }, heading?.takeIf { it.rear == rear }, onDot)
+        for (axis in Axis.entries) {
+            Column(Modifier.weight(1f).padding(3.dp)) {
+                Line(axis.label, Theme.dim)
+                Dial(axis, pending?.let { angleOf(it, axis) }, toGo?.let { angleOf(it, axis) }) { deg ->
+                    onChange(withAngle(pending ?: Angles(0.0, 0.0, 0.0), axis, deg))
+                }
             }
         }
     }
-    Line(dot?.let { describe(DirectionCircles.toShip(it)) } ?: "Drag in a circle to choose a direction.", Theme.dim)
+    Line("Set:   " + (pending?.let(::describe) ?: "drag a dial"), if (pending == null) Theme.dim else Theme.alert)
+    Line("To go: " + (toGo?.let(::describe) ?: "no heading"), Theme.dim)
 }
 
 @Composable
-private fun Circle(rear: Boolean, dot: DirectionCircles.Dot?, heading: DirectionCircles.Dot?, onDot: (DirectionCircles.Dot) -> Unit) {
-    val callback by rememberUpdatedState(onDot)
-    fun place(at: Offset, size: IntSize) = callback(toDot(rear, at, size))
+private fun Dial(axis: Axis, pending: Double?, toGo: Double?, onAngle: (Double) -> Unit) {
+    val callback by rememberUpdatedState(onAngle)
+    fun place(at: Offset, size: IntSize) {
+        val deg = Math.toDegrees(atan2((at.x - size.width / 2f).toDouble(), -(at.y - size.height / 2f).toDouble()))
+        callback(if (axis == Axis.PITCH) deg.coerceIn(-90.0, 90.0) else deg)
+    }
     Canvas(
         Modifier.fillMaxWidth().aspectRatio(1f).background(Theme.panel)
-            .pointerInput(rear) { detectTapGestures { place(it, size) } }
-            .pointerInput(rear) {
+            .pointerInput(axis) { detectTapGestures { place(it, size) } }
+            .pointerInput(axis) {
                 detectDragGestures(onDragStart = { place(it, size) }) { change, _ -> place(change.position, size) }
             },
     ) {
-        val c = center
         val r = radius()
-        drawCircle(Theme.text, r, c, style = Stroke(2f))
-        drawCircle(Theme.dim, r * 2 / 3, c, style = Stroke(1f))
-        drawCircle(Theme.dim, r / 3, c, style = Stroke(1f))
-        drawLine(Theme.dim, Offset(c.x - r, c.y), Offset(c.x + r, c.y), 1f)
-        drawLine(Theme.dim, Offset(c.x, c.y - r), Offset(c.x, c.y + r), 1f)
-        heading?.let { drawCircle(Theme.text, 10f, point(it), style = Stroke(2f)) }
-        dot?.let { drawCircle(Theme.alert, 9f, point(it)) }
+        drawCircle(Theme.text, r, center, style = Stroke(2f))
+        drawLine(Theme.text, onRim(0.0, 0.8f), onRim(0.0, 1.1f), 3f)
+        for (tick in listOf(90.0, 180.0, -90.0)) drawLine(Theme.dim, onRim(tick, 0.85f), onRim(tick, 1f), 1f)
+        toGo?.let { drawCircle(Theme.text, 10f, onRim(it, 1f), style = Stroke(2f)) }
+        pending?.let {
+            drawLine(Theme.alert, center, onRim(it, 1f), 1f)
+            drawCircle(Theme.alert, 8f, onRim(it, 1f))
+        }
     }
 }
 
-private fun DrawScope.radius() = size.minDimension / 2 * 0.9f
+private fun DrawScope.radius() = size.minDimension / 2 * 0.8f
 
-private fun DrawScope.point(d: DirectionCircles.Dot) =
-    Offset(center.x + d.x.toFloat() * radius(), center.y - d.y.toFloat() * radius())
-
-private fun toDot(rear: Boolean, at: Offset, size: IntSize): DirectionCircles.Dot {
-    val r = minOf(size.width, size.height) / 2f * 0.9f
-    var x = ((at.x - size.width / 2f) / r).toDouble()
-    var y = (-(at.y - size.height / 2f) / r).toDouble()
-    val len = sqrt(x * x + y * y)
-    if (len > 1.0) {
-        x /= len
-        y /= len
-    }
-    return DirectionCircles.Dot(rear, x, y)
+/** A point at [deg] clockwise from the top, [f] × radius from the centre. */
+private fun DrawScope.onRim(deg: Double, f: Float): Offset {
+    val a = Math.toRadians(deg)
+    val r = radius() * f
+    return Offset(center.x + (sin(a) * r).toFloat(), center.y - (cos(a) * r).toFloat())
 }
 
-/** A ship-relative direction as yaw (right +) and pitch (up +) from the front. */
-private fun describe(rel: Vec3): String {
-    val yaw = Math.toDegrees(atan2(rel.y, rel.x))
-    val pitch = Math.toDegrees(asin(rel.z.coerceIn(-1.0, 1.0)))
-    return "%.0f° %s, %.0f° %s".format(kotlin.math.abs(yaw), if (yaw >= 0) "right" else "left",
-        kotlin.math.abs(pitch), if (pitch >= 0) "up" else "down")
+private fun angleOf(a: Angles, axis: Axis) = when (axis) {
+    Axis.YAW -> a.yaw
+    Axis.PITCH -> a.pitch
+    Axis.ROLL -> a.roll
 }
+
+private fun withAngle(a: Angles, axis: Axis, deg: Double) = when (axis) {
+    Axis.YAW -> a.copy(yaw = deg)
+    Axis.PITCH -> a.copy(pitch = deg)
+    Axis.ROLL -> a.copy(roll = deg)
+}
+
+private fun describe(a: Angles): String =
+    "yaw %.0f° %s, pitch %.0f° %s, roll %.0f° %s".format(
+        abs(a.yaw), if (a.yaw >= 0) "R" else "L",
+        abs(a.pitch), if (a.pitch >= 0) "U" else "D",
+        abs(a.roll), if (a.roll >= 0) "R" else "L",
+    )

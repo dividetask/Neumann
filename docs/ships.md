@@ -53,7 +53,6 @@ Worked out from the modules that are still working:
   ammunition are used.
 - **Acceleration** = total thrust × throttle ÷ mass.
 - **Turn rate** (°/s) = total `turnAuthority` ÷ mass in tonnes.
-  **(interpretation)** Turning uses no fuel.
 - **Sensor range** = the longest `rangeAu` of the working scanners, if they
   have power. Without power, range drops to `unpoweredSensorFraction`
   (`data/rules.yaml`). With no working scanner, the ship sees nothing.
@@ -63,12 +62,16 @@ Worked out from the modules that are still working:
 ## Facing and turning
 
 - Every ship has a facing: a front, and an up. Right is front × up.
-- Ships turn toward their heading at their turn rate. A ship with no working
-  propulsion cannot turn.
+- Ships turn toward their heading at their turn rate: the front first, then
+  any roll. A ship with no working propulsion, or no fuel, cannot turn.
+- Turning uses a small amount of fuel: `turnFuelKgPerTonneDeg`
+  (`data/rules.yaml`) × mass in tonnes × degrees turned. **(interpretation)**
+  Heavier ships use more fuel to turn the same angle.
 - The main engines push only toward the front, so a burn turns the ship to
   its direction first and thrusts once the front is within
-  `alignToleranceDeg` (`data/rules.yaml`) of it. **(interpretation)** A burn's
-  duration counts thrusting time only, not the turn before it.
+  `alignToleranceDeg` (`data/rules.yaml`) of it. A burn uses fuel only while
+  it is thrusting, speeding the ship up or slowing it down; its duration
+  counts thrusting time only, not the turn before it.
 - All player controls are relative to the ship (see
   [game-design.md](game-design.md#orders)).
 - Fixed defences and bases do not turn. **(interpretation)** Their front

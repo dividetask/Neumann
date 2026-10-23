@@ -41,7 +41,11 @@ data class AiConfig(
 )
 
 @Serializable
-data class ShipRules(val alignToleranceDeg: Double, val unpoweredSensorFraction: Double)
+data class ShipRules(
+    val alignToleranceDeg: Double,
+    val unpoweredSensorFraction: Double,
+    val turnFuelKgPerTonneDeg: Double,
+)
 
 @Serializable
 data class ModulesFile(val modules: Map<String, ModuleType>, val munitions: MunitionsConfig)

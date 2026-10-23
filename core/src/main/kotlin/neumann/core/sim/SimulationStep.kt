@@ -12,7 +12,7 @@ class SimulationStep(data: GameData) {
     private val planetMover = PlanetMover()
     private val enemyAi = EnemyAi(rules.ai, performance)
     private val power = PowerPhase(performance)
-    private val turns = TurnPhase(headings, performance)
+    private val turns = TurnPhase(headings, performance, rules.ships)
     private val burns = BurnPhase(headings, performance, rules.ships)
     private val guidance = TorpedoGuidance(rules.sim)
     private val lasers = LaserPhase(damage)

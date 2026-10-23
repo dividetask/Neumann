@@ -81,17 +81,23 @@ B. **Burn** in a direction: throttle (fraction of full thrust) and duration.
 
 All directions are relative to the ship. They are chosen with:
 
-- **Direction circles** — two circles, each with a dot that can be dragged.
-  **(interpretation)** The FRONT circle is the half of space ahead of the
-  ship: its centre is straight ahead and its edge is 90° off, with right on
-  the right and up at the top. The REAR circle is the half behind: its centre
-  is straight back and its edge 90° off, drawn as seen from the front (right
-  still on the right). The dot sits in one circle at a time. The chosen
-  direction is fixed in space when the order is given.
+- **Direction circles** — three circles, one for each axis, each with a dot
+  that can be dragged around it. **(interpretation)** Each circle is a dial:
+  - **YAW** (seen from above): the top is the ship's front; clockwise is
+    right.
+  - **PITCH** (seen from the side): the top is the ship's front; clockwise is
+    up. Limited to ±90°.
+  - **ROLL** (seen from behind): the top is the ship's up; clockwise rolls
+    right.
+
+  The turn is yaw, then pitch, then roll, from the ship's facing when the
+  order is given; the resulting orientation is then fixed in space. While the
+  ship turns, each dot shows the turn still to go, so the dots move to the
+  top as the ship turns.
 - **Presets** **(interpretation)**: prograde, retrograde, toward target, away
   from target, and match target velocity (burns against the velocity relative
   to the target and stops itself when that reaches zero). Presets keep
-  tracking as things move.
+  tracking as things move, and set no roll.
 C. **Pick a target** from the contact list.
 D. **Fire a weapon now** at the target. **(interpretation)** One cannon fires
    one slug and one missile bay launches one torpedo, as soon as one is ready

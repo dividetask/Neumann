@@ -55,7 +55,8 @@ on load into the world.
 - `ModuleKind`, `ModuleState` — one fitted module: hit points, and for
   cannons and missile bays their cooldown (and torpedoes held).
 - `Station` — the planet and offset a fixed vessel holds station at.
-- `Heading`, `HeadingMode` — the direction a vessel turns to and holds.
+- `Heading`, `HeadingMode` — the direction a vessel turns to and holds, and
+  for FIXED headings an optional up (roll).
 - `Burn` — an active burn along the heading.
 - `WeaponRules` — the weapon-rule toggles. `WeaponKind` — laser, cannon, torpedo.
 - `Torpedo`, `Slug` — projectiles.
@@ -76,7 +77,7 @@ Run in this order by `SimulationStep`:
 |---|---|
 | `EnemyAi` | Sets enemy targets, headings, and burns. |
 | `PowerPhase` | Generators charge batteries; scanners draw power. |
-| `TurnPhase` | Turns vessels toward their heading at their turn rate. |
+| `TurnPhase` | Turns vessels toward their heading (then roll) at their turn rate; uses turning fuel. |
 | `BurnPhase` | Thrusts once facing the heading (fuel use, burn end). |
 | `TorpedoGuidance` | Steers and thrusts torpedoes. |
 | `LaserPhase` | Fires lasers (point defence first). |
@@ -104,8 +105,8 @@ capacities, sensor and threat range from the working modules).
 - `ScenarioBuilder` — builds a `World` from the scenario and the approach
   vector.
 - `VesselFactory` — builds a vessel from its design, fully loaded.
-- `DirectionCircles` — maps a dot in the FRONT or REAR circle to a
-  ship-relative direction, and back.
+- `DirectionDials` — turns YAW, PITCH, and ROLL dial angles into an
+  orientation in space, and an orientation back into the turn still to go.
 - `AutoPauseMonitor` — decides which new events stop a time skip (with repeat
   suppression).
 - `TimeSkip` — runs steps until the time is up or a pause.
@@ -119,7 +120,7 @@ capacities, sensor and threat range from the working modules).
 - `AssetDataSource` — `DataSource` over the APK's assets.
 - `ApproachScreen` — choose the approach vector.
 - `BridgeScreen` — status, plot, contacts, orders, time skips, event log.
-- `DirectionPad` — the two direction circles.
+- `DirectionPad` — the three direction dials.
 - `SystemPlot` — top and side views of the system. `PlotZoom` — its zoom
   levels.
 - `Controls` — `ConsoleButton`, `ChoiceRow`, `Section`, `Line`.

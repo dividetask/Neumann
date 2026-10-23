@@ -25,8 +25,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import neumann.core.game.GameSession
 import neumann.core.game.TimeSkipResult
-import neumann.core.game.DirectionCircles
-import neumann.core.math.Frame
+import neumann.core.game.DirectionDials
 import neumann.core.math.Vec3
 import neumann.core.world.HeadingMode
 import neumann.core.world.ContactKind
@@ -56,7 +55,7 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
     var notice by remember { mutableStateOf<String?>(null) }
     var zoom by remember { mutableStateOf(PlotZoom.SYSTEM) }
     var mode by remember { mutableStateOf(HeadingMode.FIXED) }
-    var dot by remember { mutableStateOf<DirectionCircles.Dot?>(null) }
+    var dials by remember { mutableStateOf<DirectionDials.Angles?>(null) }
     var throttle by remember { mutableStateOf(1.0) }
     var duration by remember { mutableStateOf(600.0) }
     val scope = rememberCoroutineScope()
@@ -173,28 +172,29 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
 
             Section("MANOEUVRE") {
                 ChoiceRow(modes, mode) { mode = it }
-                val headingDot = session.headingDirection()?.let {
-                    DirectionCircles.toDot(Frame.toShip(player.forward, player.up, it))
-                }
-                DirectionPad(dot, headingDot) { dot = it; mode = HeadingMode.FIXED }
+                DirectionPad(dials, session.turnToGo()) { dials = it; mode = HeadingMode.FIXED }
                 ChoiceRow(throttles, throttle) { throttle = it }
                 ChoiceRow(durations, duration) { duration = it }
-                fun vector() = dot?.let { Frame.toWorld(player.forward, player.up, DirectionCircles.toShip(it)) } ?: Vec3.ZERO
+                // Dial angles are turned into an orientation fixed in space when the order is given.
+                fun target() = dials?.let { DirectionDials.orientation(player.forward, player.up, it) }
                 Row(Modifier.fillMaxWidth()) {
                     ConsoleButton("FACE", enabled = !world.over) {
-                        val problem = session.orders.face(mode, vector())
-                        if (problem == null) dot = null
+                        val t = target()
+                        val problem = session.orders.face(mode, t?.forward ?: Vec3.ZERO, t?.up)
+                        if (problem == null) dials = null
                         changed(problem)
                     }
                     ConsoleButton("BURN", enabled = !world.over) {
-                        val problem = session.orders.burn(mode, vector(), throttle, duration)
-                        if (problem == null) dot = null
+                        val t = target()
+                        val problem = session.orders.burn(mode, t?.forward ?: Vec3.ZERO, throttle, duration, t?.up)
+                        if (problem == null) dials = null
                         changed(problem)
                     }
                     ConsoleButton("CANCEL", enabled = player.burn != null) { session.orders.cancelBurn(); changed() }
                 }
                 Line("Directions are relative to the ship. The ship turns first, then burns.", Theme.dim)
-                Line("Ring: current heading. MATCH stops itself when velocity matches.", Theme.dim)
+                Line("Top of each dial: where the ship points now. Ring: turn still to go.", Theme.dim)
+                Line("MATCH stops itself when velocity matches.", Theme.dim)
             }
 
             Section("LOG") {

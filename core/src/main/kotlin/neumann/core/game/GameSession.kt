@@ -23,4 +23,11 @@ class GameSession(val data: GameData, approach: ApproachVector) {
 
     /** Where the player's heading points now, in space; null if it has none. */
     fun headingDirection(): Vec3? = headings.resolve(world.player)
+
+    /** The player's turn still to go, as dial angles; null with no heading. */
+    fun turnToGo(): DirectionDials.Angles? {
+        val p = world.player
+        val dir = headingDirection() ?: return null
+        return DirectionDials.remaining(p.forward, p.up, dir, p.heading?.up)
+    }
 }

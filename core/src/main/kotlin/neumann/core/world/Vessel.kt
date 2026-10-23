@@ -20,8 +20,11 @@ class ModuleState(val typeId: String, val type: ModuleType) {
 /** The planet and offset a fixed vessel holds station at. */
 class Station(val planet: Planet, val offset: Vec3)
 
-/** The direction a vessel turns to and holds. [vector] is used by FIXED. */
-class Heading(val mode: HeadingMode, val vector: Vec3 = Vec3.ZERO)
+/**
+ * The direction a vessel turns to and holds. [vector] is used by FIXED;
+ * [up], if set, is the roll a FIXED heading turns to as well.
+ */
+class Heading(val mode: HeadingMode, val vector: Vec3 = Vec3.ZERO, val up: Vec3? = null)
 
 /** An active burn along the heading. [remainingSeconds] counts thrusting time. */
 class Burn(val throttle: Double, var remainingSeconds: Double)

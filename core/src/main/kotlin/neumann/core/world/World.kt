@@ -11,6 +11,18 @@ class PlayerWatch {
     var lowTorpedoes = false
 }
 
+/** Damage dealt so far, by attacker id and weapon ("laser", "cannon", "torpedo"), in MJ. */
+class DamageTally {
+    val dealt = HashMap<Pair<String, String>, Double>()
+
+    fun add(attackerId: String, weapon: String, amount: Double) {
+        dealt.merge(attackerId to weapon, amount, Double::plus)
+    }
+
+    fun by(attackerId: String): Map<String, Double> =
+        dealt.filterKeys { it.first == attackerId }.mapKeys { it.key.second }
+}
+
 /** The player's entry choice, from the ship looking at the star: aim (yaw, pitch) off the star, and speed. */
 data class ApproachVector(val yawDeg: Double, val pitchDeg: Double, val speedKmS: Double)
 
@@ -27,6 +39,7 @@ class World(
     val slugs = ArrayList<Slug>()
     val log = EventLog()
     val playerWatch = PlayerWatch()
+    val damage = DamageTally()
     val random = Random(data.rules.sim.seed)
     var claimed = false
     var lost = false

@@ -156,7 +156,7 @@ modules:
     massT: 12
     buildHours: 20
     hitPoints: 600
-    cannon: { muzzleSpeedKmS: 20, shotEnergyMJ: 800, cooldownSeconds: 30, autoRangeKm: 5000, arcDeg: 10 }
+    cannon: { muzzleSpeedKmS: 20, shotEnergyMJ: 800, cooldownSeconds: 30, autoRangeKm: 20000, arcDeg: 10 }
   lightCannon:
     name: Light cannon
     kind: CANNON
@@ -164,7 +164,7 @@ modules:
     massT: 6
     buildHours: 12
     hitPoints: 300
-    cannon: { muzzleSpeedKmS: 10, shotEnergyMJ: 200, cooldownSeconds: 30, autoRangeKm: 3000, arcDeg: 10 }
+    cannon: { muzzleSpeedKmS: 10, shotEnergyMJ: 200, cooldownSeconds: 30, autoRangeKm: 10000, arcDeg: 10 }
   cannonTurret:
     name: Cannon turret
     kind: CANNON
@@ -172,7 +172,7 @@ modules:
     massT: 15
     buildHours: 30
     hitPoints: 800
-    cannon: { muzzleSpeedKmS: 15, shotEnergyMJ: 450, cooldownSeconds: 20, autoRangeKm: 5000, arcDeg: 150 }
+    cannon: { muzzleSpeedKmS: 15, shotEnergyMJ: 450, cooldownSeconds: 20, autoRangeKm: 15000, arcDeg: 150 }
   missileBay:
     name: Missile bay
     kind: MISSILE_BAY
@@ -188,17 +188,17 @@ modules:
     massT: 3
     buildHours: 8
     hitPoints: 300
-    missileBay: { capacity: 4, cooldownSeconds: 20, launchRangeKm: 100000, arcDeg: 180 }
+    missileBay: { capacity: 2, cooldownSeconds: 20, launchRangeKm: 100000, arcDeg: 180 }
 
 munitions:
   slug: { massKg: 2, cost: 0.5, buildHours: 0.1 }   # damage = kinetic energy at impact
-  torpedo:                           # nuclear-thermal motor, fragmentation warhead
+  torpedo:                           # nuclear-thermal motor, fragmentation warhead, ablative armour
     launchSpeedKmS: 0.05
     accelerationMS2: 50
     deltaVKmS: 15
     terminalReserveFraction: 0.25   # delta-v kept for steering on the final approach
     sizeM: 5
-    hitPoints: 100
+    hitPoints: 3000                 # ablative armour shell
     damage: 2000
     blastRadiusKm: 1
     signature: 0.1

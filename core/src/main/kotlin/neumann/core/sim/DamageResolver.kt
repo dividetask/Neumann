@@ -15,6 +15,7 @@ import neumann.core.world.World
 class DamageResolver {
     fun hit(world: World, target: Vessel, amount: Double, attackerId: String, weapon: String) {
         if (!target.alive || amount <= 0.0) return
+        world.damage.add(attackerId, weapon, amount)
         var left = applyTo(world, target, pickModule(world, target), amount)
         while (left > 0.0) {
             val hull = target.working(ModuleKind.HULL).firstOrNull() ?: break

@@ -65,6 +65,7 @@ on load into the world.
 - `PositionHistory`, `HistorySample` — past positions, for light delay.
 - `Contact`, `ContactKind`, `ContactBook` — what one vessel's sensors see:
   estimates with an uncertainty, possibly bearing only.
+- `DamageTally` — damage dealt so far, by attacker and weapon.
 - `PlayerWatch` — what the player has already been warned about (weapon
   ranges entered, low supplies).
 - `GameEvent`, `EventKind`, `EventLog` — things that happened. Repeated

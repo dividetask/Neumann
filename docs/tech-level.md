@@ -69,6 +69,10 @@ balance rule in [game-design.md](game-design.md#opponents).
   10–20 km/s.
 - **Slugs:** 2 kg. Damage = kinetic energy at impact, relative to the target
   (½·m·v²): 400 MJ at 20 km/s, more when closing fast.
+- **Range:** with lidar tracking (metre-level position, ~0.1 m/s velocity),
+  a slug can hit a ship that is not manoeuvring out to ~20,000 km (about
+  1,000 s of flight). A target that keeps changing course dodges at long
+  range.
 - **Energy:** each shot draws `shotEnergyMJ` (~2× the slug's muzzle energy,
   at ~50% efficiency) from the batteries.
 
@@ -79,7 +83,11 @@ balance rule in [game-design.md](game-design.md#opponents).
 - **Warhead:** a fragmentation warhead, damaging everything within
   `blastRadiusKm`. **(interpretation)** Not nuclear; nuclear warheads are
   Pending (they would kill any ship at 1 km).
-- **Toughness:** ~100 MJ of laser energy to burn through to the guidance.
+- **Toughness:** an ablative armour shell (~100–200 kg of carbon-phenolic
+  type ablator at ~30 MJ/kg, with the torpedo spinning to spread the heat)
+  absorbs a few thousand MJ of laser energy before the guidance fails. A
+  15 MW laser needs a minute or two per torpedo, so a salvo can overwhelm
+  point defence.
 
 ## Sensors
 

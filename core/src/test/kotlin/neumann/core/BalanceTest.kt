@@ -26,6 +26,9 @@ class BalanceTest {
             val at = Fixture.openSpace + Vec3(300_000.0, (i - 1.5) * 20_000.0, 0.0) * Units.KM
             Fixture.place(w, r, at, Vec3(-5_000.0, 0.0, 0.0), forward = Vec3(-1.0, 0.0, 0.0))
         }
+        w.player.contacts.current.clear() // forget the scan from before the raiders were placed
+        w.player.contacts.everSeen.clear()
+        neumann.core.sim.SimulationStep(data).sensors.run(w)
         // No strategy: every weapon rule on; target the nearest enemy and face it.
         p.rules.apply { laserAutoFire = true; cannonAutoFire = true; torpedoAutoLaunch = true }
         while (!w.over && w.time < 3 * 86400.0) {
@@ -42,7 +45,14 @@ class BalanceTest {
         val integrity = p.modules.sumOf { it.hitPoints } / p.modules.sumOf { it.type.hitPoints }
         println("balance: claimed=${w.claimed} after ${w.time / 3600} h, integrity ${(integrity * 100).toInt()}%, hull left ${(hullLeft * 100).toInt()}%, " +
             "damage taken ${Fixture.damageTaken(p).toInt()}, torpedoes left ${p.torpedoes}, slugs left ${p.slugs}")
+        val byWeapon = w.damage.by(p.id)
+        val total = byWeapon.values.sum()
+        println("balance: probe damage by weapon " + byWeapon.mapValues { "${(it.value / total * 100).toInt()}%" })
         assertTrue(w.claimed, "the probe should destroy all four raiders")
+        for (weapon in listOf("laser", "cannon", "torpedo")) {
+            val share = (byWeapon[weapon] ?: 0.0) / total
+            assertTrue(share >= 0.1, "all three weapons matter: $weapon dealt ${(share * 100).toInt()}% of the probe's damage")
+        }
         assertTrue(integrity in 0.4..0.8, "medium difficulty: 40-80% integrity left, was ${(integrity * 100).toInt()}%")
     }
 }

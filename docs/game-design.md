@@ -196,6 +196,9 @@ The first-version system is defined in `data/scenario.yaml`.
   40–80% integrity left (hit points across all its modules; hits land on
   every module, not just the hull). `BalanceTest` checks this against the
   data.
+- **Balance rule:** lasers, cannons, and torpedoes must all matter.
+  **(interpretation)** In that same fight, each of the three deals at least
+  10% of the damage the probe deals.
 - The first-version system has four raiders, a base, and a defence platform.
 - **(interpretation)** First-version AI:
   - Fixed defences and bases fire at the player whenever in range.

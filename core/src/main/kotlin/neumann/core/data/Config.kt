@@ -32,6 +32,7 @@ data class SimConfig(
 data class AutoPauseConfig(
     val lowSupplyFraction: Double,
     val repeatSuppressionSeconds: Double,
+    val groupSeconds: Double,
     val pauseOn: List<EventKind>,
 )
 

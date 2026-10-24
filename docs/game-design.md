@@ -71,6 +71,11 @@ keeps hitting; if that enemy then stops for `repeatSuppressionSeconds`, its
 next hit pauses. Every event is still logged. Claiming the system and losing
 the ship always pause.
 
+Events that arrive at nearly the same time are one piece of news, so one
+pause. **(interpretation)** After an event pauses, further events of the
+same kind within `groupSeconds` do not pause again, whatever their source
+(for example, the rest of a torpedo salvo).
+
 The end of a burn does not pause; it is logged.
 
 ## Orders

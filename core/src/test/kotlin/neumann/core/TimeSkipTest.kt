@@ -30,12 +30,24 @@ class TimeSkipTest {
     }
 
     @Test
+    fun `events of one kind arriving at nearly the same time are one pause`() {
+        val cfg = Fixture.data.rules.autoPause
+        val m = AutoPauseMonitor(cfg)
+        fun inbound(t: Double, torpedo: String) = m.pausing(listOf(GameEvent(t, EventKind.TORPEDO_INBOUND, torpedo, "inbound"))).size
+        assertEquals(1, inbound(0.0, "T-1"), "the first torpedo of a salvo pauses")
+        assertEquals(0, inbound(20.0, "T-2"), "the rest of the salvo does not")
+        assertEquals(0, inbound(cfg.groupSeconds - 1, "T-3"))
+        assertEquals(1, inbound(cfg.groupSeconds + 100, "T-4"), "a later salvo is new")
+    }
+
+    @Test
     fun `continuing damage from the same source is not new and does not pause again`() {
         val gap = Fixture.data.rules.autoPause.repeatSuppressionSeconds
         val m = AutoPauseMonitor(Fixture.data.rules.autoPause)
         fun hit(t: Double, source: String) = m.pausing(listOf(GameEvent(t, EventKind.DAMAGE_TAKEN, source, "hit"))).size
         assertEquals(1, hit(0.0, "E-1"), "first hit pauses")
-        assertEquals(1, hit(10.0, "E-2"), "a different enemy's hit is new")
+        assertEquals(0, hit(10.0, "E-2"), "a different enemy's hit a moment later is the same news")
+        assertEquals(1, hit(Fixture.data.rules.autoPause.groupSeconds + 20.0, "E-3"), "a different enemy's hit later on is new")
         for (i in 1..30) assertEquals(0, hit(i * gap / 2, "E-1"), "steady hits never pause")
         assertEquals(1, hit(15 * gap + gap, "E-1"), "a hit after a quiet gap is new")
     }

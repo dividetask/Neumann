@@ -201,7 +201,10 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
 - **Planets:** 4–9, spaced outward. Rocky planets inside about 2 AU; gas and
   ice giants beyond.
 - **Moons:** rocky planets 0–2, giants 2–6. Moons follow fixed circular
-  orbits around their planet, and their gravity counts.
+  orbits around their planet, and their gravity counts. A moon weighs at
+  most 1% of its planet and orbits clear of the stations close in.
+  Moons only form inside the planet's Hill sphere (where its gravity holds
+  them).
 - **Asteroid belt:** sometimes, between the inner and outer planets
   (drawn as a ring; no gravity). **(interpretation)**
 - **Enemies:** the base orbits a random rocky planet, and the defence

@@ -1,6 +1,8 @@
 package neumann.core.world
 
+import neumann.core.data.BeltConfig
 import neumann.core.data.GameData
+import neumann.core.math.Vec3
 import kotlin.random.Random
 
 /** What the player has already been warned about. */
@@ -23,8 +25,12 @@ class DamageTally {
         dealt.filterKeys { it.first == attackerId }.mapKeys { it.key.second }
 }
 
-/** The player's entry choice, from the ship looking at the star: aim (yaw, pitch) off the star, and speed. */
-data class ApproachVector(val yawDeg: Double, val pitchDeg: Double, val speedKmS: Double)
+/**
+ * The player's entry choice, set on the map with the approach arrow: a
+ * direction in space and an entry speed. A null direction heads straight
+ * for the star.
+ */
+data class ApproachVector(val direction: Vec3?, val speedKmS: Double)
 
 /** The whole state of one battle. */
 class World(
@@ -32,6 +38,8 @@ class World(
     val star: Star,
     val planets: List<Planet>,
     val player: Vessel,
+    val belt: BeltConfig? = null,
+    val seed: Long = 0,
 ) {
     var time = 0.0
     val vessels = ArrayList<Vessel>()

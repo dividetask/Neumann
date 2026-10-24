@@ -7,8 +7,10 @@ Two Gradle modules:
 - `app/` — the Android app. Screens only; it drives `core` through
   `GameSession`.
 
-`data/` (YAML: `rules.yaml`, `modules.yaml`, `ships.yaml`, `scenario.yaml`) is loaded by
-`GameDataLoader`. The app packages `data/` as its assets.
+`data/` (YAML: `rules.yaml`, `modules.yaml`, `ships.yaml`, `scenario.yaml`,
+`system-generation.yaml`) is loaded by `GameDataLoader`. `scenario.yaml` is
+the fixed system the tests use; games use random systems from
+`SystemGenerator`. The app packages `data/` as its assets.
 
 `settings.gradle.kts` includes `app/` only when an Android SDK is found
 (`local.properties`, `ANDROID_HOME`, or `ANDROID_SDK_ROOT`), and the root
@@ -50,7 +52,8 @@ on load into the world.
 ### `neumann.core.world` — state holders (no flow logic)
 
 - `World` — the whole state of one battle.
-- `Star`, `Planet` — bodies on fixed orbits.
+- `Star`, `Planet` — bodies on fixed circular orbits. A `Planet` with a
+  `parent` is a moon of that planet.
 - `Vessel` — a ship, fixed defence, or base. `VesselRole`, `Faction`.
 - `ModuleKind`, `ModuleState` — one fitted module: hit points, and for
   cannons and missile bays their cooldown (and torpedoes held).
@@ -106,8 +109,12 @@ capacities, sensor and threat range from the working modules).
 
 ### `neumann.core.game` — orchestration
 
-- `ScenarioBuilder` — builds a `World` from the scenario and the approach
+- `SystemGenerator` — a random `ScenarioConfig` from a seed (same seed, same
+  system).
+- `ScenarioBuilder` — builds a `World` from a scenario and the approach
   vector.
+- `TrajectoryPredictor` — the coasting path from a position and velocity
+  under gravity, and the body it passes closest to.
 - `VesselFactory` — builds a vessel from its design, fully loaded.
 - `DirectionDials` — turns YAW and PITCH dial angles into a direction in
   space, and a direction back into the turn still to go.
@@ -124,12 +131,15 @@ capacities, sensor and threat range from the working modules).
 
 - `MainActivity` — hosts the screens.
 - `AssetDataSource` — `DataSource` over the APK's assets.
-- `ApproachScreen` — choose the approach vector, from the ship's view of
-  the star.
-- `BridgeScreen` — status, plot, contacts, orders, time skips, event log.
+- `ApproachScreen` — choose the approach vector by dragging an arrow from
+  the ship on the map.
+- `BridgeScreen` — the map, top bar, and bottom tabs (SHIP, CONTACTS,
+  MANOEUVRE, WEAPONS, LOG); no scrolling.
 - `DirectionPad` — the two direction dials.
-- `SystemPlot` — top and side views of the system. `PlotZoom` — its zoom
-  levels.
+- `MapView` — the full-screen 3D map and its gestures. `ApproachArrow` —
+  the arrow it draws on the approach screen.
+- `MapCamera` — the map's centre, scale, rotation, and tilt; projects space
+  to the screen.
 - `Controls` — `ConsoleButton`, `ChoiceRow`, `Section`, `Line`.
 - `DisplayFormat` — distances, speeds, times as text.
 - `Theme` — ship-display colours.

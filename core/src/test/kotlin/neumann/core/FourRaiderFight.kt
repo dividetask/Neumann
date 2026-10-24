@@ -22,7 +22,7 @@ class FourRaiderFight(
     fun run(): GameSession {
         val raiders = (1..4).map { EnemyPlacement("Raider $it", "raider", orbits = "Shale", offsetKm = listOf(0.0, 200000.0 + it, 0.0)) }
         val data = Fixture.data.copy(scenario = Fixture.data.scenario.copy(enemies = raiders))
-        val s = GameSession(data, ApproachVector(0.0, 0.0, 15.0))
+        val s = GameSession(data, ApproachVector(null, 15.0))
         val w = s.world
         val p = w.player
         Fixture.place(w, p, Fixture.openSpace, Vec3.ZERO)

@@ -6,9 +6,8 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
@@ -17,6 +16,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import neumann.core.game.DirectionDials.Angles
@@ -31,14 +31,15 @@ private enum class Axis(val label: String) { YAW("YAW"), PITCH("PITCH") }
  * The YAW and PITCH dials. The top of each dial is the ship's current
  * front. [pending] (filled dot) is the turn being set; [toGo] (ring) is the
  * turn the ship still has to make, which moves to the top as it turns.
+ * Each dial is [dialSize] square.
  */
 @Composable
-fun DirectionPad(pending: Angles?, toGo: Angles?, toGoLabel: String = "To go: ", onChange: (Angles) -> Unit) {
-    Row(Modifier.fillMaxWidth().padding(top = 6.dp)) {
+fun DirectionPad(pending: Angles?, toGo: Angles?, dialSize: Dp, toGoLabel: String = "To go: ", onChange: (Angles) -> Unit) {
+    Row(Modifier.padding(top = 4.dp)) {
         for (axis in Axis.entries) {
-            Column(Modifier.weight(1f).padding(3.dp)) {
+            Column(Modifier.padding(3.dp)) {
                 Line(axis.label, Theme.dim)
-                Dial(axis, pending?.let { angleOf(it, axis) }, toGo?.let { angleOf(it, axis) }) { deg ->
+                Dial(axis, dialSize, pending?.let { angleOf(it, axis) }, toGo?.let { angleOf(it, axis) }) { deg ->
                     onChange(withAngle(pending ?: Angles(0.0, 0.0), axis, deg))
                 }
             }
@@ -49,14 +50,14 @@ fun DirectionPad(pending: Angles?, toGo: Angles?, toGoLabel: String = "To go: ",
 }
 
 @Composable
-private fun Dial(axis: Axis, pending: Double?, toGo: Double?, onAngle: (Double) -> Unit) {
+private fun Dial(axis: Axis, dialSize: Dp, pending: Double?, toGo: Double?, onAngle: (Double) -> Unit) {
     val callback by rememberUpdatedState(onAngle)
     fun place(at: Offset, size: IntSize) {
         val deg = Math.toDegrees(atan2((at.x - size.width / 2f).toDouble(), -(at.y - size.height / 2f).toDouble()))
         callback(if (axis == Axis.PITCH) deg.coerceIn(-90.0, 90.0) else deg)
     }
     Canvas(
-        Modifier.fillMaxWidth().aspectRatio(1f).background(Theme.panel)
+        Modifier.size(dialSize).background(Theme.panel)
             .pointerInput(axis) { detectTapGestures { place(it, size) } }
             .pointerInput(axis) {
                 detectDragGestures(onDragStart = { place(it, size) }) { change, _ -> place(change.position, size) }

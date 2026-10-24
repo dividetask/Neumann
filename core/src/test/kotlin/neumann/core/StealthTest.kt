@@ -89,7 +89,7 @@ class StealthTest {
         // The target is a probe (it has thrusters to jink with), placed by hand; no AI step runs here.
         val target = EnemyPlacement("Target", "probe", orbits = "Shale", offsetKm = listOf(0.0, 200000.0, 0.0), ambush = true)
         val data = Fixture.data.copy(scenario = Fixture.data.scenario.copy(enemies = listOf(target)))
-        val w = ScenarioBuilder(data).build(ApproachVector(0.0, 0.0, 15.0))
+        val w = ScenarioBuilder(data).build(ApproachVector(null, 15.0))
         val t = w.vessels.first { it.name == "Target" }
         Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO)
         Fixture.place(w, t, Fixture.openSpace + east * (10_000.0 * Units.KM), Vec3.ZERO)

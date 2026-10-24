@@ -1,6 +1,7 @@
 package neumann.core.game
 
 import neumann.core.data.GameData
+import neumann.core.data.ScenarioConfig
 import neumann.core.math.Vec3
 import neumann.core.sim.HeadingResolver
 import neumann.core.sim.SimulationStep
@@ -8,14 +9,16 @@ import neumann.core.sim.StepSizer
 import neumann.core.world.ApproachVector
 import neumann.core.world.World
 
-/** What the UI talks to: enter the system, give orders, skip time. */
-class GameSession(val data: GameData, approach: ApproachVector) {
+/** What the UI talks to: enter a system (fixed or generated), give orders, skip time. */
+class GameSession(val data: GameData, scenario: ScenarioConfig, approach: ApproachVector) {
+    constructor(data: GameData, approach: ApproachVector) : this(data, data.scenario, approach)
+
     private val step = SimulationStep(data)
     private val timeSkip = TimeSkip(step, StepSizer(data.rules.sim), AutoPauseMonitor(data.rules.autoPause),
         data.rules.autoPause.groupSeconds)
 
     val performance = step.performance
-    val world: World = ScenarioBuilder(data).build(approach).also { step.sensors.run(it) }
+    val world: World = ScenarioBuilder(data).build(scenario, approach).also { step.sensors.run(it) }
     val orders = OrderDesk(world)
 
     private val headings = HeadingResolver()

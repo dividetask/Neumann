@@ -185,11 +185,19 @@ data class ShipDesign(
 data class ScenarioConfig(
     val name: String,
     val star: StarConfig,
+    /** Planets and moons; a moon names its planet as parent and comes after it. */
     val planets: List<PlanetConfig>,
     val entry: EntryConfig,
     val player: PlayerPlacement,
     val enemies: List<EnemyPlacement>,
+    val belt: BeltConfig? = null,
+    /** The seed a random system was generated from (0 for a fixed system). */
+    val seed: Long = 0,
 )
+
+/** An asteroid belt: drawn only, no gravity. */
+@Serializable
+data class BeltConfig(val innerAu: Double, val outerAu: Double)
 
 @Serializable
 data class StarConfig(val name: String, val massSolar: Double, val radiusKm: Double)
@@ -197,11 +205,15 @@ data class StarConfig(val name: String, val massSolar: Double, val radiusKm: Dou
 @Serializable
 data class PlanetConfig(
     val name: String,
-    val orbitAu: Double,
+    /** Orbit around the star (planets). */
+    val orbitAu: Double = 0.0,
     val inclinationDeg: Double,
     val phaseDeg: Double,
     val massEarth: Double,
     val radiusKm: Double,
+    /** For a moon: the planet it orbits, and its distance from that planet. */
+    val parent: String? = null,
+    val orbitKm: Double = 0.0,
 )
 
 @Serializable
@@ -228,11 +240,83 @@ data class EnemyPlacement(
     val ambushRangeKm: Double = 0.0,
 )
 
-/** Everything loaded from data/. */
+/** Ranges for generating a random star system (data/system-generation.yaml). */
+@Serializable
+data class GenerationConfig(
+    val starNames: List<String>,
+    val star: StarRange,
+    val planets: PlanetRanges,
+    val moons: MoonRanges,
+    val belt: BeltRanges,
+    val entry: EntryRanges,
+    val enemies: EnemyPlacementRanges,
+)
+
+@Serializable
+data class StarRange(val massSolarMin: Double, val massSolarMax: Double, val radiusKmPerSolarMass: Double)
+
+@Serializable
+data class PlanetRanges(
+    val countMin: Int,
+    val countMax: Int,
+    val firstOrbitAuMin: Double,
+    val firstOrbitAuMax: Double,
+    /** Each orbit is this many times the one inside it. */
+    val spacingMin: Double,
+    val spacingMax: Double,
+    /** Rocky planets inside this; gas and ice giants beyond. */
+    val rockyLimitAu: Double,
+    val inclinationDegMax: Double,
+    val rocky: PlanetKindRange,
+    val giant: PlanetKindRange,
+)
+
+@Serializable
+data class PlanetKindRange(val massEarthMin: Double, val massEarthMax: Double, val moonsMin: Int, val moonsMax: Int)
+
+@Serializable
+data class MoonRanges(
+    /** First moon's orbit, in planet radii. */
+    val firstOrbitRadiiMin: Double,
+    val firstOrbitRadiiMax: Double,
+    val spacingMin: Double,
+    val spacingMax: Double,
+    val massEarthMin: Double,
+    val massEarthMax: Double,
+    val maxMassFraction: Double,
+    val minOrbitKm: Double,
+)
+
+@Serializable
+data class BeltRanges(val chance: Double, val minGapAu: Double)
+
+@Serializable
+data class EntryRanges(
+    /** Entry sphere radius, as a multiple of the outermost rocky planet's orbit. */
+    val radiusOverInnerSystem: Double,
+    val radiusAuMin: Double,
+    val elevationDegMax: Double,
+)
+
+@Serializable
+data class EnemyPlacementRanges(
+    val stationOffsetKm: Double,
+    val raiderCount: Int,
+    val patrolKmMin: Double,
+    val patrolKmMax: Double,
+    /** Orbits are kept inside this fraction of the body's Hill sphere, so they stay bound. */
+    val hillFraction: Double,
+    val nearBaseChance: Double,
+    val ambushChance: Double,
+    val ambushRangeKm: Double,
+)
+
+/** Everything loaded from data/. [scenario] is the fixed test system; games use generated ones. */
 data class GameData(
     val rules: RulesFile,
     val modules: Map<String, ModuleType>,
     val munitions: MunitionsConfig,
     val designs: Map<String, ShipDesign>,
     val scenario: ScenarioConfig,
+    val generation: GenerationConfig,
 )

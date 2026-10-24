@@ -1,0 +1,44 @@
+# Ranges for generating a random star system. See docs/game-design.md#random-systems.
+
+starNames: [Arden, Velar, Kestrel, Ossian, Merrow, Halcyon, Vesper, Corvin, Thale, Isolde, Brannoc, Seren]
+
+star: { massSolarMin: 0.6, massSolarMax: 1.4, radiusKmPerSolarMass: 700000 }
+
+planets:
+  countMin: 4
+  countMax: 9
+  firstOrbitAuMin: 0.3
+  firstOrbitAuMax: 0.6
+  spacingMin: 1.4               # each orbit is this many times the one inside it
+  spacingMax: 2.0
+  rockyLimitAu: 2.0             # rocky planets inside this, gas and ice giants beyond
+  inclinationDegMax: 4
+  rocky: { massEarthMin: 0.05, massEarthMax: 3, moonsMin: 0, moonsMax: 2 }
+  giant: { massEarthMin: 10, massEarthMax: 400, moonsMin: 2, moonsMax: 6 }
+
+moons:
+  firstOrbitRadiiMin: 8         # first moon's orbit, in planet radii
+  firstOrbitRadiiMax: 30
+  spacingMin: 1.3
+  spacingMax: 2.0
+  massEarthMin: 0.0005
+  massEarthMax: 0.03
+  maxMassFraction: 0.01         # a moon weighs at most this fraction of its planet
+  minOrbitKm: 100000            # moons stay clear of the stations close to the planet
+
+belt: { chance: 0.5, minGapAu: 0.3 }   # drawn only; no gravity
+
+entry:
+  radiusOverInnerSystem: 1.3    # entry sphere: this times the outermost rocky orbit
+  radiusAuMin: 1.0
+  elevationDegMax: 15
+
+enemies:
+  stationOffsetKm: 40000        # base and platform from their planet
+  raiderCount: 4
+  patrolKmMin: 100000
+  patrolKmMax: 300000
+  hillFraction: 0.3             # keep orbits well inside the Hill sphere so they stay bound
+  nearBaseChance: 0.5
+  ambushChance: 0.5
+  ambushRangeKm: 2000000

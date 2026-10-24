@@ -1,7 +1,7 @@
 package neumann.core.game
 
 import neumann.core.data.GameData
-import neumann.core.math.Frame
+import neumann.core.data.ScenarioConfig
 import neumann.core.math.Units
 import neumann.core.math.Vec3
 import neumann.core.sim.PlanetMover
@@ -16,28 +16,20 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-/** Builds the battle's World from the scenario and the player's approach vector. */
+/** Builds the battle's World from a scenario (fixed or generated) and the player's approach vector. */
 class ScenarioBuilder(private val data: GameData) {
-    fun build(approach: ApproachVector): World {
-        val s = data.scenario
-        val star = Star(s.star.name, s.star.massSolar * Units.SOLAR_MASS, s.star.radiusKm * Units.KM)
-        val mover = PlanetMover()
-        val planets = s.planets.map {
-            val r = it.orbitAu * Units.AU
-            Planet(it.name, it.massEarth * Units.EARTH_MASS, it.radiusKm * Units.KM, r,
-                it.inclinationDeg * Units.DEGREE, it.phaseDeg * Units.DEGREE,
-                2 * Math.PI * sqrt(r * r * r / (Units.G * star.mass))).also { p -> mover.place(p, 0.0) }
-        }
+    fun build(approach: ApproachVector): World = build(data.scenario, approach)
 
-        val bearing = bearing(s.entry.bearingDeg)
+    fun build(s: ScenarioConfig, approach: ApproachVector): World {
+        val star = Star(s.star.name, s.star.massSolar * Units.SOLAR_MASS, s.star.radiusKm * Units.KM)
+        val planets = bodies(s, star)
+        val bearing = arrivalBearing(s)
         val speed = approach.speedKmS.coerceIn(s.entry.minSpeedKmS, s.entry.maxSpeedKmS) * Units.KM
-        val lookingAtStar = -bearing
-        val aim = DirectionDials.direction(lookingAtStar, Frame.upFor(lookingAtStar),
-            DirectionDials.Angles(approach.yawDeg, approach.pitchDeg))
+        val aim = approach.direction?.normalized()?.takeIf { it.lengthSquared() > 0.0 } ?: -bearing
         val factory = VesselFactory(data)
         val player = factory.build("P", s.player.name, Faction.PLAYER, s.player.design,
             bearing * (s.entry.radiusAu * Units.AU), aim * speed, aim)
-        val world = World(data, star, planets, player)
+        val world = World(data, star, planets, player, s.belt, s.seed)
         world.vessels.add(player)
 
         for (e in s.enemies) {
@@ -64,6 +56,28 @@ class ScenarioBuilder(private val data: GameData) {
         world.lastHistorySample = 0.0
         return world
     }
+
+    /** The star's planets and moons, placed at time 0. Moons orbit their parent planet. */
+    fun bodies(s: ScenarioConfig, star: Star): List<Planet> {
+        val mover = PlanetMover()
+        val built = LinkedHashMap<String, Planet>()
+        for (c in s.planets) {
+            val parent = c.parent?.let { built.getValue(it) }
+            val r = if (parent == null) c.orbitAu * Units.AU else c.orbitKm * Units.KM
+            val centralMass = parent?.mass ?: star.mass
+            val p = Planet(c.name, c.massEarth * Units.EARTH_MASS, c.radiusKm * Units.KM, r,
+                c.inclinationDeg * Units.DEGREE, c.phaseDeg * Units.DEGREE,
+                2 * Math.PI * sqrt(r * r * r / (Units.G * centralMass)), parent)
+            mover.place(p, 0.0)
+            built[c.name] = p
+        }
+        return built.values.toList()
+    }
+
+    /** Where the ship arrives: on the entry sphere at the scenario's bearing. */
+    fun arrivalPoint(s: ScenarioConfig): Vec3 = arrivalBearing(s) * (s.entry.radiusAu * Units.AU)
+
+    private fun arrivalBearing(s: ScenarioConfig) = bearing(s.entry.bearingDeg)
 
     /** Unit vector from the star toward the arrival point, from [azimuth, elevation] in degrees. */
     private fun bearing(deg: List<Double>): Vec3 {

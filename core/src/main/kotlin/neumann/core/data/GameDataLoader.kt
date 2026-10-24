@@ -11,12 +11,13 @@ class GameDataLoader(private val source: DataSource) {
         val modules = Yaml.default.decodeFromString(ModulesFile.serializer(), source.read("modules.yaml"))
         val ships = Yaml.default.decodeFromString(ShipsFile.serializer(), source.read("ships.yaml"))
         val scenario = Yaml.default.decodeFromString(ScenarioConfig.serializer(), source.read("scenario.yaml"))
+        val generation = Yaml.default.decodeFromString(GenerationConfig.serializer(), source.read("system-generation.yaml"))
         modules.modules.forEach { (id, m) -> checkModule(id, m) }
         ships.designs.forEach { (id, d) ->
             for (m in d.modules.keys) require(m in modules.modules) { "design $id: unknown module $m" }
         }
         checkScenario(ships.designs, scenario)
-        return GameData(rules, modules.modules, modules.munitions, ships.designs, scenario)
+        return GameData(rules, modules.modules, modules.munitions, ships.designs, scenario, generation)
     }
 
     /** The sub-config for the module's kind must be set. */
@@ -36,7 +37,12 @@ class GameDataLoader(private val source: DataSource) {
         require(hasConfig) { "module $id (${m.kind}) is missing its ${m.kind.name.lowercase()} settings" }
     }
 
-    private fun checkScenario(designs: Map<String, ShipDesign>, scenario: ScenarioConfig) {
+    fun checkScenario(designs: Map<String, ShipDesign>, scenario: ScenarioConfig) {
+        val seen = HashSet<String>()
+        for (p in scenario.planets) {
+            p.parent?.let { require(it in seen) { "${p.name}: parent $it must come before it" } }
+            seen.add(p.name)
+        }
         val bodies = scenario.planets.map { it.name }.toSet() + scenario.star.name
         require(scenario.player.design in designs) { "unknown design ${scenario.player.design}" }
         for (e in scenario.enemies) {

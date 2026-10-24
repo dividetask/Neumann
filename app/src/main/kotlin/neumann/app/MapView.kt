@@ -204,6 +204,12 @@ private fun DrawScope.ring(cam: MapCamera, centre: Vec3, radius: Double, inclina
     drawPath(path, color, style = Stroke(1f))
 }
 
+/**
+ * Measured first, then drawn: drawing a string directly limits it to the
+ * space left on the canvas, which throws once [at] is past the right or
+ * bottom edge.
+ */
 private fun DrawScope.label(measurer: TextMeasurer, text: String, at: Offset, color: Color) {
-    drawText(measurer, text, at, Theme.small.copy(color = color))
+    if (at.x > size.width || at.y > size.height) return
+    drawText(measurer.measure(text, Theme.small.copy(color = color)), topLeft = at)
 }

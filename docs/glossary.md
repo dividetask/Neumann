@@ -1,5 +1,7 @@
 # Glossary
 
+- **Approach arrow** — The arrow dragged out from the ship on the map to set
+  the approach vector: direction and entry speed.
 - **Approach vector** — The direction and speed at which the player's ship
   enters a star system.
 - **Auto factory** — The ship's on-board factory; it turns mined minerals
@@ -42,6 +44,8 @@
   manufacturing time.
 - **Pending** — Designed or suggested, but held back for a later version.
 - **Radar** — An active microwave sensor that finds hot and cold objects.
+- **Seed** — The number a random star system is generated from; the same
+  seed gives the same system.
 - **Sensor rules** — The radar and lidar on/off switches.
 - **Ship state** — Damage, fuel, and ammunition, kept between battles.
 - **Signature** — How easy an object is for telescopes to see; higher while

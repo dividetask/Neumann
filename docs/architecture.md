@@ -113,7 +113,9 @@ capacities, sensor and threat range from the working modules).
   space, and a direction back into the turn still to go.
 - `AutoPauseMonitor` — decides which new events stop a time skip (with repeat
   suppression).
-- `TimeSkip` — runs steps until the time is up or a pause.
+- `PauseCollector` — gathers reasons to pause arriving within `groupSeconds`
+  into one pause; drops nothing.
+- `TimeSkip` — runs steps until the time is up or a pause is due.
 - `TimeSkipResult` — how long it ran and why it stopped.
 - `OrderDesk` — applies the player's orders.
 - `GameSession` — what the UI talks to.

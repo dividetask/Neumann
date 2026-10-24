@@ -20,7 +20,7 @@ ships:
 autoPause:
   lowSupplyFraction: 0.25
   repeatSuppressionSeconds: 600
-  groupSeconds: 60             # same-kind events this soon after a pause are part of it
+  groupSeconds: 60             # a pause waits this long to gather everything arriving with it
   pauseOn:
     - NEW_CONTACT
     - TORPEDO_INBOUND

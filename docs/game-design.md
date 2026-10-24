@@ -11,7 +11,7 @@ to battle.
 
 The first version is a single battle:
 
-A. The player arrives at one made-up star system.
+A. The player arrives at a randomly generated star system.
 B. The player picks an approach vector.
 C. The player gives orders and uses time skips until the system is claimed
    (win) or the ship is lost.
@@ -71,10 +71,12 @@ keeps hitting; if that enemy then stops for `repeatSuppressionSeconds`, its
 next hit pauses. Every event is still logged. Claiming the system and losing
 the ship always pause.
 
-Events that arrive at nearly the same time are one piece of news, so one
-pause. **(interpretation)** After an event pauses, further events of the
-same kind within `groupSeconds` do not pause again, whatever their source
-(for example, the rest of a torpedo salvo).
+Events that arrive at nearly the same time are one pause, and none is
+skipped. The first reason to pause opens a window of `groupSeconds`; the
+skip runs on to the end of the window so everything arriving inside it
+(for example, every torpedo of a salvo) can be seen, then pauses once and
+lists them all. **(interpretation)** This applies to every kind of pause
+event; claiming the system and losing the ship still pause at once.
 
 The end of a burn does not pause; it is logged.
 
@@ -137,13 +139,16 @@ to spend torpedoes against point defence.
 ## Space
 
 - The game is in **3D**.
-- Everything the player chooses is from the ship's point of view; there are
-  no star-relative controls.
-- **(interpretation)** The ship arrives on the entry sphere (`radiusAu` from
-  the star) at a bearing set by where it came from (`entry.bearingDeg` in
-  `data/scenario.yaml` for the first version). The approach vector is chosen
-  from the ship, looking at the star: the YAW and PITCH dials aim it off the
-  star, and a slider sets the entry speed.
+- The direction dials are always relative to the ship's facing, never to the
+  star or the system. They are used only on the bridge.
+- **Choosing the approach vector is done on the map.** The ship is shown at
+  its arrival point on the entry sphere (`radiusAu` from the star), at a
+  bearing set by where it came from (random in the first version). The
+  player drags an arrow out from the ship: the arrow's direction is the
+  approach direction and its length the entry speed (between the entry
+  speed limits). Rotating and tilting the map lets the arrow point anywhere
+  in 3D. While dragging, the map shows the predicted coasting path (under
+  gravity) and highlights the body it passes closest to. ENTER commits.
 - **Realistic scale.** Distances are real: a system is billions of km across,
   and light takes minutes to cross it.
 - **Light delay.** Sensors show where a contact was when its light left it,
@@ -156,14 +161,13 @@ to spend torpedoes against point defence.
   engine; to stop, it turns around and burns against its motion.
 - Burns use fuel at the engines' `fuelKgS`. The ship gets lighter as it
   burns fuel, so the same thrust gives more acceleration.
-- The gravity of stars and planets affects ships, torpedoes, and slugs.
-  **(interpretation)** Stars and planets follow fixed circular orbits and are
-  not moved by anything.
+- The gravity of stars, planets, and moons affects ships, torpedoes, and
+  slugs. **(interpretation)** Stars, planets, and moons follow fixed circular
+  orbits and are not moved by anything.
 - Fixed defences are not necessarily attached to anything: they lack the
   engines to move much and only keep their orbit. **(interpretation)**
-  Fixed defences and bases start in a circular orbit of a planet or the star
-  (`orbits` in `data/scenario.yaml`) and follow it under gravity, like any
-  ship that is not burning.
+  Fixed defences and bases start in a circular orbit of a planet, moon, or
+  the star and follow it under gravity, like any ship that is not burning.
 
 ## Sensors
 
@@ -188,7 +192,23 @@ A star system may contain any mix of:
 - A permanent base.
 - An ambush: ships waiting with no base.
 
-The first-version system is defined in `data/scenario.yaml`.
+### Random systems
+
+Every game generates a new system from a seed. The seed is shown, so a
+system can be replayed. The ranges live in `data/system-generation.yaml`.
+
+- **Star:** 0.6–1.4 solar masses.
+- **Planets:** 4–9, spaced outward. Rocky planets inside about 2 AU; gas and
+  ice giants beyond.
+- **Moons:** rocky planets 0–2, giants 2–6. Moons follow fixed circular
+  orbits around their planet, and their gravity counts.
+- **Asteroid belt:** sometimes, between the inner and outer planets
+  (drawn as a ring; no gravity). **(interpretation)**
+- **Enemies:** the base orbits a random rocky planet, and the defence
+  platform orbits the same planet. The four raiders patrol near the base or
+  around a giant's moons; one may lie in ambush.
+- **Arrival:** a random bearing on the entry sphere, outside the inner
+  system.
 
 ## Player ship
 
@@ -246,5 +266,17 @@ The first-version system is defined in `data/scenario.yaml`.
 - Low graphics, close to text.
 - Styled like the ship's own display: readouts, contact lists, and simple
   diagrams and pictures. Nothing complicated.
-- First version: a status readout, contact list, event log, order controls,
-  time skip buttons, and a plot of the system from above and from the side.
+- **No scrolling.** Everything fits on the screen. Panels toggle between
+  shown and hidden instead.
+- **Map:** one full-screen 3D view of the system.
+  - One-finger drag pans; pinch zooms.
+  - Two-finger twist rotates around the system's axis; two-finger drag up
+    or down tilts between looking from above and edge-on.
+  - Double-tap recentres on the ship.
+- **Top bar** (always visible): mission time and the four time-skip
+  buttons.
+- **Bottom tab bar:** SHIP, CONTACTS, MANOEUVRE, WEAPONS, LOG. Each opens
+  one compact panel over the lower part of the map; tapping it again hides
+  it. The direction dials live in MANOEUVRE.
+- **Approach screen:** the full-screen map, the ship's arrow (see
+  [Space](#space)), the entry speed it gives, and ENTER.

@@ -11,7 +11,8 @@ import neumann.core.world.World
 /** What the UI talks to: enter the system, give orders, skip time. */
 class GameSession(val data: GameData, approach: ApproachVector) {
     private val step = SimulationStep(data)
-    private val timeSkip = TimeSkip(step, StepSizer(data.rules.sim), AutoPauseMonitor(data.rules.autoPause))
+    private val timeSkip = TimeSkip(step, StepSizer(data.rules.sim), AutoPauseMonitor(data.rules.autoPause),
+        data.rules.autoPause.groupSeconds)
 
     val performance = step.performance
     val world: World = ScenarioBuilder(data).build(approach).also { step.sensors.run(it) }

@@ -47,6 +47,14 @@ Every sensor has:
   direction is known but not its distance. **(interpretation)** It can be
   targeted (torpedoes can be launched toward it; their seekers do the rest),
   but cannons will not fire at it.
+- **Dead reckoning.** When a ship that has been seen with a position drops to
+  bearing only, the map shows where it would be now had it not turned or
+  burned: its last position fix carried forward at the velocity seen then.
+  **(interpretation)** In a straight line (gravity is ignored), and only for
+  bearing-only contacts; a contact lost altogether is not shown. A ship
+  never seen with a position shows only its bearing line.
+- A bearing-only contact is drawn as a line from the ship in its direction,
+  not at a point, since its distance is unknown.
 
 ## Slugs
 

@@ -14,6 +14,8 @@
 - **Claimed** — A star system with every enemy ship, fixed defence, and base
   destroyed.
 - **Contact** — Any object the ship's sensors have detected.
+- **Dead reckoning** — Where a bearing-only ship would be now had it kept
+  the velocity it had when last seen with a position.
 - **Design** — A ship's list of modules; fixed defences and bases are designs
   too.
 - **Desired distance** — How far a burn should take the ship before it

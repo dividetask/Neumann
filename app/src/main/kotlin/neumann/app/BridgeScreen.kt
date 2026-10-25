@@ -259,9 +259,11 @@ private fun Rule(label: String, on: Boolean, onChange: (Boolean) -> Unit) {
     }
 }
 
-/** Where the player's sensors place each ship they can see (bearing-only contacts have no distance). */
-private fun visibleShips(world: World): List<Vec3> =
-    world.player.contacts.current.values.filter { it.kind.isVessel && !it.bearingOnly }.map { it.observedPosition }
+/** Where the player's sensors place each ship they can see; bearing-only ones dead-reckoned, if ever fixed. */
+private fun visibleShips(world: World): List<Vec3> {
+    val book = world.player.contacts
+    return book.current.values.filter { it.kind.isVessel }.mapNotNull { book.placeOf(it, world.time) }
+}
 
 /** Burn and turn state, e.g. "Burn 100% accelerate: turning, 40° to go". */
 private fun manoeuvreStatus(session: GameSession): String {

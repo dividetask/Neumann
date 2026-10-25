@@ -9,6 +9,7 @@ import neumann.core.math.Vec3
 import neumann.core.world.Contact
 import neumann.core.world.ContactKind
 import neumann.core.world.EventKind
+import neumann.core.world.Fix
 import neumann.core.world.SensorType
 import neumann.core.world.Torpedo
 import neumann.core.world.Tracked
@@ -53,6 +54,9 @@ class SensorPhase(private val lightDelay: LightDelay, private val rules: ShipRul
         for (id in seen.keys) since.putIfAbsent(id, world.time)
         observer.contacts.current.clear()
         observer.contacts.current.putAll(seen)
+        for (c in seen.values) {
+            if (!c.bearingOnly) observer.contacts.lastFix[c.id] = Fix(c.observedPosition, c.observedVelocity, world.time - c.lightDelaySeconds)
+        }
     }
 
     private fun detects(s: SensorConfig, observer: Vessel, t: Tracked, distance: Double, burning: Boolean): Boolean {

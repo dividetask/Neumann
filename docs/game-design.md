@@ -278,10 +278,10 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
   - Double-tap resets the view to the default view.
   - **Default view:** frames the star, the player's ship, and every ship
     that can be seen, at the starting rotation and tilt. The bridge opens
-    with it. **(interpretation)** "Can be seen" means a vessel contact with
-    a position; a bearing-only contact's distance is unknown, so it is left
-    out. On the approach screen nothing is seen yet, so the default view is
-    the whole entry sphere.
+    with it. A bearing-only ship counts at its dead-reckoned position (see
+    [sensors.md](sensors.md)); one never seen with a position is left out,
+    since its distance is unknown. On the approach screen nothing is seen
+    yet, so the default view is the whole entry sphere.
 - **Top bar** (always visible): mission time and the four time-skip
   buttons.
 - **Messages** (always visible, under the top bar): the most recent

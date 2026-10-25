@@ -104,4 +104,26 @@ class SensorTypesTest {
         assertEquals(neumann.core.world.SensorType.LIDAR, c.sensor)
         assertTrue(c.uncertaintyM * 100 < radar)
     }
+
+    @Test
+    fun `a ship that drops to bearing only is dead-reckoned from its last position fix`() {
+        val w = setup(10_000.0)
+        val d = Fixture.dummy(w)
+        val east = Vec3(1.0, 0.0, 0.0)
+        Fixture.place(w, d, d.position, east * 10_000.0) // 10 km/s
+        sweep(w)
+        val seen = w.player.contacts[d.id]!!
+        assertTrue(!seen.bearingOnly)
+        val fix = assertNotNull(w.player.contacts.lastFix[d.id])
+
+        // Far beyond telescope and radar, its radar still on: only its bearing is known now.
+        Fixture.place(w, d, Fixture.openSpace + east * (100_000_000.0 * Units.KM), Vec3.ZERO)
+        d.sensorRules.radarActive = true
+        sweep(w)
+        assertTrue(w.player.contacts[d.id]!!.bearingOnly)
+        assertTrue(w.player.contacts.lastFix[d.id] === fix, "a bearing alone does not replace the fix")
+        val later = fix.time + 100.0
+        assertEquals(1_000.0 * Units.KM, (fix.positionAt(later) - fix.position).dot(east), 0.2 * 1_000.0 * Units.KM,
+            "carried forward at the velocity seen then")
+    }
 }

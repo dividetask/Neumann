@@ -160,25 +160,32 @@ private fun DrawScope.draw(
     }
 
     if (showContacts) {
+        val ship = at(world.player.position)
         for (c in world.player.contacts.current.values) {
-            val o = at(c.observedPosition)
-            if (!visible(o)) continue
             val color = if (c.targetsObserver) Theme.alert else Theme.enemy
-            when (c.kind) {
-                ContactKind.TORPEDO -> {
+            // Its distance is unknown, so a bearing-only contact is a line from the ship off the screen.
+            if (c.bearingOnly) {
+                val reach = size.maxDimension * 2
+                drawLine(color.copy(alpha = 0.6f), ship, ship + direction(cam, world.player.position, c.observedPosition - world.player.position) * reach, 1f)
+            }
+            val place = world.player.contacts.placeOf(c, world.time) ?: continue
+            val o = at(place)
+            if (!visible(o)) continue
+            when {
+                c.bearingOnly -> drawCircle(color, 5f, o, style = Stroke(1.5f)) // dead reckoned: hollow
+                c.kind == ContactKind.TORPEDO -> {
                     drawLine(color, o + Offset(-4f, -4f), o + Offset(4f, 4f), 2f)
                     drawLine(color, o + Offset(-4f, 4f), o + Offset(4f, -4f), 2f)
                 }
-                ContactKind.SLUG -> drawCircle(color, 2f, o)
-                ContactKind.SHIP -> drawCircle(color, 5f, o)
-                ContactKind.DEFENCE -> drawRect(color, o - Offset(4f, 4f), Size(8f, 8f))
-                ContactKind.BASE -> drawRect(color, o - Offset(7f, 7f), Size(14f, 14f))
+                c.kind == ContactKind.SLUG -> drawCircle(color, 2f, o)
+                c.kind == ContactKind.SHIP -> drawCircle(color, 5f, o)
+                c.kind == ContactKind.DEFENCE -> drawRect(color, o - Offset(4f, 4f), Size(8f, 8f))
+                c.kind == ContactKind.BASE -> drawRect(color, o - Offset(7f, 7f), Size(14f, 14f))
             }
             if (c.id == world.player.targetId) drawCircle(Theme.alert, 12f, o, style = Stroke(2f))
             val err = (c.uncertaintyM * cam.scale).toFloat()
             if (!c.bearingOnly && err > 3f) drawCircle(color.copy(alpha = 0.6f), minOf(err, size.width), o, style = Stroke(1f))
-            if (c.bearingOnly) drawLine(color.copy(alpha = 0.6f), at(world.player.position), o, 1f)
-            if (c.kind.isVessel) label(measurer, c.name, o + Offset(8f, 4f), color)
+            if (c.kind.isVessel) label(measurer, if (c.bearingOnly) "${c.name} (DR)" else c.name, o + Offset(8f, 4f), color)
         }
     }
 

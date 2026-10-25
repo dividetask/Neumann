@@ -24,6 +24,7 @@ import neumann.core.game.ScenarioBuilder
 import neumann.core.game.SystemGenerator
 import neumann.core.game.TrajectoryPredictor
 import neumann.core.math.Units
+import neumann.core.math.Vec3
 import neumann.core.world.ApproachVector
 
 /**
@@ -48,13 +49,12 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
     BoxWithConstraints(Modifier.fillMaxSize().background(Theme.background)) {
         val area = with(LocalDensity.current) { Size(maxWidth.toPx(), maxHeight.toPx()) }
         val maxArrow = minOf(area.width, area.height) * 0.35f
-        var camera by remember(scenario) {
-            mutableStateOf(MapCamera.fitting(neumann.core.math.Vec3.ZERO, entry.radiusAu * Units.AU * 1.15, area))
-        }
+        val startView = remember(scenario, area) { MapCamera.fitting(Vec3.ZERO, entry.radiusAu * Units.AU * 1.15, area) }
+        var camera by remember(startView) { mutableStateOf(startView) }
         val fraction = ((speed - entry.minSpeedKmS) / (entry.maxSpeedKmS - entry.minSpeedKmS)).toFloat()
         MapView(
             world, camera, { camera = it },
-            onRecentre = { camera = camera.copy(centre = world.player.position) },
+            onReset = { camera = startView },
             tick = 0, showContacts = false,
             path = prediction.points, highlight = prediction.closest,
             arrow = ApproachArrow(direction, 20f + fraction * (maxArrow - 20f)),
@@ -72,7 +72,7 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
             Line("NEUMANN  $version", Theme.dim)
             Line("ARRIVING: ${scenario.name.uppercase()}   seed $seed", Theme.alert)
             Line("Drag the arrow from your ship: direction = approach, length = speed.", Theme.dim)
-            Line("Pinch zoom · drag pan · twist rotate · two-finger drag tilt · double-tap ship", Theme.dim)
+            Line("Pinch zoom · drag pan · twist rotate · two-finger drag tilt · double-tap reset", Theme.dim)
         }
 
         Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().background(Theme.panel.copy(alpha = 0.85f)).padding(8.dp)) {

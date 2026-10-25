@@ -275,7 +275,9 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
   - One-finger drag pans; pinch zooms.
   - Two-finger twist rotates around the system's axis; two-finger drag up
     or down tilts between looking from above and edge-on.
-  - Double-tap recentres on the ship.
+  - Double-tap resets the view to where the screen started: the starting
+    zoom, rotation, and tilt. On the bridge it centres on the ship (where it
+    is now); on the approach screen, on the star.
 - **Top bar** (always visible): mission time and the four time-skip
   buttons.
 - **Bottom tab bar:** SHIP, CONTACTS, MANOEUVRE, WEAPONS, LOG. Each opens

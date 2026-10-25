@@ -83,8 +83,10 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
 
     BoxWithConstraints(Modifier.fillMaxSize().background(Theme.background)) {
         val area = with(LocalDensity.current) { Size(maxWidth.toPx(), maxHeight.toPx()) }
-        var camera by remember { mutableStateOf(MapCamera.fitting(world.player.position, 2e10, area)) }
-        MapView(world, camera, { camera = it }, onRecentre = { camera = camera.copy(centre = world.player.position) },
+        // The starting view, back on the ship wherever it is now.
+        fun startView() = MapCamera.fitting(world.player.position, START_VIEW_RADIUS_M, area)
+        var camera by remember { mutableStateOf(startView()) }
+        MapView(world, camera, { camera = it }, onReset = { camera = startView() },
             tick = tick, showContacts = true)
 
         // The world is mutable and not observable, so the overlays are rebuilt
@@ -280,6 +282,7 @@ private fun manoeuvreStatus(session: GameSession): String {
 }
 
 private const val LOG_LINES = 10
+private const val START_VIEW_RADIUS_M = 2e10
 private const val CONTACT_LINES = 7
 private const val MODULE_LINES = 6
 private const val PAUSE_LINES = 3

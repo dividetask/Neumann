@@ -8,7 +8,6 @@ import androidx.compose.foundation.gestures.calculateCentroid
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateRotation
 import androidx.compose.foundation.gestures.calculateZoom
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,7 +39,7 @@ class ApproachArrow(val direction: Vec3, val lengthPx: Float)
 /**
  * The full-screen 3D map. One-finger drag pans, pinch zooms, two-finger
  * twist rotates around the system's axis, two-finger drag up/down tilts,
- * double-tap recentres. With [onArrow] set, a one-finger drag that starts on
+ * double-tap resets the view ([onReset]). With [onArrow] set, a one-finger drag that starts on
  * the ship drags the approach arrow instead of panning.
  */
 @Composable
@@ -48,7 +47,7 @@ fun MapView(
     world: World,
     camera: MapCamera,
     onCamera: (MapCamera) -> Unit,
-    onRecentre: () -> Unit,
+    onReset: () -> Unit,
     tick: Int,
     showContacts: Boolean,
     modifier: Modifier = Modifier,
@@ -61,21 +60,27 @@ fun MapView(
     val cam by rememberUpdatedState(camera)
     val setCam by rememberUpdatedState(onCamera)
     val arrowDrag by rememberUpdatedState(onArrow)
-    val recentre by rememberUpdatedState(onRecentre)
+    val reset by rememberUpdatedState(onReset)
     val shipAt by rememberUpdatedState(world.player.position)
     Canvas(
         modifier.fillMaxSize().background(Theme.background)
-            .pointerInput(Unit) { detectTapGestures(onDoubleTap = { recentre() }) }
             .pointerInput(Unit) {
+                // The previous tap, to spot a double tap. Taps are found here, not by a
+                // separate tap detector, because this handler consumes every movement.
+                var lastTapTime = 0L
+                var lastTapAt = Offset.Zero
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
                     val area = Size(size.width.toFloat(), size.height.toFloat())
                     val ship = cam.project(shipAt, area)
                     // A drag that starts on the ship moves the approach arrow (approach screen only).
                     var dragging = arrowDrag != null && (down.position - ship).getDistance() < 64.dp.toPx()
+                    var tap = true
+                    var upTime = down.uptimeMillis
                     do {
                         val event = awaitPointerEvent()
                         val pressed = event.changes.filter { it.pressed }
+                        if (pressed.size > 1 || event.changes.any { (it.position - down.position).getDistance() > viewConfiguration.touchSlop }) tap = false
                         when {
                             pressed.size == 1 && dragging -> arrowDrag?.invoke(pressed[0].position - cam.project(shipAt, area))
                             pressed.size == 1 -> {
@@ -92,7 +97,19 @@ fun MapView(
                             }
                         }
                         event.changes.forEach { if (it.positionChanged()) it.consume() }
+                        upTime = event.changes.first().uptimeMillis
                     } while (event.changes.any { it.pressed })
+                    if (tap && upTime - down.uptimeMillis < viewConfiguration.longPressTimeoutMillis) {
+                        val double = down.uptimeMillis - lastTapTime < viewConfiguration.doubleTapTimeoutMillis &&
+                            (down.position - lastTapAt).getDistance() < 48.dp.toPx()
+                        if (double) {
+                            reset()
+                            lastTapTime = 0L
+                        } else {
+                            lastTapTime = upTime
+                            lastTapAt = down.position
+                        }
+                    }
                 }
             },
     ) {

@@ -275,11 +275,20 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
   - One-finger drag pans; pinch zooms.
   - Two-finger twist rotates around the system's axis; two-finger drag up
     or down tilts between looking from above and edge-on.
-  - Double-tap resets the view to where the screen started: the starting
-    zoom, rotation, and tilt. On the bridge it centres on the ship (where it
-    is now); on the approach screen, on the star.
+  - Double-tap resets the view to the default view.
+  - **Default view:** frames the star, the player's ship, and every ship
+    that can be seen, at the starting rotation and tilt. The bridge opens
+    with it. **(interpretation)** "Can be seen" means a vessel contact with
+    a position; a bearing-only contact's distance is unknown, so it is left
+    out. On the approach screen nothing is seen yet, so the default view is
+    the whole entry sphere.
 - **Top bar** (always visible): mission time and the four time-skip
   buttons.
+- **Messages** (always visible, under the top bar): the most recent
+  messages. When a time skip ends, its first line says at once how it
+  ended: the full time passed, or it paused early, with every reason for
+  the pause listed below it. The rest are the newest log entries; those
+  from the last skip are bright, older ones dim.
 - **Bottom tab bar:** SHIP, CONTACTS, MANOEUVRE, WEAPONS, LOG. Each opens
   one compact panel over the lower part of the map; tapping it again hides
   it. The direction dials live in MANOEUVRE.

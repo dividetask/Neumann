@@ -51,5 +51,17 @@ data class MapCamera(val centre: Vec3, val scale: Double, val yaw: Double = 0.0,
         /** A camera centred on [centre] that fits [radius] metres into the smaller screen side. */
         fun fitting(centre: Vec3, radius: Double, size: Size) =
             MapCamera(centre, minOf(size.width, size.height) / 2.0 / radius, tilt = 0.35)
+
+        /** A camera that fits every one of [points] on screen, with a margin. */
+        fun framing(points: List<Vec3>, size: Size): MapCamera {
+            val min = Vec3(points.minOf { it.x }, points.minOf { it.y }, points.minOf { it.z })
+            val max = Vec3(points.maxOf { it.x }, points.maxOf { it.y }, points.maxOf { it.z })
+            val centre = (min + max) * 0.5
+            val radius = points.maxOf { (it - centre).length() }
+            return fitting(centre, maxOf(radius * FRAME_MARGIN, MIN_FRAME_RADIUS_M), size)
+        }
+
+        private const val FRAME_MARGIN = 1.2
+        private const val MIN_FRAME_RADIUS_M = 1e7
     }
 }

@@ -34,6 +34,7 @@ import neumann.core.world.BurnStage
 import neumann.core.world.EventKind
 import neumann.core.world.HeadingMode
 import neumann.core.world.WeaponKind
+import neumann.core.world.World
 
 private val skips = listOf(60.0 to "1 MIN", 3600.0 to "1 HR", 4 * 3600.0 to "4 HR", 86400.0 to "1 DAY")
 private val modes = listOf(
@@ -60,6 +61,7 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
     var tick by remember { mutableStateOf(0) }
     var busy by remember { mutableStateOf(false) }
     var lastSkip by remember { mutableStateOf<TimeSkipResult?>(null) }
+    var skipStart by remember { mutableStateOf(0.0) }
     var notice by remember { mutableStateOf<String?>(null) }
     var tab by remember { mutableStateOf<Tab?>(null) }
     val manoeuvre = remember { ManoeuvreState() }
@@ -73,6 +75,7 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
     fun skip(seconds: Double) {
         busy = true
         notice = null
+        skipStart = world.time
         scope.launch {
             val r = withContext(Dispatchers.Default) { session.skip(seconds) }
             lastSkip = r
@@ -83,8 +86,8 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
 
     BoxWithConstraints(Modifier.fillMaxSize().background(Theme.background)) {
         val area = with(LocalDensity.current) { Size(maxWidth.toPx(), maxHeight.toPx()) }
-        // The starting view, back on the ship wherever it is now.
-        fun startView() = MapCamera.fitting(world.player.position, START_VIEW_RADIUS_M, area)
+        // The default view: the star, the ship, and every ship it can see, as they are now.
+        fun startView() = MapCamera.framing(visibleShips(world) + world.player.position + Vec3.ZERO, area)
         var camera by remember { mutableStateOf(startView()) }
         MapView(world, camera, { camera = it }, onReset = { camera = startView() },
             tick = tick, showContacts = true)
@@ -93,7 +96,8 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
         // whenever tick changes (after every skip or order).
         key(tick) {
             Column(Modifier.align(Alignment.TopStart).fillMaxWidth().background(Theme.panel.copy(alpha = 0.85f)).padding(6.dp)) {
-                TopBar(session, version, busy, lastSkip, notice, onNewGame, ::skip)
+                TopBar(session, version, busy, onNewGame, ::skip)
+                MessagePanel(world, busy, lastSkip, skipStart, notice)
             }
             Column(Modifier.align(Alignment.BottomStart).fillMaxWidth()) {
                 tab?.let { t ->
@@ -116,8 +120,7 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
 }
 
 @Composable
-private fun TopBar(session: GameSession, version: String, busy: Boolean, lastSkip: TimeSkipResult?, notice: String?,
-                   onNewGame: () -> Unit, skip: (Double) -> Unit) {
+private fun TopBar(session: GameSession, version: String, busy: Boolean, onNewGame: () -> Unit, skip: (Double) -> Unit) {
     val world = session.world
     Row(verticalAlignment = Alignment.CenterVertically) {
         Line("${DisplayFormat.missionTime(world.time)} ", Theme.alert)
@@ -131,16 +134,6 @@ private fun TopBar(session: GameSession, version: String, busy: Boolean, lastSki
         world.lost -> Line("*** ${world.player.name.uppercase()} LOST ***", Theme.danger)
     }
     if (world.over) ConsoleButton("NEW GAME") { onNewGame() }
-    when {
-        busy -> Line("Running...", Theme.dim)
-        lastSkip != null && lastSkip.pausedBy.isNotEmpty() -> {
-            Line("PAUSED after ${DisplayFormat.duration(lastSkip.elapsedSeconds)}:", Theme.alert)
-            for (e in lastSkip.pausedBy.take(PAUSE_LINES)) Line("  ${e.message}", Theme.alert)
-            if (lastSkip.pausedBy.size > PAUSE_LINES) Line("  +${lastSkip.pausedBy.size - PAUSE_LINES} more (LOG)", Theme.dim)
-        }
-        lastSkip != null -> Line("Skipped ${DisplayFormat.duration(lastSkip.elapsedSeconds)}", Theme.dim)
-    }
-    notice?.let { Line(it, Theme.danger) }
 }
 
 /** Ship summary; only damaged modules are listed, so it fits. */
@@ -266,6 +259,10 @@ private fun Rule(label: String, on: Boolean, onChange: (Boolean) -> Unit) {
     }
 }
 
+/** Where the player's sensors place each ship they can see (bearing-only contacts have no distance). */
+private fun visibleShips(world: World): List<Vec3> =
+    world.player.contacts.current.values.filter { it.kind.isVessel && !it.bearingOnly }.map { it.observedPosition }
+
 /** Burn and turn state, e.g. "Burn 100% accelerate: turning, 40° to go". */
 private fun manoeuvreStatus(session: GameSession): String {
     val p = session.world.player
@@ -282,7 +279,5 @@ private fun manoeuvreStatus(session: GameSession): String {
 }
 
 private const val LOG_LINES = 10
-private const val START_VIEW_RADIUS_M = 2e10
 private const val CONTACT_LINES = 7
 private const val MODULE_LINES = 6
-private const val PAUSE_LINES = 3

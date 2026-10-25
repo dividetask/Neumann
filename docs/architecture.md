@@ -142,4 +142,6 @@ capacities, sensor and threat range from the working modules).
   to the screen.
 - `Controls` — `ConsoleButton`, `ChoiceRow`, `Section`, `Line`.
 - `DisplayFormat` — distances, speeds, times as text.
+- `MessagePanel` — the most recent messages, and how the last time skip
+  ended.
 - `Theme` — ship-display colours.

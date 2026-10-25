@@ -2,6 +2,8 @@ package neumann.core
 
 import neumann.core.math.Units
 import neumann.core.math.Vec3
+import neumann.core.game.Coaster
+import neumann.core.game.ContactEstimator
 import neumann.core.sim.SimulationStep
 import neumann.core.world.Burn
 import neumann.core.world.Heading
@@ -106,24 +108,54 @@ class SensorTypesTest {
     }
 
     @Test
-    fun `a ship that drops to bearing only is dead-reckoned from its last position fix`() {
+    fun `a ship that drops to bearing only keeps its last position fix`() {
         val w = setup(10_000.0)
         val d = Fixture.dummy(w)
-        val east = Vec3(1.0, 0.0, 0.0)
-        Fixture.place(w, d, d.position, east * 10_000.0) // 10 km/s
         sweep(w)
-        val seen = w.player.contacts[d.id]!!
-        assertTrue(!seen.bearingOnly)
+        assertTrue(!w.player.contacts[d.id]!!.bearingOnly)
         val fix = assertNotNull(w.player.contacts.lastFix[d.id])
 
         // Far beyond telescope and radar, its radar still on: only its bearing is known now.
-        Fixture.place(w, d, Fixture.openSpace + east * (100_000_000.0 * Units.KM), Vec3.ZERO)
+        Fixture.place(w, d, Fixture.openSpace + Vec3(100_000_000.0 * Units.KM, 0.0, 0.0), Vec3.ZERO)
         d.sensorRules.radarActive = true
         sweep(w)
         assertTrue(w.player.contacts[d.id]!!.bearingOnly)
         assertTrue(w.player.contacts.lastFix[d.id] === fix, "a bearing alone does not replace the fix")
-        val later = fix.time + 100.0
-        assertEquals(1_000.0 * Units.KM, (fix.positionAt(later) - fix.position).dot(east), 0.2 * 1_000.0 * Units.KM,
-            "carried forward at the velocity seen then")
+    }
+}
+
+class DeadReckoningTest {
+    @Test
+    fun `a coasting ship's estimate now follows gravity, not a straight line`() {
+        val w = Fixture.world()
+        val d = Fixture.dummy(w)
+        // Close to the star, where its pull bends a path quickly.
+        val at = Vec3(0.3 * Units.AU, 0.0, 0.0)
+        Fixture.place(w, d, at, Vec3(0.0, 40_000.0, 0.0))
+        val coaster = Coaster(w.star, w.planets)
+        val start = w.time
+        val step = neumann.core.sim.SimulationStep(w.data)
+        while (w.time < start + 86_400.0) step.run(w, 60.0)
+        val estimate = coaster.coast(at, Vec3(0.0, 40_000.0, 0.0), start, w.time).position
+        val straight = at + Vec3(0.0, 40_000.0, 0.0) * (w.time - start)
+        val miss = (estimate - d.position).length()
+        assertTrue(miss * 50 < (straight - d.position).length(), "gravity makes the estimate far closer than a straight line")
+    }
+
+    @Test
+    fun `every seen ship is shown where it was seen and where it probably is, with a sphere that grows with time`() {
+        val w = Fixture.world()
+        val d = Fixture.dummy(w)
+        Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO)
+        Fixture.place(w, d, Fixture.openSpace + Vec3(1_000_000.0 * Units.KM, 0.0, 0.0), Vec3(0.0, 20_000.0, 0.0))
+        w.player.sensorRules.radarActive = true
+        w.player.sensorsOn = neumann.core.sim.PowerPhase.wanted(w.player)
+        neumann.core.sim.SimulationStep(w.data).sensors.run(w)
+        val estimator = ContactEstimator(w)
+        val e = estimator.estimate().single { it.contact.id == d.id }
+        assertTrue(w.time - e.seen.time > 3.0, "seen as its light left it, over 3 s ago")
+        assertTrue((e.now - d.position).length() < 3 * e.radiusM, "the estimate now is near where it really is")
+        assertTrue((e.now - e.seen.position).length() > 50.0 * Units.KM, "and apart from where it was seen")
+        assertTrue(e.radiusM >= e.seen.uncertaintyM)
     }
 }

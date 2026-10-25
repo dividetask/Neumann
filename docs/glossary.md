@@ -14,8 +14,8 @@
 - **Claimed** — A star system with every enemy ship, fixed defence, and base
   destroyed.
 - **Contact** — Any object the ship's sensors have detected.
-- **Dead reckoning** — Where a bearing-only ship would be now had it kept
-  the velocity it had when last seen with a position.
+- **Dead reckoning** — Carrying a contact's last position fix forward to
+  now under gravity, assuming it coasts.
 - **Design** — A ship's list of modules; fixed defences and bases are designs
   too.
 - **Desired distance** — How far a burn should take the ship before it
@@ -27,6 +27,8 @@
 - **Emitting** — Using an active sensor (radar or lidar); enemy emission
   receivers can detect it.
 - **Estimate** — A contact's sensed position and velocity, with its errors.
+- **Estimated position** — Where a contact probably is now, by dead
+  reckoning, with a sphere showing where it could be.
 - **Facing** — Which way a ship's front and top point.
 - **Fixed defence** — A weapon installation without real engines; it only
   keeps its orbit.
@@ -48,6 +50,8 @@
 - **Radar** — An active microwave sensor that finds hot and cold objects.
 - **Seed** — The number a random star system is generated from; the same
   seed gives the same system.
+- **Seen position** — Where the instruments last placed a contact, as of
+  when its light left it.
 - **Sensor rules** — The radar and lidar on/off switches.
 - **Ship state** — Damage, fuel, and ammunition, kept between battles.
 - **Signature** — How easy an object is for telescopes to see; higher while

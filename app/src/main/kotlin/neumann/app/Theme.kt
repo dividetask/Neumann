@@ -17,6 +17,8 @@ object Theme {
     val planet = Color(0xFF6FA8DC)
     val player = Color(0xFF7CFC7C)
     val enemy = Color(0xFFFF4D4D)
+    /** Where the instruments saw a ship; [enemy] is where it probably is now. */
+    val seen = Color(0xFFB8B8B8)
 
     val body = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 13.sp, color = text)
     val small = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 11.sp, color = text)

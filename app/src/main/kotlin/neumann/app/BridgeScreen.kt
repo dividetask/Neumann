@@ -34,7 +34,6 @@ import neumann.core.world.BurnStage
 import neumann.core.world.EventKind
 import neumann.core.world.HeadingMode
 import neumann.core.world.WeaponKind
-import neumann.core.world.World
 
 private val skips = listOf(60.0 to "1 MIN", 3600.0 to "1 HR", 4 * 3600.0 to "4 HR", 86400.0 to "1 DAY")
 private val modes = listOf(
@@ -86,11 +85,13 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
 
     BoxWithConstraints(Modifier.fillMaxSize().background(Theme.background)) {
         val area = with(LocalDensity.current) { Size(maxWidth.toPx(), maxHeight.toPx()) }
-        // The default view: the star, the ship, and every ship it can see, as they are now.
-        fun startView() = MapCamera.framing(visibleShips(world) + world.player.position + Vec3.ZERO, area)
+        // Ships seen and where they probably are now; dead reckoning is worked out once per change.
+        val estimates = remember(tick) { session.shipEstimates() }
+        // The default view: the star, the ship, and every ship it can see, seen and now.
+        fun startView() = MapCamera.framing(estimates.flatMap { listOf(it.seen.position, it.now) } + world.player.position + Vec3.ZERO, area)
         var camera by remember { mutableStateOf(startView()) }
         MapView(world, camera, { camera = it }, onReset = { camera = startView() },
-            tick = tick, showContacts = true)
+            tick = tick, showContacts = true, estimates = estimates)
 
         // The world is mutable and not observable, so the overlays are rebuilt
         // whenever tick changes (after every skip or order).
@@ -257,12 +258,6 @@ private fun Rule(label: String, on: Boolean, onChange: (Boolean) -> Unit) {
         Checkbox(on, onChange, colors = CheckboxDefaults.colors(checkedColor = Theme.text, uncheckedColor = Theme.dim, checkmarkColor = Theme.background))
         Line(label)
     }
-}
-
-/** Where the player's sensors place each ship they can see; bearing-only ones dead-reckoned, if ever fixed. */
-private fun visibleShips(world: World): List<Vec3> {
-    val book = world.player.contacts
-    return book.current.values.filter { it.kind.isVessel }.mapNotNull { book.placeOf(it, world.time) }
 }
 
 /** Burn and turn state, e.g. "Burn 100% accelerate: turning, 40° to go". */

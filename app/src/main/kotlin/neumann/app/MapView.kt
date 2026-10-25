@@ -25,6 +25,7 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import neumann.core.game.ShipEstimate
 import neumann.core.math.Units
 import neumann.core.math.Vec3
 import neumann.core.world.ContactKind
@@ -55,6 +56,7 @@ fun MapView(
     highlight: Planet? = null,
     arrow: ApproachArrow? = null,
     onArrow: ((Offset) -> Unit)? = null,
+    estimates: List<ShipEstimate> = emptyList(),
 ) {
     val measurer = rememberTextMeasurer()
     val cam by rememberUpdatedState(camera)
@@ -114,14 +116,14 @@ fun MapView(
             },
     ) {
         // The world is mutable, so this lambda reads [tick] to redraw after each change.
-        draw(world, camera, showContacts, measurer, path, highlight, arrow, tick)
+        draw(world, camera, showContacts, measurer, path, highlight, arrow, estimates, tick)
     }
 }
 
 @Suppress("UNUSED_PARAMETER")
 private fun DrawScope.draw(
     world: World, cam: MapCamera, showContacts: Boolean, measurer: TextMeasurer,
-    path: List<Vec3>?, highlight: Planet?, arrow: ApproachArrow?, tick: Int,
+    path: List<Vec3>?, highlight: Planet?, arrow: ApproachArrow?, estimates: List<ShipEstimate>, tick: Int,
 ) {
     fun at(p: Vec3) = cam.project(p, size)
     fun visible(o: Offset) = o.x in -20f..size.width + 20f && o.y in -20f..size.height + 20f
@@ -168,25 +170,22 @@ private fun DrawScope.draw(
                 val reach = size.maxDimension * 2
                 drawLine(color.copy(alpha = 0.6f), ship, ship + direction(cam, world.player.position, c.observedPosition - world.player.position) * reach, 1f)
             }
-            val place = world.player.contacts.placeOf(c, world.time) ?: continue
-            val o = at(place)
+            if (c.kind.isVessel || c.bearingOnly) continue // vessels are drawn from their estimates below
+            val o = at(c.observedPosition)
             if (!visible(o)) continue
-            when {
-                c.bearingOnly -> drawCircle(color, 5f, o, style = Stroke(1.5f)) // dead reckoned: hollow
-                c.kind == ContactKind.TORPEDO -> {
+            when (c.kind) {
+                ContactKind.TORPEDO -> {
                     drawLine(color, o + Offset(-4f, -4f), o + Offset(4f, 4f), 2f)
                     drawLine(color, o + Offset(-4f, 4f), o + Offset(4f, -4f), 2f)
                 }
-                c.kind == ContactKind.SLUG -> drawCircle(color, 2f, o)
-                c.kind == ContactKind.SHIP -> drawCircle(color, 5f, o)
-                c.kind == ContactKind.DEFENCE -> drawRect(color, o - Offset(4f, 4f), Size(8f, 8f))
-                c.kind == ContactKind.BASE -> drawRect(color, o - Offset(7f, 7f), Size(14f, 14f))
+                else -> drawCircle(color, 2f, o)
             }
             if (c.id == world.player.targetId) drawCircle(Theme.alert, 12f, o, style = Stroke(2f))
             val err = (c.uncertaintyM * cam.scale).toFloat()
-            if (!c.bearingOnly && err > 3f) drawCircle(color.copy(alpha = 0.6f), minOf(err, size.width), o, style = Stroke(1f))
-            if (c.kind.isVessel) label(measurer, if (c.bearingOnly) "${c.name} (DR)" else c.name, o + Offset(8f, 4f), color)
+            if (err > 3f) drawCircle(color.copy(alpha = 0.6f), minOf(err, size.width), o, style = Stroke(1f))
         }
+        for (e in estimates) shipTwice(world, cam, measurer, e)
+        label(measurer, "○ seen   ● now", Offset(8f, size.height - 46f), Theme.seen)
     }
 
     val p = world.player
@@ -204,6 +203,29 @@ private fun DrawScope.draw(
     }
     val hundredPx = 100 / cam.scale
     label(measurer, "100 px = ${DisplayFormat.distance(hundredPx)}", Offset(8f, size.height - 28f), Theme.dim)
+}
+
+/**
+ * A ship drawn twice: hollow and grey where the instruments saw it, filled
+ * where it probably is now inside a mostly translucent sphere of where it
+ * could be, and a faint line between.
+ */
+private fun DrawScope.shipTwice(world: World, cam: MapCamera, measurer: TextMeasurer, e: ShipEstimate) {
+    val c = e.contact
+    val color = if (c.id == world.player.targetId) Theme.alert else Theme.enemy
+    val seen = cam.project(e.seen.position, size)
+    val now = cam.project(e.now, size)
+    drawLine(Theme.seen.copy(alpha = 0.4f), seen, now, 1f)
+    val sphere = minOf((e.radiusM * cam.scale).toFloat(), size.maxDimension * 2)
+    if (sphere > 3f) {
+        drawCircle(color.copy(alpha = 0.10f), sphere, now)
+        drawCircle(color.copy(alpha = 0.30f), sphere, now, style = Stroke(1f))
+    }
+    val r = if (c.kind == ContactKind.BASE) 7f else 5f
+    drawCircle(Theme.seen, r, seen, style = Stroke(1.5f))
+    drawCircle(color, r, now)
+    if (c.id == world.player.targetId) drawCircle(Theme.alert, 12f, now, style = Stroke(2f))
+    if (now.x in 0f..size.width && now.y in 0f..size.height) label(measurer, c.name, now + Offset(8f, 4f), color)
 }
 
 /** Unit screen direction of a direction in space, as seen from [from]; zero if it points straight at the viewer. */

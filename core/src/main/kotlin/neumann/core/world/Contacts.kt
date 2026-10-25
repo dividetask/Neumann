@@ -20,17 +20,18 @@ class Contact(
     val targetsObserver: Boolean,
     val sensor: SensorType,
     val uncertaintyM: Double,
+    val velocityUncertaintyMS: Double,
     val bearingOnly: Boolean,
 ) {
     /** Where it is now if it kept its observed velocity. */
     val predictedPosition: Vec3 get() = observedPosition + observedVelocity * lightDelaySeconds
 }
 
-/** Where an object was at [time], and its velocity then: the last time its position was known. */
-class Fix(val position: Vec3, val velocity: Vec3, val time: Double) {
-    /** Dead reckoning: where it would be at [now] had it kept that velocity (straight line). */
-    fun positionAt(now: Double): Vec3 = position + velocity * (now - time)
-}
+/**
+ * Where an object was at [time] and its velocity then, with the errors of
+ * both: the last time its position was known.
+ */
+class Fix(val position: Vec3, val velocity: Vec3, val time: Double, val uncertaintyM: Double, val velocityUncertaintyMS: Double)
 
 /**
  * A vessel's current contacts, every id it has ever seen, when each current
@@ -44,11 +45,4 @@ class ContactBook {
     val lastFix = HashMap<String, Fix>()
 
     operator fun get(id: String?): Contact? = id?.let { current[it] }
-
-    /**
-     * Where to show [c] at [now]: its estimate, or for a bearing-only contact
-     * its dead-reckoned position; null if it has never had a position fix.
-     */
-    fun placeOf(c: Contact, now: Double): Vec3? =
-        if (!c.bearingOnly) c.observedPosition else lastFix[c.id]?.positionAt(now)
 }

@@ -55,7 +55,8 @@ class SensorPhase(private val lightDelay: LightDelay, private val rules: ShipRul
         observer.contacts.current.clear()
         observer.contacts.current.putAll(seen)
         for (c in seen.values) {
-            if (!c.bearingOnly) observer.contacts.lastFix[c.id] = Fix(c.observedPosition, c.observedVelocity, world.time - c.lightDelaySeconds)
+            if (!c.bearingOnly) observer.contacts.lastFix[c.id] =
+                Fix(c.observedPosition, c.observedVelocity, world.time - c.lightDelaySeconds, c.uncertaintyM, c.velocityUncertaintyMS)
         }
     }
 
@@ -108,7 +109,7 @@ class SensorPhase(private val lightDelay: LightDelay, private val rules: ShipRul
             else -> false
         }
         return Contact(t.id, t.name, t.contactKind, t.faction, position, velocity, obs.delaySeconds, estDistance, closing,
-            aimedAtObserver, s.type, uncertainty(s, distance, tracked), bearingOnly)
+            aimedAtObserver, s.type, uncertainty(s, distance, tracked), velocityError(s, tracked) * Units.KM, bearingOnly)
     }
 
     /**

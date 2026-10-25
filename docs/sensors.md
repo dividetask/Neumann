@@ -47,14 +47,27 @@ Every sensor has:
   direction is known but not its distance. **(interpretation)** It can be
   targeted (torpedoes can be launched toward it; their seekers do the rest),
   but cannons will not fire at it.
-- **Dead reckoning.** When a ship that has been seen with a position drops to
-  bearing only, the map shows where it would be now had it not turned or
-  burned: its last position fix carried forward at the velocity seen then.
-  **(interpretation)** In a straight line (gravity is ignored), and only for
-  bearing-only contacts; a contact lost altogether is not shown. A ship
-  never seen with a position shows only its bearing line.
-- A bearing-only contact is drawn as a line from the ship in its direction,
-  not at a point, since its distance is unknown.
+- **Seen and estimated positions.** Every ship, fixed defence, and base
+  that has been seen with a position is drawn twice on the map, in
+  different colours:
+  - **Seen** (hollow, grey): where the instruments last placed it, as of
+    when that light left it.
+  - **Estimated now** (filled, red): that fix carried forward to the
+    present by **dead reckoning**, under the gravity of the star, planets,
+    and moons (which move on their orbits meanwhile), over the light delay
+    and any time since the fix. Around it, a mostly translucent sphere
+    shows where it could be: radius = √(position error² + (velocity error ×
+    time since the fix)²).
+  - A faint line joins the two.
+
+  **(interpretation)** The estimate assumes the ship coasts: a ship that
+  burns or turns after its light left it will drift outside the sphere. A
+  contact that drops to bearing only keeps its last fix, so it is still
+  drawn twice; a contact lost altogether is not drawn. A ship never seen
+  with a position shows only its bearing line. Torpedoes and slugs are
+  drawn once, where seen.
+- A bearing-only contact is also drawn as a line from the ship in its
+  direction, since its distance is unknown.
 
 ## Slugs
 

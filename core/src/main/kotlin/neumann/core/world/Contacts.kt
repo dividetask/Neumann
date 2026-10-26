@@ -34,15 +34,23 @@ class Fix(val contact: Contact, val time: Double) {
 }
 
 /**
- * A vessel's current contacts, every id it has ever seen, when each current
- * track began, and the last position fix of each ship and torpedo (kept
- * after the position or the contact is lost, for dead reckoning).
+ * A vessel's current contacts, every id it has ever seen (with its kind and
+ * name), which of those it knows were destroyed, when each current track
+ * began, and the last position fix of each bogey (kept after the position
+ * or the contact is lost, for dead reckoning).
  */
 class ContactBook {
     val current = LinkedHashMap<String, Contact>()
-    val everSeen = HashSet<String>()
+    val everSeen = LinkedHashMap<String, ContactKind>()
+    val destroyed = HashSet<String>()
     val trackedSince = HashMap<String, Double>()
     val lastFix = HashMap<String, Fix>()
 
     operator fun get(id: String?): Contact? = id?.let { current[it] }
+
+    /** Known destroyed: no longer remaining, and no ghost. */
+    fun markDestroyed(id: String) {
+        destroyed.add(id)
+        lastFix.remove(id)
+    }
 }

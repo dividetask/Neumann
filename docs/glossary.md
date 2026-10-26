@@ -10,6 +10,9 @@
   up.
 - **Bearing only** — A contact whose direction is known but not its
   distance.
+- **Bogey** — An enemy ship or torpedo: something that moves on its own, so
+  once seen its position can only be estimated. Not slugs, fixed defences,
+  or bases.
 - **Burn** — Firing the ship's engine to change its velocity.
 - **Claimed** — A star system with every enemy ship, fixed defence, and base
   destroyed.
@@ -34,7 +37,7 @@
   keeps its orbit.
 - **Focus range** — How far a laser keeps its beam tight enough for full
   damage.
-- **Ghost** — A faint marker where a contact was last seen, once its fix is
+- **Ghost** — A faint marker where a bogey was last seen, once its fix is
   too old for an estimate.
 - **Hit point** — One megajoule of damage a module can absorb.
 - **Jinking** — Evasive manoeuvres: random sideways pushes from the
@@ -50,6 +53,8 @@
   manufacturing time.
 - **Pending** — Designed or suggested, but held back for a later version.
 - **Radar** — An active microwave sensor that finds hot and cold objects.
+- **Remaining** — How many enemy ships, fixed defences, and bases the
+  player has seen and not yet destroyed.
 - **Seed** — The number a random star system is generated from; the same
   seed gives the same system.
 - **Seen position** — Where the instruments last placed a contact, as of

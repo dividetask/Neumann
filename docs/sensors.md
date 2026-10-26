@@ -47,9 +47,10 @@ Every sensor has:
   direction is known but not its distance. **(interpretation)** It can be
   targeted (torpedoes can be launched toward it; their seekers do the rest),
   but cannons will not fire at it.
-- **Seen and estimated positions.** Every ship, fixed defence, base, and
-  torpedo that has been seen with a position is drawn twice on the map, in
-  different colours:
+- **Bogeys: seen and estimated positions.** A **bogey** is an enemy ship
+  or torpedo: an object that can move on its own, so once seen its position
+  can only be estimated. Every bogey that has been seen with a position is
+  drawn twice on the map, in different colours:
   - **Seen** (hollow, grey): where the instruments last placed it, as of
     when that light left it.
   - **Estimated now** (filled, red): that fix carried forward to the
@@ -60,18 +61,23 @@ Every sensor has:
     time since the fix)²).
   - A faint line joins the two.
 
-  This holds while the contact is tracked, bearing only, or lost
-  altogether, for up to `estimateMaxAgeSeconds` (`data/rules.yaml`, `map`)
-  after the fix. After that, the estimate and its sphere would only clutter
-  the map, so only a **ghost** is left: a faint marker where it was last
-  seen.
+  This holds while the bogey is tracked, bearing only, or lost altogether,
+  for up to `estimateMaxAgeSeconds` after the fix (`data/rules.yaml`,
+  `map`). After that, the estimate and its sphere would only clutter the
+  map, so only a **ghost** is left: a faint marker where it was last seen.
+  After `ghostMaxAgeSeconds` the ghost disappears too.
 
-  **(interpretation)** The estimate assumes the object coasts: a ship that
+  **(interpretation)** The estimate assumes the bogey coasts: a ship that
   burns or turns after its light left it, or a torpedo under thrust, will
-  drift outside the sphere. A contact that drops to bearing only keeps its
-  last fix. A ship never seen with a position shows only its bearing line.
-  An object the player saw being destroyed (lost from the sensors because
-  it no longer exists) leaves no ghost. Slugs are drawn once, where seen.
+  drift outside the sphere. A bogey that drops to bearing only keeps its
+  last fix. One never seen with a position shows only its bearing line. A
+  bogey known to be destroyed (reported destroyed, or seen right up until
+  it no longer exists) leaves no ghost.
+- **Fixed defences and bases** cannot move on their own, so once detected
+  their position is known: they are drawn once, where they are now, whether
+  or not the sensors still see them, until destroyed. **(interpretation)**
+  This covers bases as well as fixed defences.
+- Slugs are drawn once, where seen.
 - A bearing-only contact is also drawn as a line from the ship in its
   direction, since its distance is unknown.
 

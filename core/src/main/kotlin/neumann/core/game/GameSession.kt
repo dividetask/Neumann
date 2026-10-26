@@ -7,6 +7,7 @@ import neumann.core.sim.HeadingResolver
 import neumann.core.sim.SimulationStep
 import neumann.core.sim.StepSizer
 import neumann.core.world.ApproachVector
+import neumann.core.world.Vessel
 import neumann.core.world.World
 
 /** What the UI talks to: enter a system (fixed or generated), give orders, skip time. */
@@ -22,12 +23,20 @@ class GameSession(val data: GameData, scenario: ScenarioConfig, approach: Approa
     val orders = OrderDesk(world)
 
     private val headings = HeadingResolver()
-    private val estimator = ContactEstimator(world)
+    private val estimator = BogeyEstimator(world)
+    private val remaining = RemainingCount(world)
+    private val fixtures = KnownFixtures(world)
 
     fun skip(seconds: Double): TimeSkipResult = timeSkip.run(world, seconds)
 
-    /** Every ship and torpedo the player has a position fix for: where it was seen, and where it probably is now. */
-    fun estimates(): List<ContactEstimate> = estimator.estimate()
+    /** Every bogey the player has a position fix for: where it was seen, and where it probably is now. */
+    fun bogeys(): List<BogeyEstimate> = estimator.estimate()
+
+    /** What is left to destroy, as far as the player knows. */
+    fun remaining(): Remaining = remaining.count()
+
+    /** Fixed defences and bases found and not destroyed, where they are now. */
+    fun knownFixtures(): List<Vessel> = fixtures.list()
 
     /** Where the player's heading points now, in space; null if it has none. */
     fun headingDirection(): Vec3? = headings.resolve(world.player)

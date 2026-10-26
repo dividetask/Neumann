@@ -3,7 +3,9 @@ package neumann.core
 import neumann.core.math.Units
 import neumann.core.math.Vec3
 import neumann.core.game.Coaster
-import neumann.core.game.ContactEstimator
+import neumann.core.game.BogeyEstimator
+import neumann.core.game.KnownFixtures
+import neumann.core.game.RemainingCount
 import neumann.core.sim.SimulationStep
 import neumann.core.world.Burn
 import neumann.core.world.Heading
@@ -151,7 +153,7 @@ class DeadReckoningTest {
         w.player.sensorRules.radarActive = true
         w.player.sensorsOn = neumann.core.sim.PowerPhase.wanted(w.player)
         neumann.core.sim.SimulationStep(w.data).sensors.run(w)
-        val estimator = ContactEstimator(w)
+        val estimator = BogeyEstimator(w)
         val e = estimator.estimate().single { it.contact.id == d.id }
         assertTrue(w.time - e.seen.time > 3.0, "seen as its light left it, over 3 s ago")
         assertTrue((e.now!! - d.position).length() < 3 * e.radiusM, "the estimate now is near where it really is")
@@ -172,10 +174,10 @@ class DeadReckoningTest {
     }
 
     @Test
-    fun `a lost ship is still estimated, its sphere growing, until the fix is too old, then only a ghost`() {
+    fun `a lost bogey is still estimated, its sphere growing, until the fix is too old, then a ghost, then nothing`() {
         val w = seenDummy()
         val d = Fixture.dummy(w)
-        val first = ContactEstimator(w).estimate().single()
+        val first = BogeyEstimator(w).estimate().single()
         // Out of sight: the player goes dark and the dummy is cold and silent.
         w.player.sensorRules.radarActive = false
         w.player.sensorsOn = neumann.core.sim.PowerPhase.wanted(w.player)
@@ -186,7 +188,7 @@ class DeadReckoningTest {
         val maxAge = w.data.rules.map.estimateMaxAgeSeconds
         w.time += maxAge / 2
         neumann.core.sim.SimulationStep(w.data).sensors.run(w)
-        val lost = ContactEstimator(w).estimate().single()
+        val lost = BogeyEstimator(w).estimate().single()
         assertTrue(!lost.tracked && !lost.ghost, "lost, but still estimated")
         val since = w.time - lost.seen.time
         val drift = lost.contact.velocityUncertaintyMS * since
@@ -194,9 +196,12 @@ class DeadReckoningTest {
             "the sphere grows with the velocity error times the time unseen")
         assertTrue(lost.radiusM > first.radiusM)
         w.time += maxAge
-        val old = ContactEstimator(w).estimate().single()
+        val old = BogeyEstimator(w).estimate().single()
         assertTrue(old.ghost, "too old: a ghost where it was seen")
         assertEquals(first.seen.position, old.seen.position)
+        w.time = first.seen.time + w.data.rules.map.ghostMaxAgeSeconds + 1.0
+        assertTrue(BogeyEstimator(w).estimate().isEmpty(), "the ghost disappears")
+        assertEquals(1, RemainingCount(w).count().ships, "but it still counts as remaining")
     }
 
     @Test
@@ -204,6 +209,41 @@ class DeadReckoningTest {
         val w = seenDummy()
         Fixture.dummy(w).alive = false
         neumann.core.sim.SimulationStep(w.data).sensors.run(w)
-        assertTrue(ContactEstimator(w).estimate().isEmpty())
+        assertTrue(BogeyEstimator(w).estimate().isEmpty())
+    }
+}
+
+class RemainingTest {
+    @Test
+    fun `remaining counts the enemy ships, defences, and bases seen and not destroyed, but not torpedoes`() {
+        val w = Fixture.world()
+        val d = Fixture.dummy(w)
+        Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO)
+        Fixture.place(w, d, Fixture.openSpace + Vec3(10_000.0 * Units.KM, 0.0, 0.0), Vec3.ZERO)
+        val t = Torpedo("T-x", "Torpedo T-x", d.id, d.faction, w.player.id, w.data.munitions.torpedo, d.position, Vec3.ZERO, w.time)
+        w.torpedoes.add(t)
+        val at = d.position + Vec3(1_000.0 * Units.KM, 0.0, 0.0)
+        Fixture.place(w, t, at, Vec3.ZERO)
+        t.history.samples.add(0, neumann.core.world.HistorySample(w.time - 60.0, at, Vec3.ZERO, true)) // in flight already
+        val count = RemainingCount(w)
+        assertEquals(0, count.count().total, "nothing seen yet")
+        w.player.sensorRules.radarActive = true
+        w.player.sensorsOn = neumann.core.sim.PowerPhase.wanted(w.player)
+        SimulationStep(w.data).sensors.run(w)
+        assertNotNull(w.player.contacts[t.id], "the torpedo is seen")
+        assertEquals(1, count.count().total, "only the ship counts")
+        neumann.core.sim.DamageResolver().destroy(w, d, "by test")
+        assertEquals(0, count.count().total, "reported destroyed")
+    }
+
+    @Test
+    fun `a fixed defence or base, once detected, is shown where it is now even when no longer seen`() {
+        val w = neumann.core.game.ScenarioBuilder(Fixture.data).build(neumann.core.world.ApproachVector(null, 15.0))
+        val base = w.vessels.first { it.contactKind == neumann.core.world.ContactKind.BASE }
+        val fixtures = KnownFixtures(w)
+        assertTrue(fixtures.list().isEmpty(), "not yet detected")
+        w.player.contacts.everSeen[base.id] = base.contactKind
+        assertTrue(w.player.contacts[base.id] == null, "not seen now")
+        assertEquals(listOf(base), fixtures.list())
     }
 }

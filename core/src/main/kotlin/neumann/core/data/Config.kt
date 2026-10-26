@@ -40,6 +40,7 @@ data class AutoPauseConfig(
 @Serializable
 data class MapConfig(
     val estimateMaxAgeSeconds: Double,
+    val ghostMaxAgeSeconds: Double,
 )
 
 @Serializable

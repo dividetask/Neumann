@@ -30,6 +30,7 @@ class DamageResolver {
         target.alive = false
         target.burn = null
         world.event(EventKind.DESTROYED, target.id, "${target.name} destroyed $how")
+        world.player.contacts.markDestroyed(target.id) // reported destroyed
     }
 
     private fun pickModule(world: World, target: Vessel): ModuleState {

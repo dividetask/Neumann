@@ -29,4 +29,7 @@ enum class SensorType(val active: Boolean) { TELESCOPE(false), RADAR(true), LIDA
 
 enum class WeaponKind { LASER, CANNON, TORPEDO }
 
-enum class ContactKind(val isVessel: Boolean) { SHIP(true), DEFENCE(true), BASE(true), TORPEDO(false), SLUG(false) }
+/** [isBogey]: moves on its own, so once seen its position can only be estimated (see docs/sensors.md). */
+enum class ContactKind(val isVessel: Boolean, val isBogey: Boolean) {
+    SHIP(true, true), DEFENCE(true, false), BASE(true, false), TORPEDO(false, true), SLUG(false, false)
+}

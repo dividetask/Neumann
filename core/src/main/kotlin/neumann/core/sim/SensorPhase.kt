@@ -41,7 +41,8 @@ class SensorPhase(private val lightDelay: LightDelay, private val rules: ShipRul
                 .minByOrNull { uncertainty(it, distance, tracked) } ?: continue
             val contact = estimate(world, observer, t, best, obs, rel, tracked)
             seen[t.id] = contact
-            if (observer.contacts.everSeen.add(t.id) && observer === world.player) announce(world, contact)
+            val first = observer.contacts.everSeen.put(t.id, t.contactKind) == null
+            if (first && observer === world.player) announce(world, contact)
         }
         if (observer === world.player) {
             for (id in observer.contacts.current.keys - seen.keys) {
@@ -55,13 +56,13 @@ class SensorPhase(private val lightDelay: LightDelay, private val rules: ShipRul
         val wasSeen = observer.contacts.current.keys.toSet()
         observer.contacts.current.clear()
         observer.contacts.current.putAll(seen)
-        val fixes = observer.contacts.lastFix
+        val book = observer.contacts
         for (c in seen.values) {
-            if (!c.bearingOnly && c.kind != ContactKind.SLUG) fixes[c.id] = Fix(c, world.time - c.lightDelaySeconds)
+            if (!c.bearingOnly && c.kind.isBogey) book.lastFix[c.id] = Fix(c, world.time - c.lightDelaySeconds)
         }
         // Seen right up until it no longer exists: destroyed, so no ghost. (interpretation)
         val exists = tracked.mapTo(HashSet()) { it.id }
-        fixes.keys.removeAll { it in wasSeen && it !in seen && it !in exists }
+        for (id in wasSeen) if (id !in seen && id !in exists) book.markDestroyed(id)
     }
 
     private fun detects(s: SensorConfig, observer: Vessel, t: Tracked, distance: Double, burning: Boolean): Boolean {

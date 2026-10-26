@@ -283,8 +283,14 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
     since its distance is unknown, and so are lost ships, ghosts, and
     torpedoes. On the approach screen nothing is seen
     yet, so the default view is the whole entry sphere.
-- **Top bar** (always visible): mission time and the four time-skip
-  buttons.
+- **Top bar** (always visible): mission time, the four time-skip buttons,
+  and **remaining**: how many enemy ships, fixed defences, and bases have
+  been seen and not destroyed, e.g. "REMAINING 5: 3 ships, 1 defence, 1
+  base". It counts only what the sensors have found (tracked, lost, or
+  long gone), not what is really in the system, so it is what still has to
+  be found and destroyed to claim it, as far as the player knows. Torpedoes
+  are not counted. **(interpretation)** Something counts as destroyed once
+  it is reported destroyed or is seen right up until it no longer exists.
 - **Messages** (always visible, under the top bar): the most recent
   messages. When a time skip ends, its first line says at once how it
   ended: the full time passed, or it paused early, with every reason for

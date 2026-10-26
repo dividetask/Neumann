@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import neumann.core.game.DirectionDials
 import neumann.core.game.GameSession
+import neumann.core.game.Remaining
 import neumann.core.game.TimeSkipResult
 import neumann.core.math.Vec3
 import neumann.core.sim.SensorPhase
@@ -85,14 +86,16 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
 
     BoxWithConstraints(Modifier.fillMaxSize().background(Theme.background)) {
         val area = with(LocalDensity.current) { Size(maxWidth.toPx(), maxHeight.toPx()) }
-        // Ships and torpedoes seen, and where they probably are now; dead reckoning is worked out once per change.
-        val estimates = remember(tick) { session.estimates() }
+        // Bogeys seen and where they probably are now (dead reckoning is worked out once per change),
+        // and the defences and bases found.
+        val bogeys = remember(tick) { session.bogeys() }
+        val fixtures = remember(tick) { session.knownFixtures() }
         // The default view: the star, the ship, and every ship it can see, seen and now (not ghosts or torpedoes).
-        fun startView() = MapCamera.framing(estimates.filter { it.tracked && it.contact.kind.isVessel }
+        fun startView() = MapCamera.framing(bogeys.filter { it.tracked && it.contact.kind.isVessel }
             .flatMap { listOfNotNull(it.seen.position, it.now) } + world.player.position + Vec3.ZERO, area)
         var camera by remember { mutableStateOf(startView()) }
         MapView(world, camera, { camera = it }, onReset = { camera = startView() },
-            tick = tick, showContacts = true, estimates = estimates)
+            tick = tick, showContacts = true, bogeys = bogeys, fixtures = fixtures)
 
         // The world is mutable and not observable, so the overlays are rebuilt
         // whenever tick changes (after every skip or order).
@@ -128,6 +131,7 @@ private fun TopBar(session: GameSession, version: String, busy: Boolean, onNewGa
         Line("${DisplayFormat.missionTime(world.time)} ", Theme.alert)
         Line(version, Theme.dim)
     }
+    Line(remainingText(session.remaining()), Theme.text)
     Row(Modifier.fillMaxWidth()) {
         for ((seconds, label) in skips) ConsoleButton(label, enabled = !busy && !world.over) { skip(seconds) }
     }
@@ -259,6 +263,13 @@ private fun Rule(label: String, on: Boolean, onChange: (Boolean) -> Unit) {
         Checkbox(on, onChange, colors = CheckboxDefaults.colors(checkedColor = Theme.text, uncheckedColor = Theme.dim, checkmarkColor = Theme.background))
         Line(label)
     }
+}
+
+/** E.g. "REMAINING 5: 3 ships, 1 defence, 1 base": what the sensors have found and not yet destroyed. */
+private fun remainingText(r: Remaining): String {
+    fun part(n: Int, one: String, many: String) = if (n == 0) null else "$n ${if (n == 1) one else many}"
+    val parts = listOfNotNull(part(r.ships, "ship", "ships"), part(r.defences, "defence", "defences"), part(r.bases, "base", "bases"))
+    return if (parts.isEmpty()) "REMAINING 0 found" else "REMAINING ${r.total}: ${parts.joinToString(", ")}"
 }
 
 /** Burn and turn state, e.g. "Burn 100% accelerate: turning, 40° to go". */

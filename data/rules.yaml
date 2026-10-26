@@ -40,4 +40,5 @@ ai:
   maxClosingSpeedKmS: 10
 
 map:
-  estimateMaxAgeSeconds: 86400 # a contact's estimate and sphere are drawn this long after its last fix; then only a ghost
+  estimateMaxAgeSeconds: 86400 # a bogey's estimate and sphere are drawn this long after its last fix; then only a ghost
+  ghostMaxAgeSeconds: 259200   # a ghost disappears this long after the fix

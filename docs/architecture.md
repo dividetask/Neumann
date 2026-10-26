@@ -116,9 +116,11 @@ capacities, sensor and threat range from the working modules).
 - `ScenarioBuilder` — builds a `World` from a scenario and the approach
   vector.
 - `Coaster` — carries a coasting object forward in time under gravity.
-- `ContactEstimator` — dead reckoning for the map: each ship's and
-  torpedo's seen position and its estimated position now, or a ghost
-  (`ContactEstimate`).
+- `BogeyEstimator` — dead reckoning for the map: each bogey's seen
+  position and its estimated position now, or a ghost (`BogeyEstimate`).
+- `RemainingCount` — enemy ships, defences, and bases seen and not
+  destroyed (`Remaining`).
+- `KnownFixtures` — fixed defences and bases found and not destroyed.
 - `TrajectoryPredictor` — the coasting path from a position and velocity
   under gravity, and the body it passes closest to.
 - `VesselFactory` — builds a vessel from its design, fully loaded.

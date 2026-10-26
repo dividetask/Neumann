@@ -18,8 +18,9 @@ import neumann.core.world.World
  * launch everything it holds at once. Automatic launches are planned
  * salvos: every ship of a side with auto-launch on and the same target in
  * range and arc pools its torpedoes, and they launch together only if
- * [SalvoPlanner] expects some to get through. A launch-now order launches
- * one torpedo, unplanned.
+ * [SalvoPlanner] expects some to get through. Allies counted on but not yet
+ * in range promise their share and launch it when they get there. A
+ * launch-now order launches one torpedo, unplanned.
  */
 class TorpedoLaunchPhase(data: GameData) {
     private val torpedo = data.munitions.torpedo
@@ -27,7 +28,8 @@ class TorpedoLaunchPhase(data: GameData) {
 
     fun run(world: World) {
         for (v in world.vessels) if (v.active && v.launchTorpedoNow) launchNow(world, v)
-        val groups = world.vessels.filter { it.active && it.rules.torpedoAutoLaunch && it.targetId != null }
+        for (v in world.vessels) if (v.active && v.salvoShare != null) keepPromise(world, v)
+        val groups = world.vessels.filter { it.active && it.rules.torpedoAutoLaunch && it.targetId != null && it.salvoShare == null }
             .groupBy { Triple(it.faction, it.targetId!!, it.computer!!.type.computer!!) }
         for ((key, shooters) in groups) salvo(world, key.second, shooters, key.third)
     }
@@ -71,6 +73,34 @@ class TorpedoLaunchPhase(data: GameData) {
                 left--
             }
         }
+        // Allies counted on but not yet in range promise the rest, and launch it when they get there.
+        if (computer.coordination == Coordination.ALL_ALLIES) {
+            val launched = ready.map { it.first }.toSet()
+            for (v in shooters) {
+                if (left <= 0) break
+                if (v in launched || v.torpedoes <= 0) continue
+                val share = minOf(left, v.torpedoes)
+                v.salvoShare = neumann.core.world.SalvoShare(targetId, share)
+                left -= share
+            }
+        }
+    }
+
+    /** Launches a promised share once the target is in range; dropped if the target changes or dies. */
+    private fun keepPromise(world: World, v: Vessel) {
+        val share = v.salvoShare!!
+        if (v.targetId != share.targetId || world.vessel(share.targetId)?.active != true || v.torpedoes <= 0) {
+            v.salvoShare = null
+            return
+        }
+        val c = v.contacts[share.targetId]?.takeIf { it.kind.isVessel } ?: return
+        for (b in readyBays(v, c, inRange = true)) {
+            while (share.torpedoes > 0 && b.torpedoes > 0) {
+                launch(world, v, b, c)
+                share.torpedoes--
+            }
+        }
+        if (share.torpedoes <= 0) v.salvoShare = null
     }
 
     /** Loaded bays with [target] in their arc (and, with [inRange], their launch range). */

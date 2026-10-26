@@ -114,9 +114,10 @@ is what the computer can do.
     does not account for distance, so allies at very different ranges send
     their torpedoes in separately, and point defence can pick them off one
     group at a time.
-  - It launches torpedoes only when it expects the salvo to destroy the
-    target (`salvoGoal: DESTROY`), and otherwise closes and keeps firing its
-    other weapons.
+  - It launches torpedoes only when it expects at least one to get through
+    point defence, and never more than it expects are needed to destroy the
+    target (`salvoGoal: DESTROY_OR_HIT`). Otherwise it closes and keeps
+    firing its other weapons.
   - It forgets a contact not seen for `forgetAfterSeconds` (a day), as if
     it had never seen it.
 - **(interpretation)** Fixed defences and bases carry daemon cores too; a

@@ -69,16 +69,29 @@ class SalvoTest {
         for (r in raiders) r.working(ModuleKind.MISSILE_BAY).first().torpedoes = if (r === near) 2 else needed
         step.run(w, 1.0)
         assertEquals(2, w.torpedoes.count { it.ownerId == near.id }, "allies out of range count, so the near raider fires its share")
+
+        // A far ally keeps its promise once in range, though its torpedoes alone would not get through.
+        val far = raiders.first { it.salvoShare != null }
+        val promised = far.salvoShare!!.torpedoes
+        far.working(ModuleKind.MISSILE_BAY).first().torpedoes = 2
+        far.salvoShare!!.torpedoes = 2
+        Fixture.place(w, far, Fixture.openSpace + Vec3(60_000.0 * Units.KM, 0.0, 0.0), Vec3.ZERO, forward = Vec3(-1.0, 0.0, 0.0))
+        step.sensors.run(w)
+        step.run(w, 1.0)
+        assertTrue(promised > 0)
+        assertEquals(2, w.torpedoes.count { it.ownerId == far.id }, "promised share launched")
+        assertTrue(far.salvoShare == null)
     }
 
     @Test
-    fun `a daemon core assumes every target has two laser turrets, and fires only to destroy`() {
+    fun `a salvo needs at least one hit and is never bigger than needed to destroy`() {
         val c = contact(0.0)
-        assertEquals(planner.shotDown(probe, c, sentient), planner.shotDown(raider, c, daemon), "a raider is assumed as strong as the probe")
         val k = planner.shotDown(raider, c, daemon)
         val h = planner.hitsToDestroy(raider, daemon)
-        assertEquals(0, planner.size(k + h - 1, raider, c, daemon), "short of destroying it: no salvo, even though some would hit")
-        assertEquals(k + h, planner.size(k + h, raider, c, daemon))
+        assertEquals(planner.shotDown(probe, c, sentient), k, "a daemon assumes a raider is as strong as the probe")
+        assertEquals(0, planner.size(k, raider, c, daemon), "none would get through: hold")
+        assertEquals(k + 1, planner.size(k + 1, raider, c, daemon), "one should hit: fire them all")
+        assertEquals(k + h, planner.size(k + h + 3, raider, c, daemon), "more than enough: only enough to destroy")
     }
 
     @Test
@@ -87,7 +100,7 @@ class SalvoTest {
     }
 
     @Test
-    fun `a lone raider holds its torpedoes against the probe until it has enough to destroy it`() {
+    fun `a lone raider holds its torpedoes against the probe until enough to get through`() {
         val w = Fixture.world()
         val d = Fixture.dummy(w)
         Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO)
@@ -98,13 +111,13 @@ class SalvoTest {
         step.run(w, 1.0)
         assertTrue(w.torpedoes.isEmpty(), "two torpedoes cannot beat the probe's point defence")
 
-        // Enough torpedoes in the dummy's bays to destroy the probe through its point defence.
+        // More torpedoes than needed to destroy the probe through its point defence.
         val daemon = Fixture.data.modules.getValue("daemonCore").computer!!
         val c = d.contacts[w.player.id]!!
         val needed = planner.shotDown(probe, c, daemon) + planner.hitsToDestroy(probe, daemon)
         d.working(ModuleKind.MISSILE_BAY).first().torpedoes = needed + 3
         step.run(w, 1.0)
-        assertEquals(needed, w.torpedoes.size, "a salvo to destroy, launched together, and no more")
+        assertEquals(needed, w.torpedoes.size, "a salvo big enough to destroy, launched together, and no more")
         assertTrue(w.torpedoes.all { it.launchTime == w.torpedoes.first().launchTime })
     }
 }

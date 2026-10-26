@@ -253,8 +253,9 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
   - Ships in ambush lie still (not burning) until the player comes within
     their `ambushRange`.
   - Enemy lasers always do point defence.
-  - Enemy torpedoes launch only as a salvo the daemon expects to destroy
-    its target.
+  - Enemy torpedoes launch only as a salvo the daemon expects to get at
+    least one hit, and no bigger than it expects is needed to destroy the
+    target.
   - An enemy that has not seen the player for a day forgets it and goes
     back to waiting.
   - Enemy ships with translating thrusters jink while a hostile ship is

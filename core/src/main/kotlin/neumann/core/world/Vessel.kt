@@ -49,6 +49,9 @@ class WeaponRules(
 )
 
 /** A ship, fixed defence, or base, built from a design's modules. */
+/** A ship's part of an allied salvo: [torpedoes] still to launch at [targetId]. */
+class SalvoShare(val targetId: String, var torpedoes: Int)
+
 class Vessel(
     override val id: String,
     override val name: String,
@@ -90,6 +93,8 @@ class Vessel(
     var laserBurstRemaining = 0.0
     var fireCannonNow = false
     var launchTorpedoNow = false
+    /** Torpedoes this ship has promised to an allied salvo, to launch once the target is in range. */
+    var salvoShare: SalvoShare? = null
 
     /** Evasive manoeuvres: jink sideways with translating thrusters. */
     var evasive = false

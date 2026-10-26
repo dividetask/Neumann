@@ -92,7 +92,7 @@ Run in this order by `SimulationStep`:
 | `TorpedoGuidance` | Steers and thrusts torpedoes. |
 | `LaserPhase` | Fires lasers (point defence first). |
 | `CannonPhase` | Fires cannon slugs. Uses `InterceptSolver`. |
-| `TorpedoLaunchPhase` | Launches torpedoes: planned salvos for auto-launch, pooled by side; one for launch-now. |
+| `TorpedoLaunchPhase` | Launches torpedoes: planned salvos for auto-launch, pooled by side, with allies keeping their promised shares (`SalvoShare`); one for launch-now. |
 | `MotionPhase` | Gravity and movement of vessels, torpedoes, and slugs. Uses `GravityField`. |
 | *(time advances)* | |
 | `PlanetMover` | Moves planets to the new time. |

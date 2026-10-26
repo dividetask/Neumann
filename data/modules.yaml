@@ -236,7 +236,7 @@ modules:
     buildHours: 6
     hitPoints: 100
     materials: { SILICON: 0.2, COPPER: 0.15, ALUMINIUM: 0.1, RARE_EARTHS: 0.05 }
-    computer: { powerMW: 0.05, pointDefence: ASSUMED, assumedLaserTurrets: 2, assumedLaser: laserTurret, assumedTargetHitPoints: 33800, salvoGoal: DESTROY, coordination: ALL_ALLIES, forgetAfterSeconds: 86400 }
+    computer: { powerMW: 0.05, pointDefence: ASSUMED, assumedLaserTurrets: 2, assumedLaser: laserTurret, assumedTargetHitPoints: 33800, salvoGoal: DESTROY_OR_HIT, coordination: ALL_ALLIES, forgetAfterSeconds: 86400 }
 
 munitions:
   slug: { massKg: 2, sizeM: 0.1, cost: 0.5, buildHours: 0.1 }   # damage = kinetic energy at impact; cold, tiny

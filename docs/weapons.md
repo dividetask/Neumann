@@ -85,15 +85,20 @@ play as well or as poorly as they like.
   - *k* + *h* or more available: fire *k* + *h*.
   - Fewer, but more than *k*: fire them all; at least one should hit.
     Survival matters more than saving torpedoes. Only with `salvoGoal:
-    DESTROY_OR_HIT` (sentient core); a daemon core (`DESTROY`) fires none.
+    DESTROY_OR_HIT` (both cores now); with `DESTROY` it fires none.
+  - For example, with *k* = 7 and *h* = 5 (8 to get one hit, 12 to
+    destroy): 6 available → none; 9 → all 9; 15 → 12.
   - *k* or fewer: fire none.
 - **Allies fire together.** Ships of a side with the same target and
   auto-launch on pool their loaded torpedoes. With `coordination: IN_RANGE`
   (sentient core), only ships with the target within launch range and arc
   count, and they launch at the same moment. With `coordination:
   ALL_ALLIES` (daemon core), every such ally counts wherever it is, on the
-  assumption that each will fire too; each ship launches its share once it
-  has the target in range and arc.
+  assumption that each will fire too. Once the salvo is decided, the ships
+  in range launch at once, and each ally counted on keeps its promise: it
+  launches its share when it gets the target in range and arc, even though
+  its torpedoes alone would not get through. The promise lapses if its
+  target changes or is destroyed.
   **(interpretation)** Torpedoes already in flight are a separate, earlier
   salvo and do not count.
 

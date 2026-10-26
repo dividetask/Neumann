@@ -278,9 +278,10 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
   - Double-tap resets the view to the default view.
   - **Default view:** frames the star, the player's ship, and every ship
     that can be seen, at the starting rotation and tilt. The bridge opens
-    with it. Each ship counts at both its seen and estimated positions (see
+    with it. Each tracked ship counts at both its seen and estimated positions (see
     [sensors.md](sensors.md)); one never seen with a position is left out,
-    since its distance is unknown. On the approach screen nothing is seen
+    since its distance is unknown, and so are lost ships, ghosts, and
+    torpedoes. On the approach screen nothing is seen
     yet, so the default view is the whole entry sphere.
 - **Top bar** (always visible): mission time and the four time-skip
   buttons.

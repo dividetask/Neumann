@@ -47,8 +47,8 @@ Every sensor has:
   direction is known but not its distance. **(interpretation)** It can be
   targeted (torpedoes can be launched toward it; their seekers do the rest),
   but cannons will not fire at it.
-- **Seen and estimated positions.** Every ship, fixed defence, and base
-  that has been seen with a position is drawn twice on the map, in
+- **Seen and estimated positions.** Every ship, fixed defence, base, and
+  torpedo that has been seen with a position is drawn twice on the map, in
   different colours:
   - **Seen** (hollow, grey): where the instruments last placed it, as of
     when that light left it.
@@ -60,12 +60,18 @@ Every sensor has:
     time since the fix)²).
   - A faint line joins the two.
 
-  **(interpretation)** The estimate assumes the ship coasts: a ship that
-  burns or turns after its light left it will drift outside the sphere. A
-  contact that drops to bearing only keeps its last fix, so it is still
-  drawn twice; a contact lost altogether is not drawn. A ship never seen
-  with a position shows only its bearing line. Torpedoes and slugs are
-  drawn once, where seen.
+  This holds while the contact is tracked, bearing only, or lost
+  altogether, for up to `estimateMaxAgeSeconds` (`data/rules.yaml`, `map`)
+  after the fix. After that, the estimate and its sphere would only clutter
+  the map, so only a **ghost** is left: a faint marker where it was last
+  seen.
+
+  **(interpretation)** The estimate assumes the object coasts: a ship that
+  burns or turns after its light left it, or a torpedo under thrust, will
+  drift outside the sphere. A contact that drops to bearing only keeps its
+  last fix. A ship never seen with a position shows only its bearing line.
+  An object the player saw being destroyed (lost from the sensors because
+  it no longer exists) leaves no ghost. Slugs are drawn once, where seen.
 - A bearing-only contact is also drawn as a line from the ship in its
   direction, since its distance is unknown.
 

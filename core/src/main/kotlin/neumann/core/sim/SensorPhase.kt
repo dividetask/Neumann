@@ -52,12 +52,16 @@ class SensorPhase(private val lightDelay: LightDelay, private val rules: ShipRul
         val since = observer.contacts.trackedSince
         since.keys.retainAll(seen.keys)
         for (id in seen.keys) since.putIfAbsent(id, world.time)
+        val wasSeen = observer.contacts.current.keys.toSet()
         observer.contacts.current.clear()
         observer.contacts.current.putAll(seen)
+        val fixes = observer.contacts.lastFix
         for (c in seen.values) {
-            if (!c.bearingOnly) observer.contacts.lastFix[c.id] =
-                Fix(c.observedPosition, c.observedVelocity, world.time - c.lightDelaySeconds, c.uncertaintyM, c.velocityUncertaintyMS)
+            if (!c.bearingOnly && c.kind != ContactKind.SLUG) fixes[c.id] = Fix(c, world.time - c.lightDelaySeconds)
         }
+        // Seen right up until it no longer exists: destroyed, so no ghost. (interpretation)
+        val exists = tracked.mapTo(HashSet()) { it.id }
+        fixes.keys.removeAll { it in wasSeen && it !in seen && it !in exists }
     }
 
     private fun detects(s: SensorConfig, observer: Vessel, t: Tracked, distance: Double, burning: Boolean): Boolean {

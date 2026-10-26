@@ -26,8 +26,8 @@ class GameSession(val data: GameData, scenario: ScenarioConfig, approach: Approa
 
     fun skip(seconds: Double): TimeSkipResult = timeSkip.run(world, seconds)
 
-    /** Every ship the player has a position fix for: where it was seen, and where it probably is now. */
-    fun shipEstimates(): List<ShipEstimate> = estimator.estimate()
+    /** Every ship and torpedo the player has a position fix for: where it was seen, and where it probably is now. */
+    fun estimates(): List<ContactEstimate> = estimator.estimate()
 
     /** Where the player's heading points now, in space; null if it has none. */
     fun headingDirection(): Vec3? = headings.resolve(world.player)

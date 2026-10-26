@@ -25,7 +25,7 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
-import neumann.core.game.ShipEstimate
+import neumann.core.game.ContactEstimate
 import neumann.core.math.Units
 import neumann.core.math.Vec3
 import neumann.core.world.ContactKind
@@ -56,7 +56,7 @@ fun MapView(
     highlight: Planet? = null,
     arrow: ApproachArrow? = null,
     onArrow: ((Offset) -> Unit)? = null,
-    estimates: List<ShipEstimate> = emptyList(),
+    estimates: List<ContactEstimate> = emptyList(),
 ) {
     val measurer = rememberTextMeasurer()
     val cam by rememberUpdatedState(camera)
@@ -123,7 +123,7 @@ fun MapView(
 @Suppress("UNUSED_PARAMETER")
 private fun DrawScope.draw(
     world: World, cam: MapCamera, showContacts: Boolean, measurer: TextMeasurer,
-    path: List<Vec3>?, highlight: Planet?, arrow: ApproachArrow?, estimates: List<ShipEstimate>, tick: Int,
+    path: List<Vec3>?, highlight: Planet?, arrow: ApproachArrow?, estimates: List<ContactEstimate>, tick: Int,
 ) {
     fun at(p: Vec3) = cam.project(p, size)
     fun visible(o: Offset) = o.x in -20f..size.width + 20f && o.y in -20f..size.height + 20f
@@ -170,21 +170,15 @@ private fun DrawScope.draw(
                 val reach = size.maxDimension * 2
                 drawLine(color.copy(alpha = 0.6f), ship, ship + direction(cam, world.player.position, c.observedPosition - world.player.position) * reach, 1f)
             }
-            if (c.kind.isVessel || c.bearingOnly) continue // vessels are drawn from their estimates below
+            // Ships and torpedoes are drawn from their estimates below; slugs once, where seen.
+            if (c.kind != ContactKind.SLUG || c.bearingOnly) continue
             val o = at(c.observedPosition)
             if (!visible(o)) continue
-            when (c.kind) {
-                ContactKind.TORPEDO -> {
-                    drawLine(color, o + Offset(-4f, -4f), o + Offset(4f, 4f), 2f)
-                    drawLine(color, o + Offset(-4f, 4f), o + Offset(4f, -4f), 2f)
-                }
-                else -> drawCircle(color, 2f, o)
-            }
-            if (c.id == world.player.targetId) drawCircle(Theme.alert, 12f, o, style = Stroke(2f))
+            drawCircle(color, 2f, o)
             val err = (c.uncertaintyM * cam.scale).toFloat()
             if (err > 3f) drawCircle(color.copy(alpha = 0.6f), minOf(err, size.width), o, style = Stroke(1f))
         }
-        for (e in estimates) shipTwice(world, cam, measurer, e)
+        for (e in estimates) drawEstimate(world, cam, measurer, e)
         label(measurer, "○ seen   ● now", Offset(8f, size.height - 46f), Theme.seen)
     }
 
@@ -206,26 +200,45 @@ private fun DrawScope.draw(
 }
 
 /**
- * A ship drawn twice: hollow and grey where the instruments saw it, filled
- * where it probably is now inside a mostly translucent sphere of where it
- * could be, and a faint line between.
+ * A ship or torpedo drawn twice: hollow and grey where the instruments saw
+ * it, filled where it probably is now inside a mostly translucent sphere of
+ * where it could be, and a faint line between. A ghost (fix too old) is
+ * only a faint hollow marker where it was seen.
  */
-private fun DrawScope.shipTwice(world: World, cam: MapCamera, measurer: TextMeasurer, e: ShipEstimate) {
+private fun DrawScope.drawEstimate(world: World, cam: MapCamera, measurer: TextMeasurer, e: ContactEstimate) {
     val c = e.contact
-    val color = if (c.id == world.player.targetId) Theme.alert else Theme.enemy
     val seen = cam.project(e.seen.position, size)
-    val now = cam.project(e.now, size)
+    val name = if (e.tracked) c.name else "${c.name} (lost)"
+    val now = e.now?.let { cam.project(it, size) }
+    if (now == null) {
+        marker(c.kind, seen, Theme.seen.copy(alpha = 0.35f), filled = false)
+        label(measurer, name, seen + Offset(8f, 4f), Theme.seen.copy(alpha = 0.35f))
+        return
+    }
+    val targeted = c.id == world.player.targetId
+    val color = if (targeted || c.targetsObserver) Theme.alert else Theme.enemy
     drawLine(Theme.seen.copy(alpha = 0.4f), seen, now, 1f)
     val sphere = minOf((e.radiusM * cam.scale).toFloat(), size.maxDimension * 2)
     if (sphere > 3f) {
         drawCircle(color.copy(alpha = 0.10f), sphere, now)
         drawCircle(color.copy(alpha = 0.30f), sphere, now, style = Stroke(1f))
     }
-    val r = if (c.kind == ContactKind.BASE) 7f else 5f
-    drawCircle(Theme.seen, r, seen, style = Stroke(1.5f))
-    drawCircle(color, r, now)
-    if (c.id == world.player.targetId) drawCircle(Theme.alert, 12f, now, style = Stroke(2f))
-    if (now.x in 0f..size.width && now.y in 0f..size.height) label(measurer, c.name, now + Offset(8f, 4f), color)
+    marker(c.kind, seen, Theme.seen, filled = false)
+    marker(c.kind, now, color, filled = true)
+    if (targeted) drawCircle(Theme.alert, 12f, now, style = Stroke(2f))
+    if (c.kind.isVessel && now.x in 0f..size.width && now.y in 0f..size.height) label(measurer, name, now + Offset(8f, 4f), color)
+}
+
+/** A torpedo is a cross; a base a large circle; other vessels a small one. */
+private fun DrawScope.marker(kind: ContactKind, o: Offset, color: Color, filled: Boolean) {
+    if (kind == ContactKind.TORPEDO) {
+        val w = if (filled) 2.5f else 1.2f
+        drawLine(color, o + Offset(-4f, -4f), o + Offset(4f, 4f), w)
+        drawLine(color, o + Offset(-4f, 4f), o + Offset(4f, -4f), w)
+        return
+    }
+    val r = if (kind == ContactKind.BASE) 7f else 5f
+    if (filled) drawCircle(color, r, o) else drawCircle(color, r, o, style = Stroke(1.5f))
 }
 
 /** Unit screen direction of a direction in space, as seen from [from]; zero if it points straight at the viewer. */

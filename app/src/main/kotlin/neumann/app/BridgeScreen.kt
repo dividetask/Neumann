@@ -85,10 +85,11 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
 
     BoxWithConstraints(Modifier.fillMaxSize().background(Theme.background)) {
         val area = with(LocalDensity.current) { Size(maxWidth.toPx(), maxHeight.toPx()) }
-        // Ships seen and where they probably are now; dead reckoning is worked out once per change.
-        val estimates = remember(tick) { session.shipEstimates() }
-        // The default view: the star, the ship, and every ship it can see, seen and now.
-        fun startView() = MapCamera.framing(estimates.flatMap { listOf(it.seen.position, it.now) } + world.player.position + Vec3.ZERO, area)
+        // Ships and torpedoes seen, and where they probably are now; dead reckoning is worked out once per change.
+        val estimates = remember(tick) { session.estimates() }
+        // The default view: the star, the ship, and every ship it can see, seen and now (not ghosts or torpedoes).
+        fun startView() = MapCamera.framing(estimates.filter { it.tracked && it.contact.kind.isVessel }
+            .flatMap { listOfNotNull(it.seen.position, it.now) } + world.player.position + Vec3.ZERO, area)
         var camera by remember { mutableStateOf(startView()) }
         MapView(world, camera, { camera = it }, onReset = { camera = startView() },
             tick = tick, showContacts = true, estimates = estimates)

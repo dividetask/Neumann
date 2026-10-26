@@ -69,8 +69,8 @@ on load into the world.
 - `PositionHistory`, `HistorySample` — past positions, for light delay.
 - `Contact`, `ContactKind`, `ContactBook` — what one vessel's sensors see:
   estimates with an uncertainty, possibly bearing only.
-- `Fix` — a contact's last known position and velocity, with their errors,
-  for dead reckoning.
+- `Fix` — a contact as last seen with a position, and when, for dead
+  reckoning.
 - `DamageTally` — damage dealt so far, by attacker and weapon.
 - `PlayerWatch` — what the player has already been warned about (weapon
   ranges entered, low supplies).
@@ -116,8 +116,9 @@ capacities, sensor and threat range from the working modules).
 - `ScenarioBuilder` — builds a `World` from a scenario and the approach
   vector.
 - `Coaster` — carries a coasting object forward in time under gravity.
-- `ContactEstimator` — dead reckoning for the map: each ship's seen
-  position and its estimated position now (`ShipEstimate`).
+- `ContactEstimator` — dead reckoning for the map: each ship's and
+  torpedo's seen position and its estimated position now, or a ghost
+  (`ContactEstimate`).
 - `TrajectoryPredictor` — the coasting path from a position and velocity
   under gravity, and the body it passes closest to.
 - `VesselFactory` — builds a vessel from its design, fully loaded.

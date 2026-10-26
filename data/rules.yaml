@@ -1,4 +1,4 @@
-# Simulation, auto-pause, and AI settings.
+# Simulation, auto-pause, AI, and map settings.
 # See docs/game-design.md. Starting values are untuned.
 
 sim:
@@ -38,3 +38,6 @@ ai:
   standoffKm: 2000             # enemy ships try to hold this distance
   combatDvKmS: 0.5             # inside weapon range, burn only for course errors bigger than this
   maxClosingSpeedKmS: 10
+
+map:
+  estimateMaxAgeSeconds: 86400 # a contact's estimate and sphere are drawn this long after its last fix; then only a ghost

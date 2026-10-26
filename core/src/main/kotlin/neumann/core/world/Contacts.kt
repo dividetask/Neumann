@@ -27,16 +27,16 @@ class Contact(
     val predictedPosition: Vec3 get() = observedPosition + observedVelocity * lightDelaySeconds
 }
 
-/**
- * Where an object was at [time] and its velocity then, with the errors of
- * both: the last time its position was known.
- */
-class Fix(val position: Vec3, val velocity: Vec3, val time: Double, val uncertaintyM: Double, val velocityUncertaintyMS: Double)
+/** The last time an object's position was known: what was seen, as of [time] (when that light left it). */
+class Fix(val contact: Contact, val time: Double) {
+    val position: Vec3 get() = contact.observedPosition
+    val velocity: Vec3 get() = contact.observedVelocity
+}
 
 /**
  * A vessel's current contacts, every id it has ever seen, when each current
- * track began, and the last position fix of each (kept after the position
- * is lost, for dead reckoning).
+ * track began, and the last position fix of each ship and torpedo (kept
+ * after the position or the contact is lost, for dead reckoning).
  */
 class ContactBook {
     val current = LinkedHashMap<String, Contact>()

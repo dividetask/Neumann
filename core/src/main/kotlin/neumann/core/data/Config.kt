@@ -14,6 +14,7 @@ data class RulesFile(
     val ships: ShipRules,
     val autoPause: AutoPauseConfig,
     val ai: AiConfig,
+    val map: MapConfig,
 )
 
 @Serializable
@@ -34,6 +35,11 @@ data class AutoPauseConfig(
     val repeatSuppressionSeconds: Double,
     val groupSeconds: Double,
     val pauseOn: List<EventKind>,
+)
+
+@Serializable
+data class MapConfig(
+    val estimateMaxAgeSeconds: Double,
 )
 
 @Serializable

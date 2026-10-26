@@ -143,7 +143,7 @@ class DeadReckoningTest {
     }
 
     @Test
-    fun `every seen ship is shown where it was seen and where it probably is, with a sphere that grows with time`() {
+    fun `every seen ship is shown where it was seen and where it probably is, within a sphere`() {
         val w = Fixture.world()
         val d = Fixture.dummy(w)
         Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO)
@@ -154,8 +154,56 @@ class DeadReckoningTest {
         val estimator = ContactEstimator(w)
         val e = estimator.estimate().single { it.contact.id == d.id }
         assertTrue(w.time - e.seen.time > 3.0, "seen as its light left it, over 3 s ago")
-        assertTrue((e.now - d.position).length() < 3 * e.radiusM, "the estimate now is near where it really is")
-        assertTrue((e.now - e.seen.position).length() > 50.0 * Units.KM, "and apart from where it was seen")
-        assertTrue(e.radiusM >= e.seen.uncertaintyM)
+        assertTrue((e.now!! - d.position).length() < 3 * e.radiusM, "the estimate now is near where it really is")
+        assertTrue((e.now!! - e.seen.position).length() > 50.0 * Units.KM, "and apart from where it was seen")
+        assertTrue(e.radiusM >= e.contact.uncertaintyM)
+    }
+
+    /** A dummy seen by radar 1,000,000 km off, moving at 20 km/s. */
+    private fun seenDummy(): neumann.core.world.World {
+        val w = Fixture.world()
+        val d = Fixture.dummy(w)
+        Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO)
+        Fixture.place(w, d, Fixture.openSpace + Vec3(1_000_000.0 * Units.KM, 0.0, 0.0), Vec3(0.0, 20_000.0, 0.0))
+        w.player.sensorRules.radarActive = true
+        w.player.sensorsOn = neumann.core.sim.PowerPhase.wanted(w.player)
+        neumann.core.sim.SimulationStep(w.data).sensors.run(w)
+        return w
+    }
+
+    @Test
+    fun `a lost ship is still estimated, its sphere growing, until the fix is too old, then only a ghost`() {
+        val w = seenDummy()
+        val d = Fixture.dummy(w)
+        val first = ContactEstimator(w).estimate().single()
+        // Out of sight: the player goes dark and the dummy is cold and silent.
+        w.player.sensorRules.radarActive = false
+        w.player.sensorsOn = neumann.core.sim.PowerPhase.wanted(w.player)
+        d.sensorRules.radarActive = false
+        d.sensorRules.lidarActive = false
+        d.sensorsOn = neumann.core.sim.PowerPhase.wanted(d)
+        d.emitting = false
+        val maxAge = w.data.rules.map.estimateMaxAgeSeconds
+        w.time += maxAge / 2
+        neumann.core.sim.SimulationStep(w.data).sensors.run(w)
+        val lost = ContactEstimator(w).estimate().single()
+        assertTrue(!lost.tracked && !lost.ghost, "lost, but still estimated")
+        val since = w.time - lost.seen.time
+        val drift = lost.contact.velocityUncertaintyMS * since
+        assertEquals(Math.sqrt(lost.contact.uncertaintyM.let { it * it } + drift * drift), lost.radiusM, 1.0,
+            "the sphere grows with the velocity error times the time unseen")
+        assertTrue(lost.radiusM > first.radiusM)
+        w.time += maxAge
+        val old = ContactEstimator(w).estimate().single()
+        assertTrue(old.ghost, "too old: a ghost where it was seen")
+        assertEquals(first.seen.position, old.seen.position)
+    }
+
+    @Test
+    fun `a ship seen being destroyed leaves no ghost`() {
+        val w = seenDummy()
+        Fixture.dummy(w).alive = false
+        neumann.core.sim.SimulationStep(w.data).sensors.run(w)
+        assertTrue(ContactEstimator(w).estimate().isEmpty())
     }
 }

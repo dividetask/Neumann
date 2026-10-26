@@ -34,6 +34,8 @@
   keeps its orbit.
 - **Focus range** — How far a laser keeps its beam tight enough for full
   damage.
+- **Ghost** — A faint marker where a contact was last seen, once its fix is
+  too old for an estimate.
 - **Hit point** — One megajoule of damage a module can absorb.
 - **Jinking** — Evasive manoeuvres: random sideways pushes from the
   thrusters that spoil cannon fire.

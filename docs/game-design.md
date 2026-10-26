@@ -60,7 +60,7 @@ once.
 - The player's ship enters an enemy's weapon range.
 - The player's ship takes damage.
 - A target is destroyed.
-- Fuel or ammunition runs low (drops below `lowSupplyFraction`).
+- Fuel runs low (drops below `lowSupplyFraction`).
 - The system is claimed, or the player's ship is lost.
 
 Pausing requires new information. An event that continues something already
@@ -79,6 +79,10 @@ lists them all. **(interpretation)** This applies to every kind of pause
 event; claiming the system and losing the ship still pause at once.
 
 The end of a burn does not pause; it is logged.
+
+Ammunition running low does not pause either, and is logged: the player
+fires only while paused and can see how much will remain, so it is never
+new information.
 
 ## Orders
 

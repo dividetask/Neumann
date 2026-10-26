@@ -29,7 +29,6 @@ autoPause:
     - DAMAGE_TAKEN
     - DESTROYED
     - LOW_FUEL
-    - LOW_AMMO
     - SYSTEM_CLAIMED
     - SHIP_LOST
 

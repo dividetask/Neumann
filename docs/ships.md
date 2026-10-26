@@ -106,10 +106,14 @@ is what the computer can do.
 - The **daemon core** is a primitive daemon process. It can work out speeds
   and closing, and makes very basic assumptions:
   - About enemies: every target carries two standard laser turrets
-    (`assumedLaserTurrets` of `assumedLaser`) for point defence, whatever it
-    really has.
-  - About allies: it pools torpedoes with allies that have the same target
-    in range.
+    (`assumedLaserTurrets` of `assumedLaser`) for point defence, and has
+    `assumedTargetHitPoints` (the probe's 33,800), whatever it really has.
+  - About allies: every ally with the same target will fire its torpedoes
+    too (`coordination: ALL_ALLIES`). It counts all their loaded torpedoes,
+    wherever they are, and launches its own once the total is enough. It
+    does not account for distance, so allies at very different ranges send
+    their torpedoes in separately, and point defence can pick them off one
+    group at a time.
   - It launches torpedoes only when it expects the salvo to destroy the
     target (`salvoGoal: DESTROY`), and otherwise closes and keeps firing its
     other weapons.

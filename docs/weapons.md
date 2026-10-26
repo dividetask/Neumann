@@ -76,8 +76,9 @@ play as well or as poorly as they like.
   counts the target's design (its laser turrets as built); a daemon core
   assumes `assumedLaserTurrets` of `assumedLaser` on every target.
   **(interpretation)** Damage to its turrets, their arcs, its facing, and its
-  stored power are not counted, and the target's hit points come from its
-  design.
+  stored power are not counted.
+- **Target hit points.** The sentient core takes them from the target's
+  design; a daemon core assumes `assumedTargetHitPoints` for every target.
 - **Salvo size.** With *k* torpedoes expected shot down and *h* hits needed to
   destroy the target (its design's total hit points ÷ torpedo `damage`,
   rounded up):
@@ -86,9 +87,13 @@ play as well or as poorly as they like.
     Survival matters more than saving torpedoes. Only with `salvoGoal:
     DESTROY_OR_HIT` (sentient core); a daemon core (`DESTROY`) fires none.
   - *k* or fewer: fire none.
-- **Allies fire together.** Every ship of a side with the same target, the
-  target within launch range and arc, and auto-launch on, pools its loaded
-  torpedoes into one salvo and launches at the same moment.
+- **Allies fire together.** Ships of a side with the same target and
+  auto-launch on pool their loaded torpedoes. With `coordination: IN_RANGE`
+  (sentient core), only ships with the target within launch range and arc
+  count, and they launch at the same moment. With `coordination:
+  ALL_ALLIES` (daemon core), every such ally counts wherever it is, on the
+  assumption that each will fire too; each ship launches its share once it
+  has the target in range and arc.
   **(interpretation)** Torpedoes already in flight are a separate, earlier
   salvo and do not count.
 

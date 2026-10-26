@@ -4,6 +4,7 @@ import neumann.core.data.ComputerConfig
 import neumann.core.data.GameData
 import neumann.core.math.Units
 import neumann.core.world.Contact
+import neumann.core.world.Coordination
 import neumann.core.world.EventKind
 import neumann.core.world.HistorySample
 import neumann.core.world.ModuleKind
@@ -56,7 +57,11 @@ class TorpedoLaunchPhase(data: GameData) {
             if (bays.isEmpty()) null else Triple(v, c, bays)
         }
         if (ready.isEmpty()) return
-        val available = ready.sumOf { (_, _, bays) -> bays.sumOf { it.torpedoes } }
+        val available = when (computer.coordination) {
+            Coordination.IN_RANGE -> ready.sumOf { (_, _, bays) -> bays.sumOf { it.torpedoes } }
+            // Every ally with this target is assumed to fire too, wherever it is.
+            Coordination.ALL_ALLIES -> shooters.sumOf { it.torpedoes }
+        }
         // Planned on the side's best track of the target.
         val best = ready.minBy { it.second.velocityUncertaintyMS }.second
         var left = planner.size(available, design, best, computer)

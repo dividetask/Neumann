@@ -1,6 +1,7 @@
 package neumann.core.data
 
 import kotlinx.serialization.Serializable
+import neumann.core.world.Coordination
 import neumann.core.world.EventKind
 import neumann.core.world.Material
 import neumann.core.world.ModuleKind
@@ -155,7 +156,10 @@ data class ComputerConfig(
     /** With ASSUMED point defence: this many of [assumedLaser] on every target. */
     val assumedLaserTurrets: Int = 0,
     val assumedLaser: String? = null,
+    /** Hit points assumed for every target; 0 = the target's design. */
+    val assumedTargetHitPoints: Double = 0.0,
     val salvoGoal: SalvoGoal,
+    val coordination: Coordination,
     /** Forget a contact unseen this long; 0 = never. */
     val forgetAfterSeconds: Double,
 )

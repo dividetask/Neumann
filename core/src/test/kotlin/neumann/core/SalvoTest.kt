@@ -41,10 +41,34 @@ class SalvoTest {
     fun `a salvo that cannot get through is not fired, and one that can is sized to destroy or fires everything`() {
         val c = contact(0.0)
         val k = planner.shotDown(raider, c, sentient)
-        val h = planner.hitsToDestroy(raider)
+        val h = planner.hitsToDestroy(raider, sentient)
         assertEquals(0, planner.size(k, raider, c, sentient), "all would be shot down")
         assertEquals(k + 1, planner.size(k + 1, raider, c, sentient), "too few to destroy: fire them all, one should hit")
         assertEquals(k + h, planner.size(k + h + 5, raider, c, sentient), "enough to destroy it, and no more")
+    }
+
+    @Test
+    fun `a daemon core assumes every target is as tough as the probe`() {
+        assertEquals(planner.hitsToDestroy(probe, daemon), planner.hitsToDestroy(raider, daemon))
+        assertTrue(planner.hitsToDestroy(raider, sentient) < planner.hitsToDestroy(raider, daemon), "the sentient core knows a raider is weaker")
+    }
+
+    @Test
+    fun `a daemon counts every ally's torpedoes, wherever they are, and launches its own once the total is enough`() {
+        val w = neumann.core.game.ScenarioBuilder(Fixture.data).build(neumann.core.world.ApproachVector(null, 15.0))
+        val raiders = w.vessels.filter { it.design.name == "Raider" }
+        Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO)
+        val near = raiders.first()
+        Fixture.place(w, near, Fixture.openSpace + Vec3(50_000.0 * Units.KM, 0.0, 0.0), Vec3.ZERO, forward = Vec3(-1.0, 0.0, 0.0))
+        for (r in raiders) { r.ambush = false; r.targetId = w.player.id }
+        val step = SimulationStep(w.data)
+        step.sensors.run(w)
+        val c = near.contacts[w.player.id]!!
+        val needed = planner.shotDown(probe, c, daemon) + planner.hitsToDestroy(probe, daemon)
+        // The far raiders hold most of the torpedoes; the near one only its own two.
+        for (r in raiders) r.working(ModuleKind.MISSILE_BAY).first().torpedoes = if (r === near) 2 else needed
+        step.run(w, 1.0)
+        assertEquals(2, w.torpedoes.count { it.ownerId == near.id }, "allies out of range count, so the near raider fires its share")
     }
 
     @Test
@@ -52,7 +76,7 @@ class SalvoTest {
         val c = contact(0.0)
         assertEquals(planner.shotDown(probe, c, sentient), planner.shotDown(raider, c, daemon), "a raider is assumed as strong as the probe")
         val k = planner.shotDown(raider, c, daemon)
-        val h = planner.hitsToDestroy(raider)
+        val h = planner.hitsToDestroy(raider, daemon)
         assertEquals(0, planner.size(k + h - 1, raider, c, daemon), "short of destroying it: no salvo, even though some would hit")
         assertEquals(k + h, planner.size(k + h, raider, c, daemon))
     }
@@ -77,7 +101,7 @@ class SalvoTest {
         // Enough torpedoes in the dummy's bays to destroy the probe through its point defence.
         val daemon = Fixture.data.modules.getValue("daemonCore").computer!!
         val c = d.contacts[w.player.id]!!
-        val needed = planner.shotDown(probe, c, daemon) + planner.hitsToDestroy(probe)
+        val needed = planner.shotDown(probe, c, daemon) + planner.hitsToDestroy(probe, daemon)
         d.working(ModuleKind.MISSILE_BAY).first().torpedoes = needed + 3
         step.run(w, 1.0)
         assertEquals(needed, w.torpedoes.size, "a salvo to destroy, launched together, and no more")

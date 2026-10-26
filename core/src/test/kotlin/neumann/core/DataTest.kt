@@ -1,6 +1,7 @@
 package neumann.core
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class DataTest {
@@ -22,5 +23,12 @@ class DataTest {
         for ((id, d) in Fixture.data.designs) {
             assertTrue(d.modules.keys.count { Fixture.data.modules.getValue(it).kind == neumann.core.world.ModuleKind.COMPUTER } == 1, id)
         }
+    }
+
+    @Test
+    fun `a daemon assumes every target is exactly as tough as the probe`() {
+        val d = Fixture.data
+        val probe = d.designs.getValue("probe").modules.entries.sumOf { (id, n) -> d.modules.getValue(id).hitPoints * n }
+        assertEquals(probe, d.modules.getValue("daemonCore").computer!!.assumedTargetHitPoints)
     }
 }

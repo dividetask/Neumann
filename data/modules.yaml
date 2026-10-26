@@ -216,6 +216,9 @@ modules:
   # salvoGoal: DESTROY = a torpedo salvo only if it should destroy the target;
   # DESTROY_OR_HIT = also all torpedoes if at least one should hit.
   # forgetAfterSeconds: forget a contact unseen this long (0 = never).
+  # assumedTargetHitPoints: hit points assumed for every target (0 = the target's design).
+  # coordination: IN_RANGE = pool with allies in launch range; ALL_ALLIES = count every
+  # ally with the same target, assuming each will fire too.
   sentientCore:
     name: Sentient core              # the probe's sentient AI: hardened, redundant
     kind: COMPUTER
@@ -224,7 +227,7 @@ modules:
     buildHours: 200
     hitPoints: 4000
     materials: { SILICON: 4, COPPER: 2, ALUMINIUM: 2, TUNGSTEN: 1, RARE_EARTHS: 1 }
-    computer: { powerMW: 5, pointDefence: DESIGN, salvoGoal: DESTROY_OR_HIT, forgetAfterSeconds: 0 }
+    computer: { powerMW: 5, pointDefence: DESIGN, salvoGoal: DESTROY_OR_HIT, coordination: IN_RANGE, forgetAfterSeconds: 0 }
   daemonCore:
     name: Daemon core                # a primitive daemon process
     kind: COMPUTER
@@ -233,7 +236,7 @@ modules:
     buildHours: 6
     hitPoints: 100
     materials: { SILICON: 0.2, COPPER: 0.15, ALUMINIUM: 0.1, RARE_EARTHS: 0.05 }
-    computer: { powerMW: 0.05, pointDefence: ASSUMED, assumedLaserTurrets: 2, assumedLaser: laserTurret, salvoGoal: DESTROY, forgetAfterSeconds: 86400 }
+    computer: { powerMW: 0.05, pointDefence: ASSUMED, assumedLaserTurrets: 2, assumedLaser: laserTurret, assumedTargetHitPoints: 33800, salvoGoal: DESTROY, coordination: ALL_ALLIES, forgetAfterSeconds: 86400 }
 
 munitions:
   slug: { massKg: 2, sizeM: 0.1, cost: 0.5, buildHours: 0.1 }   # damage = kinetic energy at impact; cold, tiny

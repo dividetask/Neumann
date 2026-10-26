@@ -41,5 +41,8 @@ enum class Material { IRON, ALUMINIUM, TITANIUM, CARBON, SILICON, COPPER, RARE_E
 /** How a computer judges a target's point defence: its real design, or an assumption. */
 enum class PointDefenceModel { DESIGN, ASSUMED }
 
+/** Whose torpedoes a salvo counts: allies with the target in range, or every ally with the same target. */
+enum class Coordination { IN_RANGE, ALL_ALLIES }
+
 /** When an automatic torpedo salvo is fired: only to destroy, or also when at least one should hit. */
 enum class SalvoGoal { DESTROY, DESTROY_OR_HIT }

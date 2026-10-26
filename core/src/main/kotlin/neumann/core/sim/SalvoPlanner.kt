@@ -25,7 +25,7 @@ class SalvoPlanner(private val data: GameData) {
     /** Salvo size from [available] torpedoes against [design], as seen in [contact], planned by [computer]. */
     fun size(available: Int, design: ShipDesign, contact: Contact, computer: ComputerConfig): Int {
         val k = shotDown(design, contact, computer)
-        val h = hitsToDestroy(design)
+        val h = hitsToDestroy(design, computer)
         return when {
             available >= k + h -> k + h
             available > k && computer.salvoGoal == SalvoGoal.DESTROY_OR_HIT -> available
@@ -46,8 +46,10 @@ class SalvoPlanner(private val data: GameData) {
         return floor(damage / torpedo.hitPoints).toInt()
     }
 
-    fun hitsToDestroy(design: ShipDesign): Int {
-        val hp = design.modules.entries.sumOf { (id, n) -> data.modules.getValue(id).hitPoints * n }
+    /** Hits to destroy the target: from its design, or the computer's assumed hit points. */
+    fun hitsToDestroy(design: ShipDesign, computer: ComputerConfig): Int {
+        val hp = if (computer.assumedTargetHitPoints > 0.0) computer.assumedTargetHitPoints
+            else design.modules.entries.sumOf { (id, n) -> data.modules.getValue(id).hitPoints * n }
         return ceil(hp / torpedo.damage).toInt()
     }
 

@@ -18,7 +18,7 @@ class SimulationStep(data: GameData) {
     private val guidance = TorpedoGuidance(rules.sim)
     private val lasers = LaserPhase(damage)
     private val cannons = CannonPhase(InterceptSolver(), data.munitions.slug)
-    private val launches = TorpedoLaunchPhase(data.munitions.torpedo)
+    private val launches = TorpedoLaunchPhase(data)
     private val motion = MotionPhase(GravityField(), rules.sim)
     private val impacts = ImpactPhase(damage)
     private val collisions = BodyCollisionPhase(damage)
@@ -37,7 +37,7 @@ class SimulationStep(data: GameData) {
         guidance.run(world, dt)
         lasers.run(world, dt)
         cannons.run(world, dt)
-        launches.run(world, dt)
+        launches.run(world)
         motion.run(world, dt)
         world.time += dt
         planetMover.run(world)

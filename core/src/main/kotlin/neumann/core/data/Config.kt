@@ -144,8 +144,8 @@ data class CannonConfig(
 
 @Serializable
 data class MissileBayConfig(
+    /** Launch cells: each holds one torpedo, and all can launch at once. */
     val capacity: Int,
-    val cooldownSeconds: Double,
     val launchRangeKm: Double,
     val arcDeg: Double,
 )

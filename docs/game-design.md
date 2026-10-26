@@ -60,7 +60,9 @@ once.
 - The player's ship enters an enemy's weapon range.
 - The player's ship takes damage.
 - A target is destroyed.
-- Fuel runs low (drops below `lowSupplyFraction`).
+- Fuel runs low (drops below `lowSupplyFraction`) unexpectedly: because a
+  fuel tank was destroyed. Fuel running low from burns, turns, and jinking
+  the player ordered is logged but does not pause.
 - The system is claimed, or the player's ship is lost.
 
 Pausing requires new information. An event that continues something already
@@ -129,7 +131,9 @@ D. **Fire a weapon now** at the target. **(interpretation)** One cannon fires
    with the target in its arc. The laser turrets fire a burst of
    `burstSeconds`, each while the target is in its range and arc.
 E. **Set weapon rules**: laser point defence, laser auto-fire at target,
-   cannon auto-fire at target, torpedo auto-launch at target. Each fires only
+   cannon auto-fire at target, torpedo auto-launch at target (launches only
+   salvos big enough to get through; see
+   [weapons.md](weapons.md#torpedo-salvos)). Each fires only
    when the target is in that weapon's range and arc.
 F. **Set sensor rules**: radar on/off, lidar on/off (see
    [sensors.md](sensors.md)).

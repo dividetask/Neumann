@@ -35,8 +35,8 @@ The bare minimum to test the game.
   slugs give off no heat, firing does not raise the shooter's signature, and
   only radar can see a slug, at short range (see [sensors.md](sensors.md#slugs)).
   Lasers do not shoot at slugs. **(interpretation)**
-- **Guided exploding torpedo** — launched from a missile bay (each bay holds
-  its own) at `launchSpeed`, then accelerates
+- **Guided exploding torpedo** — launched from a missile bay at
+  `launchSpeed`, then accelerates
   at `acceleration` until only `terminalReserveFraction` of its `deltaV` is
   left, which it keeps for steering on the final approach. Steers itself toward its
   target and explodes when it passes within `blastRadius`, damaging every
@@ -47,6 +47,46 @@ The bare minimum to test the game.
   cannot be dodged: they out-accelerate any ship many times over and keep a
   reserve for the final approach. The defences are point defence and
   staying out of reach of their delta-v.
+- **Missile bays** hold each torpedo in its own launch cell, so a bay can
+  launch all it holds at once: a salvo leaves together and arrives together.
+  **(interpretation)** Cells fire a second or two apart, which is ignored. A
+  launch-now order launches one torpedo.
+
+### Torpedo salvos
+
+A torpedo that point defence shoots down is wasted, so automatic launches
+(the player's torpedo auto-launch rule and the AI) fire a salvo big enough
+to get through, or nothing. Launch-now orders are not planned: players can
+play as well or as poorly as they like.
+
+- **Point-defence estimate.** Each of the target's laser turrets does
+  `beamMW` × `focusRangeKm` × (2 − `focusRangeKm` ÷ `rangeKm`) ÷ *v* damage to
+  incoming torpedoes over a salvo's approach, where *v* is the torpedoes'
+  closing speed at the end: the closing speed now plus the delta-v each
+  torpedo burns before its terminal reserve. (This is the laser falloff
+  integrated over the approach.) The salvo loses that total ÷ the torpedo's
+  `hitPoints` torpedoes, rounded down.
+- **Semi-accurate.** The closing speed comes from the shooter's sensor
+  estimate, taken at its least favourable: closing speed − 2 × its velocity
+  error, which makes point defence look stronger. A poor track therefore
+  asks for a bigger salvo, so a shooter may wait until its track improves
+  (passive tracking gets better with time; see [sensors.md](sensors.md)).
+  **(interpretation)** The target's design (its laser turrets as built) is
+  known; damage to its turrets, their arcs, its facing, and its stored power
+  are not counted.
+- **Salvo size.** With *k* torpedoes expected shot down and *h* hits needed to
+  destroy the target (its design's total hit points ÷ torpedo `damage`,
+  rounded up):
+  - *k* + *h* or more available: fire *k* + *h*.
+  - Fewer, but more than *k*: fire them all; at least one should hit.
+    Survival matters more than saving torpedoes.
+  - *k* or fewer: fire none.
+- **Allies fire together.** Every ship of a side with the same target, the
+  target within launch range and arc, and auto-launch on, pools its loaded
+  torpedoes into one salvo and launches at the same moment.
+  **(interpretation)** Torpedoes already in flight are a separate, earlier
+  salvo and do not count.
+
 - **(interpretation)** Slugs and torpedoes that hit nothing are removed after
   `slugLifetimeSeconds` / `torpedoLifetimeSeconds` (`data/rules.yaml`).
 

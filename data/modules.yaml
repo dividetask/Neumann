@@ -180,7 +180,7 @@ modules:
     massT: 6
     buildHours: 16
     hitPoints: 500
-    missileBay: { capacity: 6, cooldownSeconds: 60, launchRangeKm: 100000, arcDeg: 180 }
+    missileBay: { capacity: 6, launchRangeKm: 100000, arcDeg: 180 }
   smallMissileBay:
     name: Small missile bay
     kind: MISSILE_BAY
@@ -188,7 +188,7 @@ modules:
     massT: 3
     buildHours: 8
     hitPoints: 300
-    missileBay: { capacity: 2, cooldownSeconds: 20, launchRangeKm: 100000, arcDeg: 180 }
+    missileBay: { capacity: 2, launchRangeKm: 100000, arcDeg: 180 }
 
 munitions:
   slug: { massKg: 2, sizeM: 0.1, cost: 0.5, buildHours: 0.1 }   # damage = kinetic energy at impact; cold, tiny

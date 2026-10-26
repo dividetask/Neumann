@@ -59,11 +59,17 @@ class TimeSkipTest {
         val d = Fixture.dummy(w)
         Fixture.place(w, d, Fixture.openSpace + Vec3(50_000.0 * Units.KM, 0.0, 0.0), Vec3.ZERO)
         neumann.core.sim.SimulationStep(w.data).sensors.run(w)
-        // The dummy fires its whole missile bay at the player: one torpedo, then the next 20 s later.
-        d.targetId = w.player.id
-        val salvo = d.torpedoes
+        // A salvo of three already in flight from the dummy, a few seconds apart.
+        val salvo = 3
+        for (i in 0 until salvo) {
+            val at = d.position + Vec3(0.0, i * 100.0 * Units.KM, 0.0)
+            val v = (w.player.position - at).normalized() * 1_000.0
+            val t = neumann.core.world.Torpedo("T-$i", "Torpedo T-$i", d.id, d.faction, w.player.id, w.data.munitions.torpedo, at, v, w.time - i * 5.0)
+            t.history.record(neumann.core.world.HistorySample(w.time - 200.0, at - v * 200.0, v, true))
+            t.history.record(neumann.core.world.HistorySample(w.time, at, v, true))
+            w.torpedoes.add(t)
+        }
         val r = Fixture.timeSkip(w).run(w, 3600.0)
-        assertTrue(salvo >= 2)
         assertEquals(salvo, r.pausedBy.count { it.kind == EventKind.TORPEDO_INBOUND }, "every torpedo of the salvo in one pause")
     }
 

@@ -92,7 +92,7 @@ Run in this order by `SimulationStep`:
 | `TorpedoGuidance` | Steers and thrusts torpedoes. |
 | `LaserPhase` | Fires lasers (point defence first). |
 | `CannonPhase` | Fires cannon slugs. Uses `InterceptSolver`. |
-| `TorpedoLaunchPhase` | Launches torpedoes. |
+| `TorpedoLaunchPhase` | Launches torpedoes: planned salvos for auto-launch, pooled by side; one for launch-now. |
 | `MotionPhase` | Gravity and movement of vessels, torpedoes, and slugs. Uses `GravityField`. |
 | *(time advances)* | |
 | `PlanetMover` | Moves planets to the new time. |
@@ -104,7 +104,7 @@ Run in this order by `SimulationStep`:
 | `ClaimCheck` | Detects a claimed system or a lost ship. |
 | `HistoryPhase` | Records positions for light delay. |
 
-Helpers: `LaserFalloff` (laser damage by distance: full to the focus range, then 1/distance²), `StepSizer` (step length; short steps when projectiles are near
+Helpers: `SalvoPlanner` (how big an automatic torpedo salvo must be to get through point defence, or none), `LaserFalloff` (laser damage by distance: full to the focus range, then 1/distance²), `StepSizer` (step length; short steps when projectiles are near
 targets), `DamageResolver` (applies a hit to a module), `HeadingResolver`
 (where a heading points now), `ShipPerformance` (mass, thrust, turn rate,
 capacities, sensor and threat range from the working modules).

@@ -9,6 +9,8 @@ import kotlin.random.Random
 class PlayerWatch {
     val inRangeOf = HashSet<String>()
     var lowFuel = false
+    /** Fuel capacity at the last check; a drop means a fuel tank was destroyed. */
+    var fuelCapacity = -1.0
     var lowSlugs = false
     var lowTorpedoes = false
 }

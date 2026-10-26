@@ -34,11 +34,12 @@ E. Back to A, keeping the ship's state.
 ## Win and loss
 
 - **First version:** the player wins by claiming the system. A system is
-  claimed when every enemy ship, fixed defence, and base in it is destroyed.
+  claimed when every enemy ship, fixed defence, and base in it is destroyed,
+  or dead (its computer destroyed; see [ships.md](ships.md#computers)).
 - **Later versions:** there is a limited number of unclaimed stars, all within
   a random radius. The game is won by destroying all enemy players.
-- The player loses when their ship's hull is destroyed, or the ship hits a
-  star or planet.
+- The player loses when their ship's hull or sentient core is destroyed, or
+  the ship hits a star or planet.
 
 ## Time skips
 
@@ -244,13 +245,18 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
   **(interpretation)** In that same fight, each of the three deals at least
   10% of the damage the probe deals.
 - The first-version system has four raiders, a base, and a defence platform.
-- **(interpretation)** First-version AI:
+- **(interpretation)** First-version AI (every enemy runs a daemon core; see
+  [ships.md](ships.md#computers)):
   - Fixed defences and bases fire at the player whenever in range.
   - Enemy ships close on the player and match velocity at weapon range, then
     face the player and fire everything that is in range and arc.
   - Ships in ambush lie still (not burning) until the player comes within
     their `ambushRange`.
   - Enemy lasers always do point defence.
+  - Enemy torpedoes launch only as a salvo the daemon expects to destroy
+    its target.
+  - An enemy that has not seen the player for a day forgets it and goes
+    back to waiting.
   - Enemy ships with translating thrusters jink while a hostile ship is
     within `jinkRangeKm` (`data/rules.yaml`). The raider has none.
 

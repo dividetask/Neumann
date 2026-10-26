@@ -16,7 +16,12 @@
 - **Burn** — Firing the ship's engine to change its velocity.
 - **Claimed** — A star system with every enemy ship, fixed defence, and base
   destroyed.
+- **Computer** — The module that runs a ship; without it the ship is dead.
 - **Contact** — Any object the ship's sensors have detected.
+- **Daemon core** — The simplest computer: a primitive daemon process, run by
+  raiders, fixed defences, and bases.
+- **Dead** — A ship whose computer is destroyed: it drifts and does nothing,
+  and is as good as destroyed.
 - **Dead reckoning** — Carrying a contact's last position fix forward to
   now under gravity, assuming it coasts.
 - **Design** — A ship's list of modules; fixed defences and bases are designs
@@ -46,6 +51,8 @@
   precisely.
 - **Light delay** — The time light takes to reach the ship; sensors show
   contacts as they were, not as they are.
+- **Material** — What modules are made of (iron, aluminium, and so on), in
+  tonnes; mined and used by the factory later.
 - **Mineral estimate** — The predicted mineral resources at a destination
   star, shown when choosing where to go.
 - **Missile bay** — A module that holds and launches torpedoes.
@@ -59,6 +66,7 @@
   seed gives the same system.
 - **Seen position** — Where the instruments last placed a contact, as of
   when its light left it.
+- **Sentient core** — The probe's computer: a sentient AI, the player.
 - **Sensor rules** — The radar and lidar on/off switches.
 - **Ship state** — Damage, fuel, and ammunition, kept between battles.
 - **Signature** — How easy an object is for telescopes to see; higher while

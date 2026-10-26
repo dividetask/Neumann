@@ -12,7 +12,7 @@ import neumann.core.world.World
 class JinkPhase(private val performance: ShipPerformance, private val rules: ShipRules) {
     fun run(world: World, dt: Double) {
         for (v in world.vessels) {
-            if (!v.alive || !v.evasive || v.fuel <= 0.0) continue
+            if (!v.active || !v.evasive || v.fuel <= 0.0) continue
             val thrust = performance.translationThrustN(v)
             if (thrust <= 0.0) continue
             v.jinkTimeLeft -= dt

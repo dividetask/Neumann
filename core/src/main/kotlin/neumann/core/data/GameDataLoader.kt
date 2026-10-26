@@ -15,6 +15,10 @@ class GameDataLoader(private val source: DataSource) {
         modules.modules.forEach { (id, m) -> checkModule(id, m) }
         ships.designs.forEach { (id, d) ->
             for (m in d.modules.keys) require(m in modules.modules) { "design $id: unknown module $m" }
+            require(d.modules.keys.count { modules.modules.getValue(it).kind == ModuleKind.COMPUTER } == 1) { "design $id: needs exactly one computer" }
+        }
+        for ((id, m) in modules.modules) m.computer?.assumedLaser?.let {
+            require(modules.modules[it]?.laser != null) { "module $id: assumedLaser $it is not a laser" }
         }
         checkScenario(ships.designs, scenario)
         return GameData(rules, modules.modules, modules.munitions, ships.designs, scenario, generation)
@@ -33,8 +37,11 @@ class GameDataLoader(private val source: DataSource) {
             ModuleKind.LASER_TURRET -> m.laser != null
             ModuleKind.CANNON -> m.cannon != null
             ModuleKind.MISSILE_BAY -> m.missileBay != null
+            ModuleKind.COMPUTER -> m.computer != null
         }
         require(hasConfig) { "module $id (${m.kind}) is missing its ${m.kind.name.lowercase()} settings" }
+        val made = m.materials.values.sum()
+        require(Math.abs(made - m.massT) <= 0.01 * m.massT) { "module $id: materials add up to $made t, not its ${m.massT} t" }
     }
 
     fun checkScenario(designs: Map<String, ShipDesign>, scenario: ScenarioConfig) {

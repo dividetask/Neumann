@@ -25,7 +25,10 @@ import kotlin.math.sqrt
 class SensorPhase(private val lightDelay: LightDelay, private val rules: ShipRules) {
     fun run(world: World) {
         val tracked = world.tracked()
-        for (v in world.vessels) if (v.alive) sweep(world, v, tracked)
+        for (v in world.vessels) {
+            if (v.active) sweep(world, v, tracked)
+            else v.contacts.current.clear() // dead: its sensors are off
+        }
     }
 
     private fun sweep(world: World, observer: Vessel, tracked: List<Tracked>) {
@@ -57,12 +60,23 @@ class SensorPhase(private val lightDelay: LightDelay, private val rules: ShipRul
         observer.contacts.current.clear()
         observer.contacts.current.putAll(seen)
         val book = observer.contacts
+        for (id in seen.keys) book.lastSeen[id] = world.time
+        forgetOld(world, observer)
         for (c in seen.values) {
             if (!c.bearingOnly && c.kind.isBogey) book.lastFix[c.id] = Fix(c, world.time - c.lightDelaySeconds)
         }
         // Seen right up until it no longer exists: destroyed, so no ghost. (interpretation)
         val exists = tracked.mapTo(HashSet()) { it.id }
         for (id in wasSeen) if (id !in seen && id !in exists) book.markDestroyed(id)
+    }
+
+    /** A computer with `forgetAfterSeconds` forgets contacts unseen that long. */
+    private fun forgetOld(world: World, observer: Vessel) {
+        val after = observer.computer?.type?.computer?.forgetAfterSeconds ?: return
+        if (after <= 0.0) return
+        val book = observer.contacts
+        val old = book.lastSeen.filterValues { world.time - it > after }.keys
+        for (id in old) book.forget(id)
     }
 
     private fun detects(s: SensorConfig, observer: Vessel, t: Tracked, distance: Double, burning: Boolean): Boolean {

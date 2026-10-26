@@ -19,7 +19,7 @@ import kotlin.math.max
 class CannonPhase(private val solver: InterceptSolver, private val slug: SlugConfig) {
     fun run(world: World, dt: Double) {
         for (v in world.vessels) {
-            if (!v.alive) continue
+            if (!v.active) continue
             val cannons = v.working(ModuleKind.CANNON)
             for (c in cannons) c.cooldown = max(0.0, c.cooldown - dt)
             val target = v.contacts[v.targetId]?.takeIf { it.kind.isVessel && !it.bearingOnly }

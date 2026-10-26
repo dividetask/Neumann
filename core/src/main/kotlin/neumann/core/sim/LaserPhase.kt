@@ -18,7 +18,7 @@ import kotlin.math.max
 class LaserPhase(private val damage: DamageResolver) {
     fun run(world: World, dt: Double) {
         for (v in world.vessels) {
-            if (!v.alive) continue
+            if (!v.active) continue
             val bursting = v.laserBurstRemaining > 0.0
             v.laserBurstRemaining = max(0.0, v.laserBurstRemaining - dt)
             val engaged = HashSet<String>()

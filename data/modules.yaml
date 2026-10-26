@@ -1,18 +1,18 @@
 # Module types and munitions. See docs/ships.md, docs/weapons.md,
 # docs/sensors.md; the numbers follow docs/tech-level.md.
 # Every module: cost (resources), massT (tonnes), buildHours,
-# hitPoints (1 hit point = 1 MJ).
+# hitPoints (1 hit point = 1 MJ), materials (tonnes of each, adding up to massT).
 
 modules:
   # --- Hulls (300 MJ of hit points per tonne) ----------------------------
   probeHull:
-    { name: Probe hull, kind: HULL, cost: 200, massT: 60, buildHours: 48, hitPoints: 18000 }
+    { name: Probe hull, kind: HULL, cost: 200, massT: 60, buildHours: 48, hitPoints: 18000, materials: { IRON: 30, TITANIUM: 12, ALUMINIUM: 12, CARBON: 6 } }
   raiderHull:
-    { name: Raider hull, kind: HULL, cost: 60, massT: 30, buildHours: 16, hitPoints: 9000 }
+    { name: Raider hull, kind: HULL, cost: 60, massT: 30, buildHours: 16, hitPoints: 9000, materials: { IRON: 15, TITANIUM: 6, ALUMINIUM: 6, CARBON: 3 } }
   platformHull:
-    { name: Platform hull, kind: HULL, cost: 80, massT: 50, buildHours: 24, hitPoints: 15000 }
+    { name: Platform hull, kind: HULL, cost: 80, massT: 50, buildHours: 24, hitPoints: 15000, materials: { IRON: 25, TITANIUM: 10, ALUMINIUM: 10, CARBON: 5 } }
   baseHull:
-    { name: Base hull, kind: HULL, cost: 400, massT: 400, buildHours: 120, hitPoints: 120000 }
+    { name: Base hull, kind: HULL, cost: 400, massT: 400, buildHours: 120, hitPoints: 120000, materials: { IRON: 200, TITANIUM: 80, ALUMINIUM: 80, CARBON: 40 } }
 
   # --- Propulsion ----------------------------------------------------------
   # thrust = 2 x jet power / exhaust speed; fuel use = thrust / exhaust speed.
@@ -24,6 +24,7 @@ modules:
     massT: 40
     buildHours: 36
     hitPoints: 2000
+    materials: { IRON: 12, TUNGSTEN: 8, COPPER: 8, RARE_EARTHS: 4, TITANIUM: 4, CARBON: 4 }
     propulsion: { thrustKN: 26.7, fuelKgS: 0.089, turnAuthority: 300 }
   plasmaDrive:
     name: Plasma drive               # 1 GW jet power, 200 km/s exhaust
@@ -32,6 +33,7 @@ modules:
     massT: 15
     buildHours: 20
     hitPoints: 1000
+    materials: { IRON: 4.5, TUNGSTEN: 3, COPPER: 3, RARE_EARTHS: 1.5, TITANIUM: 1.5, CARBON: 1.5 }
     propulsion: { thrustKN: 10, fuelKgS: 0.05, turnAuthority: 300 }
   manoeuvringThrusters:
     name: Manoeuvring thrusters      # 40 MW, 40 km/s exhaust
@@ -40,6 +42,7 @@ modules:
     massT: 3
     buildHours: 8
     hitPoints: 300
+    materials: { IRON: 0.9, TUNGSTEN: 0.6, COPPER: 0.6, RARE_EARTHS: 0.3, TITANIUM: 0.3, CARBON: 0.3 }
     propulsion: { thrustKN: 2, fuelKgS: 0.05, turnAuthority: 600, translates: true }
 
   # --- Power ---------------------------------------------------------------
@@ -50,6 +53,7 @@ modules:
     massT: 20
     buildHours: 30
     hitPoints: 1000
+    materials: { IRON: 6, TUNGSTEN: 4, COPPER: 5, RARE_EARTHS: 2, LITHIUM: 1, CARBON: 2 }
     generator: { powerMW: 100 }
   smallReactor:
     name: Small electrical engine
@@ -58,6 +62,7 @@ modules:
     massT: 8
     buildHours: 14
     hitPoints: 500
+    materials: { IRON: 2.4, TUNGSTEN: 1.6, COPPER: 2, RARE_EARTHS: 0.8, LITHIUM: 0.4, CARBON: 0.8 }
     generator: { powerMW: 40 }
   battery:
     name: Battery                    # ~2 MJ per kg
@@ -66,6 +71,7 @@ modules:
     massT: 5
     buildHours: 10
     hitPoints: 300
+    materials: { LITHIUM: 1.5, ALUMINIUM: 1.5, COPPER: 1, CARBON: 1 }
     battery: { capacityMJ: 10000 }
 
   # --- Storage -------------------------------------------------------------
@@ -76,6 +82,7 @@ modules:
     massT: 3
     buildHours: 6
     hitPoints: 500
+    materials: { ALUMINIUM: 1.8, CARBON: 0.9, TITANIUM: 0.3 }
     fuelTank: { capacityT: 20 }
   ammoContainer:
     name: Ammo container
@@ -84,6 +91,7 @@ modules:
     massT: 1
     buildHours: 4
     hitPoints: 300
+    materials: { IRON: 0.7, ALUMINIUM: 0.3 }
     ammoContainer: { capacity: 200 }
 
   # --- Sensors (see docs/sensors.md) --------------------------------------
@@ -95,6 +103,7 @@ modules:
     massT: 3
     buildHours: 16
     hitPoints: 200
+    materials: { ALUMINIUM: 1.2, SILICON: 0.9, COPPER: 0.6, CARBON: 0.3 }
     sensor: { type: TELESCOPE, rangeAu: 1.0, bearingErrorDeg: 0.0005, rangeErrorFraction: 0.2, velocityErrorKmS: 0.5, powerMW: 0.1, trackTimeConstantSeconds: 60, minRangeErrorFraction: 0.0005, minVelocityErrorKmS: 0.001 }
   radar:
     name: Radar
@@ -103,6 +112,7 @@ modules:
     massT: 6
     buildHours: 20
     hitPoints: 300
+    materials: { ALUMINIUM: 2.4, SILICON: 1.8, COPPER: 1.2, CARBON: 0.6 }
     sensor: { type: RADAR, rangeAu: 0.01, bearingErrorDeg: 0.05, rangeErrorFraction: 0.002, velocityErrorKmS: 0.02, powerMW: 10 }
   lidar:
     name: Lidar
@@ -111,6 +121,7 @@ modules:
     massT: 3
     buildHours: 18
     hitPoints: 200
+    materials: { ALUMINIUM: 1.2, SILICON: 0.9, COPPER: 0.6, CARBON: 0.3 }
     sensor: { type: LIDAR, rangeAu: 0.007, bearingErrorDeg: 0.0001, rangeErrorFraction: 0.00001, velocityErrorKmS: 0.0001, powerMW: 2 }
   emissionReceiver:
     name: Emission receiver
@@ -119,6 +130,7 @@ modules:
     massT: 1
     buildHours: 8
     hitPoints: 100
+    materials: { ALUMINIUM: 0.4, SILICON: 0.3, COPPER: 0.2, CARBON: 0.1 }
     sensor: { type: EMISSION_RECEIVER, rangeAu: 3.0, bearingErrorDeg: 0.1, rangeErrorFraction: 1.0, velocityErrorKmS: 1.0, powerMW: 0.05 }
 
   # --- Weapons -------------------------------------------------------------
@@ -131,6 +143,7 @@ modules:
     massT: 10
     buildHours: 24
     hitPoints: 600
+    materials: { COPPER: 3, SILICON: 2, ALUMINIUM: 2, RARE_EARTHS: 1, IRON: 2 }
     laser: { rangeKm: 50000, focusRangeKm: 5000, beamMW: 15, powerMW: 30, burstSeconds: 60, arcDeg: 150 }
   lightLaserTurret:
     name: Light laser turret
@@ -139,6 +152,7 @@ modules:
     massT: 5
     buildHours: 12
     hitPoints: 300
+    materials: { COPPER: 1.5, SILICON: 1, ALUMINIUM: 1, RARE_EARTHS: 0.5, IRON: 1 }
     laser: { rangeKm: 50000, focusRangeKm: 5000, beamMW: 14, powerMW: 28, burstSeconds: 60, arcDeg: 150 }
   heavyLaserTurret:
     name: Heavy laser turret
@@ -147,6 +161,7 @@ modules:
     massT: 20
     buildHours: 40
     hitPoints: 1000
+    materials: { COPPER: 6, SILICON: 4, ALUMINIUM: 4, RARE_EARTHS: 2, IRON: 4 }
     laser: { rangeKm: 80000, focusRangeKm: 8000, beamMW: 60, powerMW: 120, burstSeconds: 60, arcDeg: 150 }
   # Coilguns. shotEnergyMJ ~ 2 x muzzle energy of a 2 kg slug.
   cannon:
@@ -156,6 +171,7 @@ modules:
     massT: 12
     buildHours: 20
     hitPoints: 600
+    materials: { IRON: 4.8, COPPER: 3.6, RARE_EARTHS: 2.4, ALUMINIUM: 1.2 }
     cannon: { muzzleSpeedKmS: 20, shotEnergyMJ: 800, cooldownSeconds: 30, autoRangeKm: 20000, arcDeg: 10 }
   lightCannon:
     name: Light cannon
@@ -164,6 +180,7 @@ modules:
     massT: 6
     buildHours: 12
     hitPoints: 300
+    materials: { IRON: 2.4, COPPER: 1.8, RARE_EARTHS: 1.2, ALUMINIUM: 0.6 }
     cannon: { muzzleSpeedKmS: 10, shotEnergyMJ: 200, cooldownSeconds: 30, autoRangeKm: 10000, arcDeg: 10 }
   cannonTurret:
     name: Cannon turret
@@ -172,6 +189,7 @@ modules:
     massT: 15
     buildHours: 30
     hitPoints: 800
+    materials: { IRON: 6, COPPER: 4.5, RARE_EARTHS: 3, ALUMINIUM: 1.5 }
     cannon: { muzzleSpeedKmS: 15, shotEnergyMJ: 450, cooldownSeconds: 20, autoRangeKm: 15000, arcDeg: 150 }
   missileBay:
     name: Missile bay
@@ -180,6 +198,7 @@ modules:
     massT: 6
     buildHours: 16
     hitPoints: 500
+    materials: { IRON: 3, ALUMINIUM: 2.4, COPPER: 0.6 }
     missileBay: { capacity: 6, launchRangeKm: 100000, arcDeg: 180 }
   smallMissileBay:
     name: Small missile bay
@@ -188,7 +207,33 @@ modules:
     massT: 3
     buildHours: 8
     hitPoints: 300
+    materials: { IRON: 1.5, ALUMINIUM: 1.2, COPPER: 0.3 }
     missileBay: { capacity: 2, launchRangeKm: 100000, arcDeg: 180 }
+
+  # --- Computers (see docs/ships.md#computers) -----------------------------
+  # pointDefence: DESIGN = counts the target's real turrets; ASSUMED = assumes
+  # assumedLaserTurrets of assumedLaser on every target.
+  # salvoGoal: DESTROY = a torpedo salvo only if it should destroy the target;
+  # DESTROY_OR_HIT = also all torpedoes if at least one should hit.
+  # forgetAfterSeconds: forget a contact unseen this long (0 = never).
+  sentientCore:
+    name: Sentient core              # the probe's sentient AI: hardened, redundant
+    kind: COMPUTER
+    cost: 500
+    massT: 10
+    buildHours: 200
+    hitPoints: 4000
+    materials: { SILICON: 4, COPPER: 2, ALUMINIUM: 2, TUNGSTEN: 1, RARE_EARTHS: 1 }
+    computer: { powerMW: 5, pointDefence: DESIGN, salvoGoal: DESTROY_OR_HIT, forgetAfterSeconds: 0 }
+  daemonCore:
+    name: Daemon core                # a primitive daemon process
+    kind: COMPUTER
+    cost: 20
+    massT: 0.5
+    buildHours: 6
+    hitPoints: 100
+    materials: { SILICON: 0.2, COPPER: 0.15, ALUMINIUM: 0.1, RARE_EARTHS: 0.05 }
+    computer: { powerMW: 0.05, pointDefence: ASSUMED, assumedLaserTurrets: 2, assumedLaser: laserTurret, salvoGoal: DESTROY, forgetAfterSeconds: 86400 }
 
 munitions:
   slug: { massKg: 2, sizeM: 0.1, cost: 0.5, buildHours: 0.1 }   # damage = kinetic energy at impact; cold, tiny

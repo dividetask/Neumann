@@ -27,7 +27,7 @@ class BurnPhase(
     fun run(world: World, dt: Double) {
         for (v in world.vessels) {
             v.burning = false
-            if (v.alive) burn(world, v, dt)
+            if (v.active) burn(world, v, dt)
         }
     }
 

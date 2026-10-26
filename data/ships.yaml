@@ -10,6 +10,7 @@ designs:
     burningSignature: 4.0
     modules:
       probeHull: 1
+      sentientCore: 1
       fusionDrive: 1
       manoeuvringThrusters: 2
       reactor: 1
@@ -33,6 +34,7 @@ designs:
     burningSignature: 4.0
     modules:
       raiderHull: 1
+      daemonCore: 1
       plasmaDrive: 1
       smallReactor: 1
       battery: 1
@@ -53,6 +55,7 @@ designs:
     burningSignature: 0.3
     modules:
       platformHull: 1
+      daemonCore: 1
       reactor: 1
       battery: 1
       telescope: 1
@@ -70,6 +73,7 @@ designs:
     burningSignature: 2.0
     modules:
       baseHull: 1
+      daemonCore: 1
       reactor: 2
       battery: 3
       telescope: 1

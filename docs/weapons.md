@@ -56,7 +56,8 @@ The bare minimum to test the game.
 
 A torpedo that point defence shoots down is wasted, so automatic launches
 (the player's torpedo auto-launch rule and the AI) fire a salvo big enough
-to get through, or nothing. Launch-now orders are not planned: players can
+to get through, or nothing. How well a ship plans depends on its computer
+(see [ships.md](ships.md#computers)). Launch-now orders are not planned: players can
 play as well or as poorly as they like.
 
 - **Point-defence estimate.** Each of the target's laser turrets does
@@ -71,15 +72,19 @@ play as well or as poorly as they like.
   error, which makes point defence look stronger. A poor track therefore
   asks for a bigger salvo, so a shooter may wait until its track improves
   (passive tracking gets better with time; see [sensors.md](sensors.md)).
-  **(interpretation)** The target's design (its laser turrets as built) is
-  known; damage to its turrets, their arcs, its facing, and its stored power
-  are not counted.
+  Which turrets are counted depends on the computer: the sentient core
+  counts the target's design (its laser turrets as built); a daemon core
+  assumes `assumedLaserTurrets` of `assumedLaser` on every target.
+  **(interpretation)** Damage to its turrets, their arcs, its facing, and its
+  stored power are not counted, and the target's hit points come from its
+  design.
 - **Salvo size.** With *k* torpedoes expected shot down and *h* hits needed to
   destroy the target (its design's total hit points ÷ torpedo `damage`,
   rounded up):
   - *k* + *h* or more available: fire *k* + *h*.
   - Fewer, but more than *k*: fire them all; at least one should hit.
-    Survival matters more than saving torpedoes.
+    Survival matters more than saving torpedoes. Only with `salvoGoal:
+    DESTROY_OR_HIT` (sentient core); a daemon core (`DESTROY`) fires none.
   - *k* or fewer: fire none.
 - **Allies fire together.** Every ship of a side with the same target, the
   target within launch range and arc, and auto-launch on, pools its loaded

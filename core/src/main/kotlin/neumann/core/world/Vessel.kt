@@ -106,6 +106,12 @@ class Vessel(
     /** Torpedoes held in working missile bays. */
     val torpedoes: Int get() = working(ModuleKind.MISSILE_BAY).sumOf { it.torpedoes }
 
+    /** The working computer; without one the ship is dead (see docs/ships.md#computers). */
+    val computer: ModuleState? get() = working(ModuleKind.COMPUTER).firstOrNull()
+
+    /** Alive and with a working computer: able to sense, steer, and fire. */
+    val active: Boolean get() = alive && computer != null
+
     fun working(kind: ModuleKind): List<ModuleState> = modules.filter { it.kind == kind && !it.destroyed }
 
     fun has(kind: ModuleKind): Boolean = modules.any { it.kind == kind && !it.destroyed }

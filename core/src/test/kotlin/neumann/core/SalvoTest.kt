@@ -18,6 +18,8 @@ class SalvoTest {
     private val planner = SalvoPlanner(Fixture.data)
     private val probe = Fixture.data.designs.getValue("probe")
     private val raider = Fixture.data.designs.getValue("raider")
+    private val sentient = Fixture.data.modules.getValue("sentientCore").computer!!
+    private val daemon = Fixture.data.modules.getValue("daemonCore").computer!!
 
     /** A well-tracked target closing at [closingKmS]. */
     private fun contact(closingKmS: Double, velocityErrorMS: Double = 0.0) = Contact("x", "x", ContactKind.SHIP, Faction.PLAYER,
@@ -26,32 +28,42 @@ class SalvoTest {
     @Test
     fun `point defence estimates match a measured salvo from a standing start`() {
         // Measured by simulation: salvos launched together from 100,000 km at a ship standing still.
-        assertEquals(8, planner.shotDown(probe, contact(0.0)), "the probe's two turrets stop 8")
-        assertEquals(3, planner.shotDown(raider, contact(0.0)), "a raider's one light laser stops 3")
+        assertEquals(8, planner.shotDown(probe, contact(0.0), sentient), "the probe's two turrets stop 8")
+        assertEquals(3, planner.shotDown(raider, contact(0.0), sentient), "a raider's one light laser stops 3")
     }
 
     @Test
     fun `point defence stops fewer torpedoes the faster they close`() {
-        assertTrue(planner.shotDown(probe, contact(4.0)) < planner.shotDown(probe, contact(0.0)))
+        assertTrue(planner.shotDown(probe, contact(4.0), sentient) < planner.shotDown(probe, contact(0.0), sentient))
     }
 
     @Test
     fun `a salvo that cannot get through is not fired, and one that can is sized to destroy or fires everything`() {
         val c = contact(0.0)
-        val k = planner.shotDown(raider, c)
+        val k = planner.shotDown(raider, c, sentient)
         val h = planner.hitsToDestroy(raider)
-        assertEquals(0, planner.size(k, raider, c), "all would be shot down")
-        assertEquals(k + 1, planner.size(k + 1, raider, c), "too few to destroy: fire them all, one should hit")
-        assertEquals(k + h, planner.size(k + h + 5, raider, c), "enough to destroy it, and no more")
+        assertEquals(0, planner.size(k, raider, c, sentient), "all would be shot down")
+        assertEquals(k + 1, planner.size(k + 1, raider, c, sentient), "too few to destroy: fire them all, one should hit")
+        assertEquals(k + h, planner.size(k + h + 5, raider, c, sentient), "enough to destroy it, and no more")
+    }
+
+    @Test
+    fun `a daemon core assumes every target has two laser turrets, and fires only to destroy`() {
+        val c = contact(0.0)
+        assertEquals(planner.shotDown(probe, c, sentient), planner.shotDown(raider, c, daemon), "a raider is assumed as strong as the probe")
+        val k = planner.shotDown(raider, c, daemon)
+        val h = planner.hitsToDestroy(raider)
+        assertEquals(0, planner.size(k + h - 1, raider, c, daemon), "short of destroying it: no salvo, even though some would hit")
+        assertEquals(k + h, planner.size(k + h, raider, c, daemon))
     }
 
     @Test
     fun `a poor track makes point defence look stronger, so the shooter waits for a better one`() {
-        assertTrue(planner.shotDown(probe, contact(4.0, velocityErrorMS = 1_000.0)) > planner.shotDown(probe, contact(4.0)))
+        assertTrue(planner.shotDown(probe, contact(4.0, velocityErrorMS = 1_000.0), sentient) > planner.shotDown(probe, contact(4.0), sentient))
     }
 
     @Test
-    fun `a lone raider holds its torpedoes against the probe, but raiders together fire as one salvo`() {
+    fun `a lone raider holds its torpedoes against the probe until it has enough to destroy it`() {
         val w = Fixture.world()
         val d = Fixture.dummy(w)
         Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO)
@@ -62,10 +74,13 @@ class SalvoTest {
         step.run(w, 1.0)
         assertTrue(w.torpedoes.isEmpty(), "two torpedoes cannot beat the probe's point defence")
 
-        // Five raiders' worth of torpedoes in the dummy's bays (10 > the 8 the probe stops).
-        d.working(ModuleKind.MISSILE_BAY).first().torpedoes = 10
+        // Enough torpedoes in the dummy's bays to destroy the probe through its point defence.
+        val daemon = Fixture.data.modules.getValue("daemonCore").computer!!
+        val c = d.contacts[w.player.id]!!
+        val needed = planner.shotDown(probe, c, daemon) + planner.hitsToDestroy(probe)
+        d.working(ModuleKind.MISSILE_BAY).first().torpedoes = needed + 3
         step.run(w, 1.0)
-        assertTrue(w.torpedoes.size >= 9, "enough to get through, launched together")
+        assertEquals(needed, w.torpedoes.size, "a salvo to destroy, launched together, and no more")
         assertTrue(w.torpedoes.all { it.launchTime == w.torpedoes.first().launchTime })
     }
 }
@@ -89,5 +104,78 @@ class FuelWarningTest {
         w2.player.fuel = 1.0
         watch2.run(w2)
         assertTrue(w2.log.events.any { it.kind == EventKind.LOW_FUEL }, "a lost tank is unexpected: it pauses")
+    }
+}
+
+class ComputerTest {
+    private fun hitComputer(w: neumann.core.world.World, v: neumann.core.world.Vessel) {
+        v.computer!!.hitPoints = 0.0
+        // Any further hit notices it: here, a tiny one.
+        neumann.core.sim.DamageResolver().hit(w, v, 0.001, w.player.id, "laser")
+    }
+
+    @Test
+    fun `a ship whose computer is destroyed is dead - it drifts and does nothing - and counts as destroyed`() {
+        val w = Fixture.world()
+        val d = Fixture.dummy(w)
+        Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO)
+        Fixture.place(w, d, Fixture.openSpace + Vec3(10_000.0 * Units.KM, 0.0, 0.0), Vec3(0.0, 1_000.0, 0.0))
+        val step = SimulationStep(w.data)
+        step.sensors.run(w)
+        assertEquals(1, neumann.core.game.RemainingCount(w).count().ships)
+        // A fresh hit that lands on the computer: simulate by destroying it, then any hit.
+        d.computer!!.hitPoints = 0.0
+        d.computer // gone
+        assertTrue(!d.active && d.alive, "dead, but still there")
+        val before = d.position
+        step.run(w, 10.0)
+        assertTrue(d.contacts.current.isEmpty(), "its sensors are off")
+        assertTrue((d.position - before).length() > 5_000.0, "it drifts on")
+        assertTrue(w.claimed, "a dead enemy is as good as destroyed")
+    }
+
+    @Test
+    fun `the computer dying from a hit is reported, and no longer remaining`() {
+        val w = Fixture.world()
+        val d = Fixture.dummy(w)
+        Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO)
+        Fixture.place(w, d, Fixture.openSpace + Vec3(10_000.0 * Units.KM, 0.0, 0.0), Vec3.ZERO)
+        SimulationStep(w.data).sensors.run(w)
+        val core = d.computer!!
+        core.hitPoints = 0.0001
+        // Hits land by mass at random; push hits until one finishes the computer.
+        var tries = 0
+        while (core.hitPoints > 0.0 && tries++ < 10_000) neumann.core.sim.DamageResolver().hit(w, d, 0.01, w.player.id, "laser")
+        assertTrue(w.log.events.any { it.kind == EventKind.DESTROYED && it.message.contains("computer destroyed") })
+        assertEquals(0, neumann.core.game.RemainingCount(w).count().total)
+    }
+
+    @Test
+    fun `losing the sentient core loses the game`() {
+        val w = Fixture.world()
+        w.player.computer!!.hitPoints = 0.0
+        SimulationStep(w.data).run(w, 1.0)
+        assertTrue(w.lost)
+    }
+
+    @Test
+    fun `a daemon core forgets a contact it has not seen for a day`() {
+        val w = Fixture.world()
+        val d = Fixture.dummy(w)
+        Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO)
+        Fixture.place(w, d, Fixture.openSpace + Vec3(10_000.0 * Units.KM, 0.0, 0.0), Vec3.ZERO)
+        val step = SimulationStep(w.data)
+        step.sensors.run(w)
+        assertTrue(w.player.id in d.contacts.everSeen)
+        // The player moves far away, out of every sensor's reach.
+        Fixture.place(w, w.player, Fixture.openSpace + Vec3(0.0, 0.0, 3.0 * Units.AU), Vec3.ZERO)
+        w.player.sensorRules.radarActive = false
+        w.time += 3600.0
+        step.sensors.run(w)
+        assertTrue(w.player.id in d.contacts.everSeen, "an hour: still remembered")
+        w.time += Fixture.data.modules.getValue("daemonCore").computer!!.forgetAfterSeconds
+        step.sensors.run(w)
+        assertTrue(w.player.id !in d.contacts.everSeen, "a day: forgotten")
+        assertTrue(d.id in w.player.contacts.everSeen, "the sentient core never forgets")
     }
 }

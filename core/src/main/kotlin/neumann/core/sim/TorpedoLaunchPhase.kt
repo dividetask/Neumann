@@ -1,5 +1,6 @@
 package neumann.core.sim
 
+import neumann.core.data.ComputerConfig
 import neumann.core.data.GameData
 import neumann.core.math.Units
 import neumann.core.world.Contact
@@ -24,10 +25,10 @@ class TorpedoLaunchPhase(data: GameData) {
     private val planner = SalvoPlanner(data)
 
     fun run(world: World) {
-        for (v in world.vessels) if (v.alive && v.launchTorpedoNow) launchNow(world, v)
-        val groups = world.vessels.filter { it.alive && it.rules.torpedoAutoLaunch && it.targetId != null }
-            .groupBy { it.faction to it.targetId!! }
-        for ((key, shooters) in groups) salvo(world, key.second, shooters)
+        for (v in world.vessels) if (v.active && v.launchTorpedoNow) launchNow(world, v)
+        val groups = world.vessels.filter { it.active && it.rules.torpedoAutoLaunch && it.targetId != null }
+            .groupBy { Triple(it.faction, it.targetId!!, it.computer!!.type.computer!!) }
+        for ((key, shooters) in groups) salvo(world, key.second, shooters, key.third)
     }
 
     private fun launchNow(world: World, v: Vessel) {
@@ -45,7 +46,8 @@ class TorpedoLaunchPhase(data: GameData) {
         launch(world, v, bay, target)
     }
 
-    private fun salvo(world: World, targetId: String, shooters: List<Vessel>) {
+    /** Ships with the same computer plan alike, so they pool into one salvo. */
+    private fun salvo(world: World, targetId: String, shooters: List<Vessel>, computer: ComputerConfig) {
         val design = world.vessel(targetId)?.design ?: return
         // Each shooter's bays that could launch at the target now.
         val ready = shooters.mapNotNull { v ->
@@ -57,7 +59,7 @@ class TorpedoLaunchPhase(data: GameData) {
         val available = ready.sumOf { (_, _, bays) -> bays.sumOf { it.torpedoes } }
         // Planned on the side's best track of the target.
         val best = ready.minBy { it.second.velocityUncertaintyMS }.second
-        var left = planner.size(available, design, best)
+        var left = planner.size(available, design, best, computer)
         for ((v, c, bays) in ready) for (b in bays) {
             while (left > 0 && b.torpedoes > 0) {
                 launch(world, v, b, c)

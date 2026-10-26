@@ -45,8 +45,17 @@ class ContactBook {
     val destroyed = HashSet<String>()
     val trackedSince = HashMap<String, Double>()
     val lastFix = HashMap<String, Fix>()
+    /** When each object was last detected at all. */
+    val lastSeen = HashMap<String, Double>()
 
     operator fun get(id: String?): Contact? = id?.let { current[it] }
+
+    /** Forget [id] entirely, as if it had never been seen. */
+    fun forget(id: String) {
+        everSeen.remove(id)
+        lastFix.remove(id)
+        lastSeen.remove(id)
+    }
 
     /** Known destroyed: no longer remaining, and no ghost. */
     fun markDestroyed(id: String) {

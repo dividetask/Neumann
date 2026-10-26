@@ -2,7 +2,10 @@ package neumann.core.data
 
 import kotlinx.serialization.Serializable
 import neumann.core.world.EventKind
+import neumann.core.world.Material
 import neumann.core.world.ModuleKind
+import neumann.core.world.PointDefenceModel
+import neumann.core.world.SalvoGoal
 import neumann.core.world.SensorType
 import neumann.core.world.VesselRole
 
@@ -72,6 +75,7 @@ data class ModuleType(
     val massT: Double,
     val buildHours: Double,
     val hitPoints: Double,
+    val materials: Map<Material, Double> = emptyMap(),
     val propulsion: PropulsionConfig? = null,
     val generator: GeneratorConfig? = null,
     val battery: BatteryConfig? = null,
@@ -81,6 +85,7 @@ data class ModuleType(
     val laser: LaserConfig? = null,
     val cannon: CannonConfig? = null,
     val missileBay: MissileBayConfig? = null,
+    val computer: ComputerConfig? = null,
 )
 
 @Serializable
@@ -140,6 +145,19 @@ data class CannonConfig(
     val cooldownSeconds: Double,
     val autoRangeKm: Double,
     val arcDeg: Double,
+)
+
+/** How well a computer plans (see docs/ships.md#computers). */
+@Serializable
+data class ComputerConfig(
+    val powerMW: Double,
+    val pointDefence: PointDefenceModel,
+    /** With ASSUMED point defence: this many of [assumedLaser] on every target. */
+    val assumedLaserTurrets: Int = 0,
+    val assumedLaser: String? = null,
+    val salvoGoal: SalvoGoal,
+    /** Forget a contact unseen this long; 0 = never. */
+    val forgetAfterSeconds: Double,
 )
 
 @Serializable

@@ -22,9 +22,12 @@ Every module type has:
 | `massT` | Weight, in tonnes. |
 | `buildHours` | Manufacturing time. |
 | `hitPoints` | Damage it can take before it stops working. |
+| `materials` | What it is made of: tonnes of each material (`IRON`, `ALUMINIUM`, `TITANIUM`, `CARBON`, `SILICON`, `COPPER`, `RARE_EARTHS`, `TUNGSTEN`, `LITHIUM`), adding up to `massT`. |
 
-`cost` and `buildHours` are stored now and used once the auto factory exists
-(Pending).
+`cost`, `buildHours`, and `materials` are stored now and used once mining
+and the auto factory exist (Pending). **(interpretation)** The material
+split of each module is a rough engineering guess. Munitions' materials are
+Pending.
 
 Module kinds and what they do:
 
@@ -40,6 +43,7 @@ Module kinds and what they do:
 | Cannon | Fires slugs from the ammo containers. |
 | Ammo container | Holds cannon slugs (`capacity`). |
 | Missile bay | Holds and launches torpedoes (`capacity`). |
+| Computer | Runs the ship; draws `powerMW` all the time. Its settings decide how well the ship plans (see [Computers](#computers)). |
 
 Pending module kinds: auto factory, mining equipment.
 
@@ -84,6 +88,43 @@ Worked out from the modules that are still working:
   **(interpretation)** Their front starts pointing away from the body they
   orbit and stays fixed in space.
 
+## Computers
+
+Every ship, fixed defence, and base carries a computer, and its intelligence
+is what the computer can do.
+
+| Computer | Carried by | Mass | Power | Hit points |
+|---|---|---|---|---|
+| **Sentient core** | the probe | 10 t | 5 MW | 4000 |
+| **Daemon core** | raiders, fixed defences, bases | 0.5 t | 0.05 MW | 100 |
+
+- The **sentient core** is the player: a sentient AI. It automates nothing
+  beyond the weapon rules the player sets, and its automatic torpedo salvos
+  use the full point-defence estimate (see
+  [weapons.md](weapons.md#torpedo-salvos)). It is heavy because it is
+  hardened and redundant.
+- The **daemon core** is a primitive daemon process. It can work out speeds
+  and closing, and makes very basic assumptions:
+  - About enemies: every target carries two standard laser turrets
+    (`assumedLaserTurrets` of `assumedLaser`) for point defence, whatever it
+    really has.
+  - About allies: it pools torpedoes with allies that have the same target
+    in range.
+  - It launches torpedoes only when it expects the salvo to destroy the
+    target (`salvoGoal: DESTROY`), and otherwise closes and keeps firing its
+    other weapons.
+  - It forgets a contact not seen for `forgetAfterSeconds` (a day), as if
+    it had never seen it.
+- **(interpretation)** Fixed defences and bases carry daemon cores too; a
+  ship cannot act without a computer.
+- **A destroyed computer** leaves the ship dead: it drifts, and its engines,
+  sensors, and weapons (point defence included) stop. A dead ship is as good
+  as destroyed: it no longer counts toward claiming the system or toward
+  remaining. If the probe's sentient core is destroyed, the game is lost.
+- **(interpretation)** The computer draws its power before anything else; its
+  draw is tiny next to the electrical engine.
+- Pending: a tactical core between the two.
+
 ## Power
 
 - Electrical engines charge the batteries; anything beyond battery capacity
@@ -102,4 +143,6 @@ Worked out from the modules that are still working:
 - A destroyed module stops working. What it held is lost: a fuel tank or ammo
   container loses its share of the fuel or slugs (by capacity); a missile bay
   loses its torpedoes; a battery its share of stored power.
-- The ship is destroyed when every hull module is destroyed.
+- The ship is destroyed when every hull module is destroyed, and dead (as
+  good as destroyed) when its computer is destroyed (see
+  [Computers](#computers)).

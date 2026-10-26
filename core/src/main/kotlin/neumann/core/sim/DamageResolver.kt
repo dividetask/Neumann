@@ -16,6 +16,7 @@ class DamageResolver {
     fun hit(world: World, target: Vessel, amount: Double, attackerId: String, weapon: String) {
         if (!target.alive || amount <= 0.0) return
         world.damage.add(attackerId, weapon, amount)
+        val wasActive = target.active
         var left = applyTo(world, target, pickModule(world, target), amount)
         while (left > 0.0) {
             val hull = target.working(ModuleKind.HULL).firstOrNull() ?: break
@@ -23,6 +24,14 @@ class DamageResolver {
         }
         report(world, target, amount, attackerId, weapon)
         if (!target.has(ModuleKind.HULL)) destroy(world, target, "by ${nameOf(world, attackerId)}'s $weapon")
+        else if (wasActive && !target.active) disable(world, target, "by ${nameOf(world, attackerId)}'s $weapon")
+    }
+
+    /** Its computer destroyed: dead, as good as destroyed. */
+    private fun disable(world: World, target: Vessel, how: String) {
+        target.burn = null
+        world.event(EventKind.DESTROYED, target.id, "${target.name} dead: computer destroyed $how")
+        world.player.contacts.markDestroyed(target.id) // reported dead
     }
 
     fun destroy(world: World, target: Vessel, how: String) {

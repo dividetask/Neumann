@@ -22,7 +22,7 @@ import kotlin.math.sqrt
 class EnemyAi(private val config: AiConfig, private val performance: ShipPerformance) {
     fun run(world: World, dt: Double) {
         for (v in world.vessels) {
-            if (!v.alive || v.faction != Faction.ENEMY) continue
+            if (!v.active || v.faction != Faction.ENEMY) continue
             // Active sensors on once the player has been seen, unless lying in ambush.
             val active = world.player.id in v.contacts.everSeen && !v.ambush
             v.sensorRules.radarActive = active

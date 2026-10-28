@@ -52,5 +52,5 @@ Daemon will be stopped at the end of the build
 > Task :app:createDebugApkListingFileRedirect
 > Task :app:assembleDebug
 
-BUILD SUCCESSFUL in 13s
+BUILD SUCCESSFUL in 12s
 40 actionable tasks: 12 executed, 28 up-to-date

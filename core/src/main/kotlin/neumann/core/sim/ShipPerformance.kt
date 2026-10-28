@@ -1,6 +1,7 @@
 package neumann.core.sim
 
 import neumann.core.data.MunitionsConfig
+import neumann.core.data.PropulsionConfig
 import neumann.core.math.Units
 import neumann.core.world.ModuleKind
 import neumann.core.world.Vessel
@@ -13,12 +14,33 @@ class ShipPerformance(private val munitions: MunitionsConfig) {
         v.modules.sumOf { it.type.massT } * 1000.0 + v.fuel * 1000.0 +
             v.slugs * munitions.slug.massKg + v.torpedoes * munitions.torpedo.massKg
 
-    fun thrustN(v: Vessel): Double = v.working(ModuleKind.PROPULSION).sumOf { it.type.propulsion!!.thrustKN } * 1000.0
+    /** Main engines' thrust at drive setting [drive] (1 = full thrust, 0 = most economical), N. Thrusters only jink. */
+    fun thrustN(v: Vessel, drive: Double = 1.0): Double =
+        mainEngines(v).sumOf { val p = it.type.propulsion!!; p.thrustKN * 1000.0 * slowdown(p, drive) }
 
-    /** Fuel use at full throttle, kg/s. */
-    fun fuelKgS(v: Vessel): Double = v.working(ModuleKind.PROPULSION).sumOf { it.type.propulsion!!.fuelKgS }
+    /** Main engines' fuel use at drive setting [drive], kg/s. */
+    fun fuelKgS(v: Vessel, drive: Double = 1.0): Double =
+        mainEngines(v).sumOf { val p = it.type.propulsion!!; val s = slowdown(p, drive); p.fuelKgS * s * s }
 
-    fun accelerationMS2(v: Vessel): Double = thrustN(v) / massKg(v)
+    private fun mainEngines(v: Vessel) = v.working(ModuleKind.PROPULSION).filter { !it.type.propulsion!!.translates }
+
+    fun accelerationMS2(v: Vessel, drive: Double = 1.0): Double = thrustN(v, drive) / massKg(v)
+
+    /** Effective exhaust speed at [drive], m/s: speed change per kg of fuel × mass. */
+    fun exhaustMS(v: Vessel, drive: Double = 1.0): Double = fuelKgS(v, drive).let { if (it > 0.0) thrustN(v, drive) / it else 0.0 }
+
+    /**
+     * At the same jet power, thrust goes as 1 / exhaust speed and fuel use as
+     * 1 / exhaust speed²: the factor, full-thrust exhaust ÷ exhaust at [drive].
+     * The exhaust moves on a log scale from full thrust (drive 1) to the
+     * fastest (drive 0).
+     */
+    private fun slowdown(p: PropulsionConfig, drive: Double): Double {
+        val slowest = p.thrustKN * 1000.0 / p.fuelKgS
+        val fastest = maxOf(slowest, p.maxExhaustKmS * Units.KM)
+        val exhaust = slowest * Math.pow(fastest / slowest, 1.0 - drive.coerceIn(0.0, 1.0))
+        return slowest / exhaust
+    }
 
     /** Sideways thrust from modules that can translate (for jinking), N. */
     fun translationThrustN(v: Vessel): Double =

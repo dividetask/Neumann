@@ -16,6 +16,7 @@ modules:
 
   # --- Propulsion ----------------------------------------------------------
   # thrust = 2 x jet power / exhaust speed; fuel use = thrust / exhaust speed.
+# thrustKN/fuelKgS are at full thrust; maxExhaustKmS is the most economical setting (drive dial).
   # Ship turn rate (deg/s) = total turnAuthority / ship mass in tonnes.
   fusionDrive:
     name: Fusion drive               # 4 GW jet power, 300 km/s exhaust
@@ -25,7 +26,7 @@ modules:
     buildHours: 36
     hitPoints: 2000
     materials: { IRON: 12, TUNGSTEN: 8, COPPER: 8, RARE_EARTHS: 4, TITANIUM: 4, CARBON: 4 }
-    propulsion: { thrustKN: 26.7, fuelKgS: 0.089, turnAuthority: 300 }
+    propulsion: { thrustKN: 26.7, fuelKgS: 0.089, maxExhaustKmS: 2000, turnAuthority: 300 }
   plasmaDrive:
     name: Plasma drive               # 1 GW jet power, 200 km/s exhaust
     kind: PROPULSION
@@ -34,7 +35,7 @@ modules:
     buildHours: 20
     hitPoints: 1000
     materials: { IRON: 4.5, TUNGSTEN: 3, COPPER: 3, RARE_EARTHS: 1.5, TITANIUM: 1.5, CARBON: 1.5 }
-    propulsion: { thrustKN: 10, fuelKgS: 0.05, turnAuthority: 300 }
+    propulsion: { thrustKN: 10, fuelKgS: 0.05, maxExhaustKmS: 2000, turnAuthority: 300 }
   manoeuvringThrusters:
     name: Manoeuvring thrusters      # 40 MW, 40 km/s exhaust
     kind: PROPULSION

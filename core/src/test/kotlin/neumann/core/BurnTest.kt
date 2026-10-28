@@ -138,4 +138,28 @@ class BurnTest {
         w.player.fuel = 0.0
         assertTrue(perf.accelerationMS2(w.player) > full)
     }
+
+    @Test
+    fun `the economical end of the drive dial pushes less but gives far more speed change per tonne of fuel`() {
+        val p = Fixture.world().player
+        val full = perf.accelerationMS2(p, 1.0)
+        val eco = perf.accelerationMS2(p, 0.0)
+        assertEquals(300_000.0, perf.exhaustMS(p, 1.0), 2_000.0, "full thrust: the 300 km/s exhaust")
+        assertTrue(eco < full / 5, "about a seventh of the push")
+        assertTrue(perf.exhaustMS(p, 0.0) > 5 * perf.exhaustMS(p, 1.0), "several times the speed change per kg of fuel")
+        assertTrue(perf.accelerationMS2(p, 0.5) in eco..full, "in between, in between")
+    }
+
+    @Test
+    fun `an economical burn uses less fuel for the same speed change`() {
+        fun fuelFor(drive: Double): Double {
+            val w = still()
+            val before = w.player.fuel
+            OrderDesk(w).burn(HeadingMode.FIXED, north, drive, 1.0, null)
+            Fixture.runFor(w, 86_400.0 * 2)
+            assertNull(w.player.burn, "reached 1 km/s")
+            return before - w.player.fuel
+        }
+        assertTrue(fuelFor(0.0) * 4 < fuelFor(1.0))
+    }
 }

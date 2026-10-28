@@ -25,10 +25,11 @@ enum class BurnStage { ACCELERATE, COAST, BRAKE }
 /**
  * An active burn along the heading, toward a desired speed (m/s), a desired
  * distance (m), or both, measured along the burn direction from where the
- * ship was ([startPosition], [startVelocity] at [startTime]).
+ * ship was ([startPosition], [startVelocity] at [startTime]). [drive] is the
+ * drive dial: 1 = full thrust, 0 = most economical.
  */
 class Burn(
-    val throttle: Double,
+    val drive: Double,
     val targetSpeed: Double?,
     val targetDistance: Double?,
     val startTime: Double,

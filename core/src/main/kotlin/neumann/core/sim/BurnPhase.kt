@@ -37,7 +37,7 @@ class BurnPhase(
         if (v.fuel <= 0.0) return end(world, v, "out of fuel")
         val match = v.heading?.mode == HeadingMode.MATCH_TARGET
         val dir = resolver.resolve(v) ?: return end(world, v, if (match) "velocity matched" else "no direction (no target?)")
-        val accel = performance.thrustN(v) * burn.throttle / performance.massKg(v)
+        val accel = performance.accelerationMS2(v, burn.drive)
         if (accel <= 0.0) return
 
         // Progress along the burn direction, seen from where the ship was when the order was given.
@@ -57,7 +57,8 @@ class BurnPhase(
             }
         }
         if (burn.stage == BurnStage.BRAKE && speed <= 1e-6) return end(world, v, "stopped after ${(travelled / Units.KM).toLong()} km")
-        if (burn.stage == BurnStage.ACCELERATE && burn.targetDistance == null && wanted <= 1e-6) {
+        // Within a centimetre a second is there: gravity's nudges would otherwise keep a gentle burn going for ever.
+        if (burn.stage == BurnStage.ACCELERATE && burn.targetDistance == null && wanted <= SPEED_TOLERANCE_MS) {
             return end(world, v, "reached ${"%.2f".format(speed / Units.KM)} km/s")
         }
         if (wanted <= 0.0) return
@@ -88,7 +89,7 @@ class BurnPhase(
 
     private fun thrust(v: Vessel, burn: Burn, dv: Double, fullDv: Double, dt: Double) {
         var change = dv
-        var fuelUsed = performance.fuelKgS(v) * burn.throttle * dt / 1000.0 * (dv / fullDv)
+        var fuelUsed = performance.fuelKgS(v, burn.drive) * dt / 1000.0 * (dv / fullDv)
         if (fuelUsed > v.fuel) {
             change *= v.fuel / fuelUsed
             fuelUsed = v.fuel
@@ -105,3 +106,5 @@ class BurnPhase(
         if (v === world.player) world.event(EventKind.BURN_COMPLETE, v.id, "Burn ended: $reason")
     }
 }
+
+private const val SPEED_TOLERANCE_MS = 0.01

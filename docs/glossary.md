@@ -31,6 +31,8 @@
 - **Desired speed** — The speed a burn should reach before the ship coasts.
 - **Direction circles** — The YAW and PITCH dials used to pick a direction
   relative to the ship.
+- **Drive dial** — The setting from full thrust to most economical: how
+  much reaction mass the drive adds, trading push for fuel.
 - **Emission receiver** — A passive sensor that detects active sensors.
 - **Emitting** — Using an active sensor (radar or lidar); enemy emission
   receivers can detect it.

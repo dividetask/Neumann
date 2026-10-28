@@ -146,6 +146,8 @@ capacities, sensor and threat range from the working modules).
 - `BridgeScreen` — the map, top bar, and bottom tabs (SHIP, CONTACTS,
   MANOEUVRE, WEAPONS, LOG); no scrolling.
 - `DirectionPad` — the two direction dials.
+- `DriveDial` — the drive dial (full thrust to most economical), with the
+  acceleration and fuel per km/s it gives.
 - `MapView` — the full-screen 3D map and its gestures. `ApproachArrow` —
   the arrow it draws on the approach screen.
 - `MapCamera` — the map's centre, scale, rotation, and tilt; projects space

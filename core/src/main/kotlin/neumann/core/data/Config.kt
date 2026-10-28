@@ -91,8 +91,11 @@ data class ModuleType(
 
 @Serializable
 data class PropulsionConfig(
+    /** Thrust and fuel use at full thrust (the slowest exhaust). */
     val thrustKN: Double,
     val fuelKgS: Double,
+    /** Fastest exhaust it can run at, for economy; 0 = fixed (see docs/ships.md#performance). */
+    val maxExhaustKmS: Double = 0.0,
     val turnAuthority: Double,
     /** Can push sideways without turning (for jinking). */
     val translates: Boolean = false,

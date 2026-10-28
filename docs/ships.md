@@ -34,7 +34,7 @@ Module kinds and what they do:
 | Kind | Does |
 |---|---|
 | Hull | Structure and armour. The ship is destroyed when every hull module is destroyed. |
-| Propulsion | Thrust (`thrustKN`), fuel use (`fuelKgS` at full throttle), and turning (`turnAuthority`). Different engine types trade thrust, turning, weight, and fuel use. |
+| Propulsion | Thrust (`thrustKN`) and fuel use (`fuelKgS`) at full thrust, the fastest exhaust it can run at (`maxExhaustKmS`; none = fixed), and turning (`turnAuthority`). Different engine types trade thrust, turning, weight, and fuel use. |
 | Electrical engine | Generates power (`powerMW`) into the batteries. |
 | Battery | Stores power (`capacityMJ`). |
 | Fuel tank | Holds fuel (`capacityT`). |
@@ -56,7 +56,21 @@ Worked out from the modules that are still working:
 
 - **Mass** = all modules + fuel + slugs + torpedoes. It falls as fuel and
   ammunition are used.
-- **Acceleration** = total thrust × throttle ÷ mass.
+- **Drive dial.** A fusion or plasma drive runs at full power all the time,
+  and the dial sets how much reaction mass (hydrogen) it adds:
+  - **Full thrust** (dial at 1): the exhaust speed in the data
+    (`thrustKN` ÷ `fuelKgS`, e.g. 300 km/s): most push, most fuel per km/s.
+  - **Most economical** (dial at 0): `maxExhaustKmS` (2,000 km/s): about a
+    seventh of the push, but each tonne of fuel gives about 7 times the
+    speed change.
+  - In between, the exhaust speed moves smoothly (on a log scale) between
+    the two. At the same power, thrust goes as 1 ÷ exhaust speed and fuel use
+    as 1 ÷ exhaust speed², so the speed change per tonne of fuel goes as the
+    exhaust speed.
+  - Thrusters without `maxExhaustKmS` (the manoeuvring thrusters) stay
+    fixed. The player sets the dial; enemy ships always burn at full thrust.
+    **(interpretation)**
+- **Acceleration** = total thrust at the drive setting ÷ mass.
 - **Turn rate** (°/s) = total `turnAuthority` ÷ mass in tonnes.
 - **Sensors**: see [sensors.md](sensors.md).
 - **Signature** (`signature`, `burningSignature`) and **size** (`sizeM`)

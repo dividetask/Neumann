@@ -26,6 +26,12 @@ toward the optimistic end where the studies disagree.
   **~65 MW/t** for the smaller plasma drive.
 - **Exhaust speed** trades thrust against fuel use at the same power:
   thrust = 2 × jet power ÷ exhaust speed; fuel use = thrust ÷ exhaust speed.
+  A magnetic-nozzle drive can change it in flight by adding more or less
+  hydrogen reaction mass (real variable-exhaust plasma engines, such as
+  NASA's VASIMR design, work this way). Assumed range for the fusion and
+  plasma drives: from the table's figure up to **2,000 km/s**. At 2,000
+  km/s the probe's 100 t of fuel gives about 700 km/s of delta-v instead of
+  about 110, at a seventh of the thrust.
 
 | Engine | Mass | Jet power | Exhaust speed | Thrust | Fuel use |
 |---|---|---|---|---|---|

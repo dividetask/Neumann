@@ -45,7 +45,6 @@ private val modes = listOf(
     HeadingMode.AWAY_FROM_TARGET to "AWAY",
     HeadingMode.MATCH_TARGET to "MATCH",
 )
-private val throttles = listOf(0.25 to "25%", 0.5 to "50%", 1.0 to "100%")
 
 /** The bottom tabs; each opens one panel over the map. */
 private enum class Tab(val label: String) { SHIP("SHIP"), CONTACTS("CONTACTS"), MANOEUVRE("MANV"), WEAPONS("WEAPONS"), LOG("LOG") }
@@ -190,7 +189,8 @@ private fun ContactsPanel(session: GameSession, changed: (String?) -> Unit) {
 private class ManoeuvreState {
     var mode by mutableStateOf(HeadingMode.FIXED)
     var dials by mutableStateOf<DirectionDials.Angles?>(null)
-    var throttle by mutableStateOf(1.0)
+    /** Drive dial: 1 = full thrust, 0 = most economical. */
+    var drive by mutableStateOf(1.0)
     var speed by mutableStateOf<Double?>(null)
     var distance by mutableStateOf<Double?>(null)
 }
@@ -202,7 +202,7 @@ private fun ManoeuvrePanel(session: GameSession, s: ManoeuvreState, changed: (St
     ChoiceRow(modes.take(3), s.mode) { s.mode = it }
     ChoiceRow(modes.drop(3), s.mode) { s.mode = it }
     DirectionPad(s.dials, session.turnToGo(), dialSize = 96.dp) { s.dials = it; s.mode = HeadingMode.FIXED }
-    ChoiceRow(throttles, s.throttle) { s.throttle = it }
+    DriveDial(s.drive, player, session.performance) { s.drive = it }
     LogSlider("Speed   ", s.speed, 0.01, 300.0, { "%.2f km/s".format(it) }) { s.speed = it }
     LogSlider("Distance", s.distance, 100.0, 1e8, { DisplayFormat.distance(it * 1000) }) { s.distance = it }
     // Dial angles become a direction fixed in space when the order is given.
@@ -214,7 +214,7 @@ private fun ManoeuvrePanel(session: GameSession, s: ManoeuvreState, changed: (St
             changed(problem)
         }
         ConsoleButton("BURN", enabled = !world.over) {
-            val problem = session.orders.burn(s.mode, target(), s.throttle, s.speed, s.distance)
+            val problem = session.orders.burn(s.mode, target(), s.drive, s.speed, s.distance)
             if (problem == null) s.dials = null
             changed(problem)
         }
@@ -278,7 +278,7 @@ private fun manoeuvreStatus(session: GameSession): String {
     val turning = if (toGo > session.data.rules.ships.alignToleranceDeg) "turning, %.0f° to go".format(toGo) else null
     val burn = p.burn
     return when {
-        burn != null -> "Burn ${(burn.throttle * 100).toInt()}% ${burn.stage.name.lowercase()}: " +
+        burn != null -> "Burn %.3f m/s² ${burn.stage.name.lowercase()}: ".format(session.performance.accelerationMS2(p, burn.drive)) +
             (turning ?: if (burn.stage == BurnStage.COAST) "coasting" else "thrusting")
         turning != null -> "Heading $turning"
         else -> "Burn none"

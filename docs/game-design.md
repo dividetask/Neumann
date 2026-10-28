@@ -92,7 +92,8 @@ new information.
 Between time skips the player can:
 
 A. **Face** a direction: the ship turns to it and holds it.
-B. **Burn** in a direction: throttle (fraction of full thrust), and a
+B. **Burn** in a direction: the **drive dial** (see
+   [ships.md](ships.md#performance): from full thrust to most economical), and a
    **desired speed**, a **desired distance**, or both (two sliders). The ship
    turns to the direction first (see [ships.md](ships.md#facing-and-turning)).
    - **Speed only:** burn until moving at the desired speed, then coast.

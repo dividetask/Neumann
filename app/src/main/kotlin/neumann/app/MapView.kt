@@ -134,13 +134,14 @@ private fun DrawScope.draw(
         val steps = 6
         for (i in 0..steps) {
             val r = (belt.innerAu + (belt.outerAu - belt.innerAu) * i / steps) * Units.AU
-            ring(cam, Vec3.ZERO, r, 0.0, Theme.dim.copy(alpha = 0.25f))
+            ring(cam, Vec3.ZERO, r, 0.0, Theme.dim.copy(alpha = 0.25f), 1f)
         }
     }
     for (p in world.planets) {
         val centre = p.parent?.position ?: Vec3.ZERO
         if (p.orbitRadius * cam.scale < 8) continue // too small to see at this zoom
-        ring(cam, centre, p.orbitRadius, p.inclination, Theme.dim.copy(alpha = if (p.isMoon) 0.3f else 0.5f))
+        if (p.isMoon) ring(cam, centre, p.orbitRadius, p.inclination, Theme.orbit.copy(alpha = 0.55f), 1.5.dp.toPx())
+        else ring(cam, centre, p.orbitRadius, p.inclination, Theme.orbit.copy(alpha = 0.85f), 2.dp.toPx())
     }
     path?.let { pts ->
         val line = Path()
@@ -261,7 +262,7 @@ private fun DrawScope.direction(cam: MapCamera, from: Vec3, dir: Vec3): Offset {
 }
 
 /** A circular orbit of [radius] around [centre], tilted by [inclination] (same tilt as PlanetMover). */
-private fun DrawScope.ring(cam: MapCamera, centre: Vec3, radius: Double, inclination: Double, color: Color) {
+private fun DrawScope.ring(cam: MapCamera, centre: Vec3, radius: Double, inclination: Double, color: Color, width: Float) {
     val path = Path()
     for (i in 0..96) {
         val th = 2 * Math.PI * i / 96
@@ -269,7 +270,7 @@ private fun DrawScope.ring(cam: MapCamera, centre: Vec3, radius: Double, inclina
         val o = cam.project(centre + Vec3(radius * cos(th), y * cos(inclination), y * sin(inclination)), size)
         if (i == 0) path.moveTo(o.x, o.y) else path.lineTo(o.x, o.y)
     }
-    drawPath(path, color, style = Stroke(1f))
+    drawPath(path, color, style = Stroke(width))
 }
 
 /**

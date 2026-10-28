@@ -15,6 +15,8 @@ object Theme {
     val danger = Color(0xFFFF4D4D)
     val star = Color(0xFFFFE070)
     val planet = Color(0xFF6FA8DC)
+    /** Orbit rings: bright cyan, apart from the green display, red enemies, and amber alerts. */
+    val orbit = Color(0xFF3FD0FF)
     val player = Color(0xFF7CFC7C)
     val enemy = Color(0xFFFF4D4D)
     /** Where the instruments saw a ship; [enemy] is where it probably is now. */

@@ -287,6 +287,8 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
 - **No scrolling.** Everything fits on the screen. Panels toggle between
   shown and hidden instead.
 - **Map:** one full-screen 3D view of the system.
+  - Orbits are drawn as thick bright cyan rings (moons' thinner and
+    fainter), so they stand out from the green display.
   - One-finger drag pans; pinch zooms.
   - Two-finger twist rotates around the system's axis; two-finger drag up
     or down tilts between looking from above and edge-on.

@@ -20,6 +20,7 @@ import kotlin.random.Random
  */
 class SystemGenerator(private val data: GameData) {
     private val g = data.generation
+    private val reach = DetectionReach(data).au()
 
     fun generate(seed: Long): ScenarioConfig {
         val rnd = Random(seed)
@@ -31,6 +32,7 @@ class SystemGenerator(private val data: GameData) {
         val count = rnd.nextInt(g.planets.countMin, g.planets.countMax + 1)
         var orbit = rnd.range(g.planets.firstOrbitAuMin, g.planets.firstOrbitAuMax)
         for (i in 0 until count) {
+            if (orbit > g.planets.maxOrbitAu) break // real systems are no wider
             val rocky = orbit < g.planets.rockyLimitAu
             val kind = if (rocky) g.planets.rocky else g.planets.giant
             val mass = rnd.logRange(kind.massEarthMin, kind.massEarthMax)
@@ -52,8 +54,8 @@ class SystemGenerator(private val data: GameData) {
         val giants = worlds.filter { it.orbitAu >= g.planets.rockyLimitAu }
         val belt = belt(rnd, rockyWorlds, giants)
 
-        val innerEdge = rockyWorlds.maxOf { it.orbitAu }
-        val entryRadius = maxOf(g.entry.radiusAuMin, innerEdge * g.entry.radiusOverInnerSystem)
+        // Far out: beyond the outermost orbit by several enemy detection ranges.
+        val entryRadius = worlds.maxOf { it.orbitAu } + g.entry.detectionRangeMultiple * reach
         val f = data.scenario.entry
         val entry = EntryConfig(entryRadius, listOf(rnd.range(0.0, 360.0), rnd.range(-g.entry.elevationDegMax, g.entry.elevationDegMax)),
             f.minSpeedKmS, f.maxSpeedKmS, f.defaultSpeedKmS)

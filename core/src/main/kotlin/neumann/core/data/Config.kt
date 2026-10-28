@@ -295,6 +295,8 @@ data class PlanetRanges(
     val spacingMax: Double,
     /** Rocky planets inside this; gas and ice giants beyond. */
     val rockyLimitAu: Double,
+    /** No orbit beyond this, as in real systems. */
+    val maxOrbitAu: Double,
     val inclinationDegMax: Double,
     val rocky: PlanetKindRange,
     val giant: PlanetKindRange,
@@ -321,9 +323,8 @@ data class BeltRanges(val chance: Double, val minGapAu: Double)
 
 @Serializable
 data class EntryRanges(
-    /** Entry sphere radius, as a multiple of the outermost rocky planet's orbit. */
-    val radiusOverInnerSystem: Double,
-    val radiusAuMin: Double,
+    /** The entry sphere lies this many enemy detection ranges beyond the outermost orbit. */
+    val detectionRangeMultiple: Double,
     val elevationDegMax: Double,
 )
 

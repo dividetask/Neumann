@@ -207,8 +207,10 @@ Every game generates a new system from a seed. The seed is shown, so a
 system can be replayed. The ranges live in `data/system-generation.yaml`.
 
 - **Star:** 0.6–1.4 solar masses.
-- **Planets:** 4–9, spaced outward. Rocky planets inside about 2 AU; gas and
-  ice giants beyond.
+- **Planets:** 4–9, spaced outward (each orbit 1.4–2 times the one inside
+  it, as in real systems). Rocky planets inside about 2 AU; gas and ice
+  giants beyond. As compact as real systems: no orbit beyond `maxOrbitAu`
+  (45 AU; Neptune is at 30), so a system may end up with fewer planets.
 - **Moons:** rocky planets 0–2, giants 2–6. Moons follow fixed circular
   orbits around their planet, and their gravity counts. A moon weighs at
   most 1% of its planet and orbits clear of the stations close in.
@@ -219,8 +221,13 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
 - **Enemies:** the base orbits a random rocky planet, and the defence
   platform orbits the same planet. The four raiders patrol near the base or
   around a giant's moons; one may lie in ambush.
-- **Arrival:** a random bearing on the entry sphere, outside the inner
-  system.
+- **Arrival:** a random bearing on the entry sphere, always far out:
+  beyond the outermost orbit by `detectionRangeMultiple` (4) times the
+  furthest any enemy could detect the probe, so nothing can attack before
+  the first pause. **(interpretation)** That range is worked out from the
+  data: the longest reach of any enemy sensor against the probe, which is a
+  telescope against the probe while burning (1 AU × burning signature 4 =
+  4 AU), so the probe arrives 16 AU beyond the outermost orbit.
 
 ## Player ship
 

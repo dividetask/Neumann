@@ -39,10 +39,18 @@ class SystemGeneratorTest {
                 val moons = s.planets.count { it.parent == p.name }
                 assertTrue(moons <= kind.moonsMax, "seed $seed: ${p.name} has $moons moons")
             }
+            assertTrue(planets.all { it.orbitAu <= ranges.planets.maxOrbitAu }, "seed $seed: as compact as real systems")
+            assertEquals(planets.maxOf { it.orbitAu } + ranges.entry.detectionRangeMultiple * neumann.core.game.DetectionReach(data).au(),
+                s.entry.radiusAu, 1e-9, "seed $seed: arrives far out, beyond every enemy's detection")
             assertEquals(1, s.enemies.count { it.design == "base" })
             assertEquals(1, s.enemies.count { it.design == "defencePlatform" })
             assertEquals(ranges.enemies.raiderCount, s.enemies.count { it.design == "raider" })
         }
+    }
+
+    @Test
+    fun `the furthest an enemy can detect the probe is a telescope against it burning`() {
+        assertEquals(4.0, neumann.core.game.DetectionReach(data).au(), 1e-9)
     }
 
     @Test

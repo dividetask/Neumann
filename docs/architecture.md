@@ -111,6 +111,8 @@ capacities, sensor and threat range from the working modules).
 
 ### `neumann.core.game` — orchestration
 
+- `DetectionReach` — the furthest any enemy could detect the probe (sets how
+  far out the probe arrives).
 - `SystemGenerator` — a random `ScenarioConfig` from a seed (same seed, same
   system).
 - `ScenarioBuilder` — builds a `World` from a scenario and the approach

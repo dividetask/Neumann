@@ -43,7 +43,9 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
     var direction by remember(scenario) { mutableStateOf(-world.player.position.normalized()) }
     var speed by remember(scenario) { mutableStateOf(entry.defaultSpeedKmS) }
     val prediction = remember(direction, speed) {
-        predictor.predict(world.player.position, direction * (speed * Units.KM), PREDICT_DAYS * 86400.0, 3 * 3600.0)
+        // Long enough to cross the system from the entry sphere and out the other side.
+        val span = PREDICT_CROSSINGS * world.player.position.length() / (speed * Units.KM)
+        predictor.predict(world.player.position, direction * (speed * Units.KM), span, span / PREDICT_STEPS)
     }
 
     BoxWithConstraints(Modifier.fillMaxSize().background(Theme.background)) {
@@ -81,7 +83,7 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
                 prediction.hits && closest != null -> "Path hits ${closest.name} in ${DisplayFormat.duration(prediction.closestTime)}!"
                 prediction.hits -> "Path falls into ${world.star.name}!"
                 closest != null -> "Passes ${closest.name} at ${DisplayFormat.distance(prediction.closestDistance)} in ${DisplayFormat.duration(prediction.closestTime)}"
-                else -> "Coasting path for $PREDICT_DAYS days"
+                else -> "Coasting path"
             }, if (prediction.hits) Theme.danger else Theme.text)
             Row(Modifier.fillMaxWidth()) {
                 ConsoleButton("NEW SYSTEM") { onNewSystem() }
@@ -92,4 +94,5 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
     }
 }
 
-private const val PREDICT_DAYS = 180
+private const val PREDICT_CROSSINGS = 2.0
+private const val PREDICT_STEPS = 3000

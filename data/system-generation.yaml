@@ -12,6 +12,7 @@ planets:
   spacingMin: 1.4               # each orbit is this many times the one inside it
   spacingMax: 2.0
   rockyLimitAu: 2.0             # rocky planets inside this, gas and ice giants beyond
+  maxOrbitAu: 45                # as compact as real systems: no orbit beyond this (Neptune: 30 AU)
   inclinationDegMax: 4
   rocky: { massEarthMin: 0.05, massEarthMax: 3, moonsMin: 0, moonsMax: 2 }
   giant: { massEarthMin: 10, massEarthMax: 400, moonsMin: 2, moonsMax: 6 }
@@ -29,8 +30,7 @@ moons:
 belt: { chance: 0.5, minGapAu: 0.3 }   # drawn only; no gravity
 
 entry:
-  radiusOverInnerSystem: 1.3    # entry sphere: this times the outermost rocky orbit
-  radiusAuMin: 1.0
+  detectionRangeMultiple: 4     # entry sphere: this many enemy detection ranges beyond the outermost orbit
   elevationDegMax: 15
 
 enemies:

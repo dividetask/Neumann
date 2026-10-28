@@ -293,13 +293,12 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
   - Two-finger twist rotates around the system's axis; two-finger drag up
     or down tilts between looking from above and edge-on.
   - Double-tap resets the view to the default view.
-  - **Default view:** frames the star, the player's ship, and every ship
-    that can be seen, at the starting rotation and tilt. The bridge opens
-    with it. Each tracked ship counts at both its seen and estimated positions (see
-    [sensors.md](sensors.md)); one never seen with a position is left out,
-    since its distance is unknown, and so are lost ships, ghosts, and
-    torpedoes. On the approach screen nothing is seen
-    yet, so the default view is the whole entry sphere.
+  - **Default view:** frames the star, every planet (not moons), the
+    player's ship, and every ship that can be seen, at the starting
+    rotation and tilt. Both screens open with it. Each tracked ship counts
+    at both its seen and estimated positions (see [sensors.md](sensors.md));
+    one never seen with a position is left out, since its distance is
+    unknown, and so are lost ships, ghosts, and torpedoes.
 - **Top bar** (always visible): mission time, the four time-skip buttons,
   and **remaining**: how many enemy ships, fixed defences, and bases have
   been seen and not destroyed, e.g. "REMAINING 5: 3 ships, 1 defence, 1
@@ -318,3 +317,5 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
   it. The direction dials live in MANOEUVRE.
 - **Approach screen:** the full-screen map, the ship's arrow (see
   [Space](#space)), the entry speed it gives, and ENTER.
+- **No instructions on the game screens.** How to play (gestures, setting
+  the approach, targeting) is for a tutorial. Pending: the tutorial.

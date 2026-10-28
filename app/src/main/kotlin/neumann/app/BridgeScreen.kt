@@ -90,8 +90,8 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
         // and the defences and bases found.
         val bogeys = remember(tick) { session.bogeys() }
         val fixtures = remember(tick) { session.knownFixtures() }
-        // The default view: the star, the ship, and every ship it can see, seen and now (not ghosts or torpedoes).
-        fun startView() = MapCamera.framing(bogeys.filter { it.tracked && it.contact.kind.isVessel }
+        // The default view: the star, every planet, the ship, and every ship it can see, seen and now (not ghosts or torpedoes).
+        fun startView() = MapCamera.framing(world.planets.filter { !it.isMoon }.map { it.position } + bogeys.filter { it.tracked && it.contact.kind.isVessel }
             .flatMap { listOfNotNull(it.seen.position, it.now) } + world.player.position + Vec3.ZERO, area)
         var camera by remember { mutableStateOf(startView()) }
         MapView(world, camera, { camera = it }, onReset = { camera = startView() },
@@ -184,7 +184,6 @@ private fun ContactsPanel(session: GameSession, changed: (String?) -> Unit) {
             Modifier.fillMaxWidth().clickable(enabled = c.kind.isVessel) { changed(session.orders.setTarget(c.id)) }.padding(vertical = 3.dp))
     }
     if (contacts.size > CONTACT_LINES) Line("+${contacts.size - CONTACT_LINES} further", Theme.dim)
-    Line("Tap a contact to target it.", Theme.dim)
 }
 
 /** Order inputs kept between panel openings. */
@@ -233,7 +232,6 @@ private fun WeaponsPanel(session: GameSession, changed: (String?) -> Unit) {
         ConsoleButton("CANNON", enabled = !world.over) { changed(session.orders.fireNow(WeaponKind.CANNON)) }
         ConsoleButton("TORPEDO", enabled = !world.over) { changed(session.orders.fireNow(WeaponKind.TORPEDO)) }
     }
-    Line("Fires at the target during the next time skip.", Theme.dim)
     val rules = player.rules
     Rule("Laser point defence", rules.laserPointDefence) { rules.laserPointDefence = it; changed(null) }
     Rule("Laser auto-fire", rules.laserAutoFire) { rules.laserAutoFire = it; changed(null) }

@@ -16,7 +16,7 @@ fun MessagePanel(world: World, busy: Boolean, lastSkip: TimeSkipResult?, skipSta
     notice?.let { Line(it, Theme.danger); lines++ }
     when {
         busy -> Line("Running...", Theme.dim)
-        lastSkip == null -> Line("Choose a time skip.", Theme.dim)
+        lastSkip == null -> Line("No time skip yet.", Theme.dim)
         lastSkip.pausedBy.isEmpty() -> Line("Skipped ${DisplayFormat.duration(lastSkip.elapsedSeconds)}: nothing to pause for", Theme.text)
         else -> {
             Line("PAUSED after ${DisplayFormat.duration(lastSkip.elapsedSeconds)}:", Theme.alert)

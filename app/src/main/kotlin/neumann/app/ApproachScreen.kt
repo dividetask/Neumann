@@ -49,7 +49,8 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
     BoxWithConstraints(Modifier.fillMaxSize().background(Theme.background)) {
         val area = with(LocalDensity.current) { Size(maxWidth.toPx(), maxHeight.toPx()) }
         val maxArrow = minOf(area.width, area.height) * 0.35f
-        val startView = remember(scenario, area) { MapCamera.fitting(Vec3.ZERO, entry.radiusAu * Units.AU * 1.15, area) }
+        // The default view: the star, every planet, and the ship.
+        val startView = remember(scenario, area) { MapCamera.framing(world.planets.filter { !it.isMoon }.map { it.position } + world.player.position + Vec3.ZERO, area) }
         var camera by remember(startView) { mutableStateOf(startView) }
         val fraction = ((speed - entry.minSpeedKmS) / (entry.maxSpeedKmS - entry.minSpeedKmS)).toFloat()
         MapView(
@@ -71,8 +72,6 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
         Column(Modifier.align(Alignment.TopStart).fillMaxWidth().background(Theme.panel.copy(alpha = 0.85f)).padding(8.dp)) {
             Line("NEUMANN  $version", Theme.dim)
             Line("ARRIVING: ${scenario.name.uppercase()}   seed $seed", Theme.alert)
-            Line("Drag the arrow from your ship: direction = approach, length = speed.", Theme.dim)
-            Line("Pinch zoom · drag pan · twist rotate · two-finger drag tilt · double-tap reset", Theme.dim)
         }
 
         Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().background(Theme.panel.copy(alpha = 0.85f)).padding(8.dp)) {

@@ -45,7 +45,7 @@ fun DirectionPad(pending: Angles?, toGo: Angles?, dialSize: Dp, toGoLabel: Strin
             }
         }
     }
-    Line("Set:   " + (pending?.let(::describe) ?: "drag a dial"), if (pending == null) Theme.dim else Theme.alert)
+    Line("Set:   " + (pending?.let(::describe) ?: "none"), if (pending == null) Theme.dim else Theme.alert)
     if (toGoLabel.isNotEmpty()) Line(toGoLabel + (toGo?.let(::describe) ?: "no heading"), Theme.dim)
 }
 

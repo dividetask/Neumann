@@ -289,6 +289,11 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
 - **Map:** one full-screen 3D view of the system.
   - Orbits are drawn as thick bright cyan rings (moons' thinner and
     fainter), so they stand out from the green display.
+  - The star, planets, and moons are drawn at their true size when zoomed
+    in close enough, and otherwise at a minimum size: every planet smaller
+    than that looks the same (moons have a smaller minimum).
+  - The player's ship is drawn as a small arrowhead pointing where the ship
+    faces, with a line showing its velocity.
   - One-finger drag pans; pinch zooms.
   - Two-finger twist rotates around the system's axis; two-finger drag up
     or down tilts between looking from above and edge-on.

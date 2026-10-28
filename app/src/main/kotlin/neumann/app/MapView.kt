@@ -150,18 +150,20 @@ private fun DrawScope.draw(
     }
     val star = at(Vec3.ZERO)
     if (visible(star)) {
-        drawCircle(Theme.star, 7f, star)
-        label(measurer, world.star.name, star + Offset(9f, -9f), Theme.star)
+        val r = shown(world.star.radius, cam, STAR_MIN_DP)
+        drawCircle(Theme.star, r, star)
+        label(measurer, world.star.name, star + Offset(r + 3f, -r - 3f), Theme.star)
     }
     for (p in world.planets) {
         val o = at(p.position)
         if (!visible(o)) continue
-        val radius = if (p.isMoon) 2.5f else if (p.mass > 10 * Units.EARTH_MASS) 6f else 4f
+        // True size when zoomed in; below the minimum, every planet (and every moon) looks the same.
+        val radius = shown(p.radius, cam, if (p.isMoon) MOON_MIN_DP else PLANET_MIN_DP)
         drawCircle(if (p.isMoon) Theme.dim else Theme.planet, radius, o)
         if (p === highlight) drawCircle(Theme.alert, radius + 6f, o, style = Stroke(2f))
         // Moons are labelled only when zoomed in enough to tell them apart.
         val labelled = !p.isMoon || p.orbitRadius * cam.scale > 40
-        if (labelled) label(measurer, p.name, o + Offset(7f, -7f), if (p.isMoon) Theme.dim else Theme.planet)
+        if (labelled) label(measurer, p.name, o + Offset(radius + 3f, -radius - 3f), if (p.isMoon) Theme.dim else Theme.planet)
     }
 
     if (showContacts) {
@@ -197,9 +199,8 @@ private fun DrawScope.draw(
     if (p.alive) {
         val o = at(p.position)
         val reach = minOf(size.width, size.height) * 0.08f
-        drawCircle(Theme.player, 5f, o)
         drawLine(Theme.player, o, o + direction(cam, p.position, p.velocity) * reach * 1.5f, 2f) // velocity
-        drawLine(Theme.alert, o, o + direction(cam, p.position, p.forward) * reach, 3f) // facing
+        spaceship(o, direction(cam, p.position, p.forward), Theme.player)
         arrow?.let { a ->
             val tip = o + direction(cam, p.position, a.direction) * a.lengthPx
             drawLine(Theme.alert, o, tip, 4f)
@@ -250,6 +251,40 @@ private fun DrawScope.marker(kind: ContactKind, o: Offset, color: Color, filled:
     }
     if (filled) drawCircle(color, 5f, o) else drawCircle(color, 5f, o, style = Stroke(1.5f))
 }
+
+/** On-screen radius of a body: its true size at this zoom, but never under [minDp]. */
+private fun DrawScope.shown(radiusM: Double, cam: MapCamera, minDp: Float): Float =
+    maxOf((radiusM * cam.scale).toFloat(), minDp.dp.toPx())
+
+/**
+ * A small arrowhead ship pointing along [facing] (a unit screen direction);
+ * a ring when it points straight at or away from the viewer.
+ */
+private fun DrawScope.spaceship(o: Offset, facing: Offset, color: Color) {
+    val len = SHIP_DP.dp.toPx()
+    if (facing == Offset.Zero) {
+        drawCircle(color, len * 0.5f, o, style = Stroke(2f))
+        return
+    }
+    val side = Offset(-facing.y, facing.x)
+    val hull = Path().apply {
+        val nose = o + facing * len
+        moveTo(nose.x, nose.y)
+        val left = o - facing * (len * 0.6f) + side * (len * 0.55f)
+        lineTo(left.x, left.y)
+        val notch = o - facing * (len * 0.3f)
+        lineTo(notch.x, notch.y)
+        val right = o - facing * (len * 0.6f) - side * (len * 0.55f)
+        lineTo(right.x, right.y)
+        close()
+    }
+    drawPath(hull, color)
+}
+
+private const val STAR_MIN_DP = 7f
+private const val PLANET_MIN_DP = 5f
+private const val MOON_MIN_DP = 2.5f
+private const val SHIP_DP = 9f
 
 /** Unit screen direction of a direction in space, as seen from [from]; zero if it points straight at the viewer. */
 private fun DrawScope.direction(cam: MapCamera, from: Vec3, dir: Vec3): Offset {

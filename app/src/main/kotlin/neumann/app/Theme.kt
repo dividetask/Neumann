@@ -12,7 +12,7 @@ object Theme {
     val text = Color(0xFF7CFC7C)
     val dim = Color(0xFF3F7F3F)
     val alert = Color(0xFFFFB000)
-    val danger = Color(0xFFFF4D4D)
+    val danger = Color(0xFFFF8A80) // light red: readable on the dark background
     val star = Color(0xFFFFE070)
     val planet = Color(0xFF6FA8DC)
     /** Orbit rings: bright cyan, apart from the green display, red enemies, and amber alerts. */

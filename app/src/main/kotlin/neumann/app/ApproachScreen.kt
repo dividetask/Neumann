@@ -92,8 +92,11 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
 
         Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().background(Theme.panel.copy(alpha = 0.85f)).padding(8.dp)) {
             Line("Entry speed %.1f km/s".format(speed / Units.KM))
-            Line("Entry burn %.0f km/s: %.1f t fuel, about %s".format(burn.deltaV / Units.KM, burn.fuelT, DisplayFormat.duration(burn.seconds)),
-                if (burn.possible) Theme.text else Theme.danger)
+            if (burn.possible) {
+                Line("Entry burn %.0f km/s: %.1f t fuel, about %s".format(burn.deltaV / Units.KM, burn.fuelT, DisplayFormat.duration(burn.seconds)))
+            } else {
+                Line("Not enough fuel: needs %.1f t, have %.1f t".format(burn.fuelT, probe.fuel), Theme.alert)
+            }
             DriveDial(drive, probe, performance) { drive = it }
             val closest = prediction.closest
             Line(when {

@@ -163,7 +163,8 @@ to spend torpedoes against point defence.
   lets the arrow point anywhere in 3D. While dragging, the map shows the
   coasting path at that velocity (under gravity), highlights the body it
   passes closest to, and the screen shows the entry burn's speed change,
-  fuel, and time at the drive dial's setting. ENTER commits: the probe
+  fuel, and time at the drive dial's setting, or "Not enough fuel" with the
+  fuel it needs and has (ENTER is then disabled). ENTER commits: the probe
   burns toward that velocity (a matching burn), and the game runs on
   normally, pausing as usual, until the burn ends.
 

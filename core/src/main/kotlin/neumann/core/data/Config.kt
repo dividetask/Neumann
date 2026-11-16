@@ -24,6 +24,8 @@ data class RulesFile(
 @Serializable
 data class SimConfig(
     val baseStepSeconds: Double,
+    val maxStepSeconds: Double,
+    val stepsPerOrbit: Double,
     val fineStepSeconds: Double,
     val fineStepDivisions: Double,
     val historySampleSeconds: Double,

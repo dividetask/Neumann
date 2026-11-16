@@ -15,8 +15,8 @@ class GameSession(val data: GameData, scenario: ScenarioConfig, approach: Approa
     constructor(data: GameData, approach: ApproachVector) : this(data, data.scenario, approach)
 
     private val step = SimulationStep(data)
-    private val timeSkip = TimeSkip(step, StepSizer(data.rules.sim), AutoPauseMonitor(data.rules.autoPause),
-        data.rules.autoPause.groupSeconds)
+    private val timeSkip = TimeSkip(step, StepSizer(data.rules.sim, step.performance), AutoPauseMonitor(data.rules.autoPause),
+        data.rules.autoPause.groupSeconds, data.rules.sim.baseStepSeconds)
 
     val performance = step.performance
     val world: World = ScenarioBuilder(data).build(scenario, approach).also { step.sensors.run(it) }

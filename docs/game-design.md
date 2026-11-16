@@ -167,6 +167,20 @@ to spend torpedoes against point defence.
 
 ## Physics
 
+- **Simulation steps** **(interpretation)**: the simulation moves in steps
+  that are as long as nothing important would be missed: at most
+  `maxStepSeconds` (an hour), and never longer than
+  - `baseStepSeconds` (10 s) while any enemy is within weapon range of the
+    player, or the player within weapon range of an enemy;
+  - a tenth of the time until the player and an enemy could come within
+    weapon range of each other at their current closing speed;
+  - an orbit divided by `stepsPerOrbit` for every ship near a planet, moon,
+    or the star, so orbits stay true;
+  - a tenth of the time a burn has left;
+  - the short steps near projectiles (`fineStepSeconds`).
+
+  Longer steps give the same result when nothing is close, so long skips
+  stay fast.
 - Real Newtonian movement. A ship keeps its velocity until it burns its
   engine; to stop, it turns around and burns against its motion.
 - Burns use fuel at the engines' `fuelKgS`. The ship gets lighter as it

@@ -35,7 +35,9 @@ class BurnPhase(
         val burn = v.burn ?: return
         if (!v.has(ModuleKind.PROPULSION)) return end(world, v, "no working propulsion")
         if (v.fuel <= 0.0) return end(world, v, "out of fuel")
-        val match = v.heading?.mode == HeadingMode.MATCH_TARGET
+        val gap = resolver.matchGap(v) // a matching burn: target's velocity, or a given one
+        val match = gap != null
+        if (gap != null && gap < SPEED_TOLERANCE_MS) return end(world, v, "velocity matched")
         val dir = resolver.resolve(v) ?: return end(world, v, if (match) "velocity matched" else "no direction (no target?)")
         val accel = performance.accelerationMS2(v, burn.drive)
         if (accel <= 0.0) return
@@ -44,10 +46,8 @@ class BurnPhase(
         val speed = (v.velocity - burn.startVelocity).dot(dir)
         val travelled = (v.position - burn.startPosition - burn.startVelocity * (world.time - burn.startTime)).dot(dir)
 
-        val wanted: Double = if (match) {
-            val rel = (v.contacts[v.targetId]!!.observedVelocity - v.velocity).length()
-            if (rel < 1e-6) return end(world, v, "velocity matched")
-            rel
+        val wanted: Double = if (gap != null) {
+            gap
         } else {
             advanceStage(burn, speed, travelled, accel, v, dt)
             when (burn.stage) {
@@ -102,7 +102,7 @@ class BurnPhase(
     private fun end(world: World, v: Vessel, reason: String) {
         val braking = v.burn?.stage == BurnStage.BRAKE
         v.burn = null
-        if (v.heading?.mode == HeadingMode.MATCH_TARGET || braking) v.heading = Heading(HeadingMode.FIXED, v.forward)
+        if (v.heading?.mode == HeadingMode.MATCH_TARGET || v.heading?.mode == HeadingMode.MATCH_VELOCITY || braking) v.heading = Heading(HeadingMode.FIXED, v.forward)
         if (v === world.player) world.event(EventKind.BURN_COMPLETE, v.id, "Burn ended: $reason")
     }
 }

@@ -33,8 +33,9 @@ class LightDelay {
         }
         if (time < last.time) return target.history.at(time)
         val f = (time - last.time) / (current.time - last.time)
+        // Burning or not: whichever end of the gap is nearer (a long step may hide when it changed).
         return HistorySample(time, last.position + (current.position - last.position) * f,
-            last.velocity + (current.velocity - last.velocity) * f, last.burning)
+            last.velocity + (current.velocity - last.velocity) * f, if (f < 0.5) last.burning else current.burning)
     }
 
     companion object {

@@ -23,7 +23,8 @@ enum class ModuleKind {
  * (chosen with the direction circles, or by the AI); the rest track as
  * things move.
  */
-enum class HeadingMode { FIXED, PROGRADE, RETROGRADE, TOWARD_TARGET, AWAY_FROM_TARGET, MATCH_TARGET }
+/** MATCH_VELOCITY: burn until the velocity is the heading's vector (m/s, relative to the star). */
+enum class HeadingMode { FIXED, PROGRADE, RETROGRADE, TOWARD_TARGET, AWAY_FROM_TARGET, MATCH_TARGET, MATCH_VELOCITY }
 
 /** Telescope and emission receiver are passive; radar and lidar are active. */
 enum class SensorType(val active: Boolean) { TELESCOPE(false), RADAR(true), LIDAR(true), EMISSION_RECEIVER(false) }

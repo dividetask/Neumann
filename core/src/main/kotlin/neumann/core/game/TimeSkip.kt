@@ -19,15 +19,20 @@ class TimeSkip(
     private val sizer: StepSizer,
     private val monitor: AutoPauseMonitor,
     private val groupSeconds: Double,
+    private val firstStepSeconds: Double,
 ) {
     fun run(world: World, seconds: Double): TimeSkipResult {
         val start = world.time
         val end = start + seconds
         val collector = PauseCollector(groupSeconds)
         var seen = world.log.events.size
+        var first = true
         while (!world.over && end - world.time > 1e-9) {
             val stopAt = min(end, collector.deadline)
-            step.run(world, sizer.next(world, stopAt - world.time))
+            // The first step is short, so whatever can be seen right away pauses at once.
+            val dt = sizer.next(world, stopAt - world.time)
+            step.run(world, if (first) min(dt, firstStepSeconds) else dt)
+            first = false
             val fresh = world.log.events.subList(seen, world.log.events.size).toList()
             seen = world.log.events.size
             collector.offer(monitor.pausing(fresh), world.time)?.let { return TimeSkipResult(world.time - start, it) }

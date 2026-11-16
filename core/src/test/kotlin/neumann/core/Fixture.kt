@@ -50,8 +50,8 @@ object Fixture {
     val openSpace = Vec3(-1.3 * Units.AU, 0.0, 0.0)
 
     fun timeSkip(world: World) =
-        TimeSkip(SimulationStep(world.data), StepSizer(world.data.rules.sim), AutoPauseMonitor(world.data.rules.autoPause),
-            world.data.rules.autoPause.groupSeconds)
+        TimeSkip(SimulationStep(world.data), StepSizer(world.data.rules.sim, SimulationStep(world.data).performance), AutoPauseMonitor(world.data.rules.autoPause),
+            world.data.rules.autoPause.groupSeconds, world.data.rules.sim.baseStepSeconds)
 
     /** Skips until [seconds] have passed, ignoring pauses (stops if the battle ends). */
     fun runFor(world: World, seconds: Double) {

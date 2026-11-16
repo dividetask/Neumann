@@ -104,8 +104,9 @@ Run in this order by `SimulationStep`:
 | `ClaimCheck` | Detects a claimed system or a lost ship. |
 | `HistoryPhase` | Records positions for light delay. |
 
-Helpers: `SalvoPlanner` (how big an automatic torpedo salvo must be to get through point defence, or none), `LaserFalloff` (laser damage by distance: full to the focus range, then 1/distance²), `StepSizer` (step length; short steps when projectiles are near
-targets), `DamageResolver` (applies a hit to a module), `HeadingResolver`
+Helpers: `SalvoPlanner` (how big an automatic torpedo salvo must be to get through point defence, or none), `LaserFalloff` (laser damage by distance: full to the focus range, then 1/distance²), `StepSizer` (step length: long when nothing is close, short near
+projectiles, weapon ranges, orbits, and the end of a burn), `BurnClock`
+(how long a burn has left), `DamageResolver` (applies a hit to a module), `HeadingResolver`
 (where a heading points now), `ShipPerformance` (mass, thrust, turn rate,
 capacities, sensor and threat range from the working modules).
 

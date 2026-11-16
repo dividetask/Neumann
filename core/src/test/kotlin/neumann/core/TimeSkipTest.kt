@@ -94,4 +94,17 @@ class EventLogTest {
         assertEquals(2, log.events.size)
         assertEquals(20.0, log.events[0].amount, 1e-9)
     }
+
+    @Test
+    fun `steps are long when nothing is close, and short inside weapon range`() {
+        val w = Fixture.world()
+        val d = Fixture.dummy(w)
+        val sizer = neumann.core.sim.StepSizer(w.data.rules.sim, neumann.core.sim.SimulationStep(w.data).performance)
+        // Far out in empty space, far from the dummy.
+        Fixture.place(w, w.player, Fixture.openSpace * 20.0, Vec3.ZERO)
+        Fixture.place(w, d, Fixture.openSpace * 20.0 + Vec3(0.0, 5.0 * Units.AU, 0.0), Vec3.ZERO)
+        assertEquals(w.data.rules.sim.maxStepSeconds, sizer.next(w, 1e9), 1e-9, "nothing close: the longest step")
+        Fixture.place(w, d, w.player.position + Vec3(10_000.0 * Units.KM, 0.0, 0.0), Vec3.ZERO)
+        assertEquals(w.data.rules.sim.baseStepSeconds, sizer.next(w, 1e9), 1e-9, "in weapon range: base steps")
+    }
 }

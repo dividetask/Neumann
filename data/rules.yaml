@@ -2,7 +2,9 @@
 # See docs/game-design.md. Starting values are untuned.
 
 sim:
-  baseStepSeconds: 10          # normal simulation step
+  baseStepSeconds: 10          # step while anything is in weapon range
+  maxStepSeconds: 3600         # longest step, when nothing is close
+  stepsPerOrbit: 200           # a ship near a body takes at least this many steps per orbit
   fineStepSeconds: 0.5         # shortest step, used near impacts
   fineStepDivisions: 10        # step ≈ projectile time-to-target / this
   historySampleSeconds: 10     # how often positions are recorded for light delay

@@ -6,7 +6,7 @@ Neumann is an Android game of space battles between ships that travel slower
 than light. The player commands one ship against AI opponents: they pick a
 star to travel to, choose an approach vector into its system, and fight the
 fixed defences and ships waiting there. Time moves forward in skips (1 minute,
-1 hour, 4 hours, 1 day) that stop early when something worth pausing for
+1 hour, 4 hours, 1 day, 1 month) that stop early when something worth pausing for
 happens. Ship state carries over between battles. The presentation is low on
 graphics and close to text, styled like a ship's own display.
 

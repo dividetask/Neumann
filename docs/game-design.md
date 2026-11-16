@@ -43,7 +43,7 @@ E. Back to A, keeping the ship's state.
 
 ## Time skips
 
-Controls: **1 minute**, **1 hour**, **4 hours**, **1 day**.
+Controls: **1 minute**, **1 hour**, **4 hours**, **1 day**, **1 month** (30 days).
 
 A time skip moves the game forward until the chosen time has passed, or until
 an auto-pause event happens, whichever comes first.
@@ -312,7 +312,7 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
     at both its seen and estimated positions (see [sensors.md](sensors.md));
     one never seen with a position is left out, since its distance is
     unknown, and so are lost ships, ghosts, and torpedoes.
-- **Top bar** (always visible): mission time, the four time-skip buttons,
+- **Top bar** (always visible): mission time, the five time-skip buttons,
   and **remaining**: how many enemy ships, fixed defences, and bases have
   been seen and not destroyed, e.g. "REMAINING 5: 3 ships, 1 defence, 1
   base". It counts only what the sensors have found (tracked, lost, or

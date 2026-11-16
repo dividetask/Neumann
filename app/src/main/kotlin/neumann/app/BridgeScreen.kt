@@ -36,7 +36,7 @@ import neumann.core.world.EventKind
 import neumann.core.world.HeadingMode
 import neumann.core.world.WeaponKind
 
-private val skips = listOf(60.0 to "1 MIN", 3600.0 to "1 HR", 4 * 3600.0 to "4 HR", 86400.0 to "1 DAY")
+private val skips = listOf(60.0 to "1 MIN", 3600.0 to "1 HR", 4 * 3600.0 to "4 HR", 86400.0 to "1 DAY", 30 * 86400.0 to "1 MON")
 private val modes = listOf(
     HeadingMode.FIXED to "DIALS",
     HeadingMode.PROGRADE to "PRO",

@@ -158,8 +158,11 @@ to spend torpedoes against point defence.
   bearing set by where it came from (random in the first version), moving
   at its arrival speed (see [Arrival](#arrival)). The player drags an arrow
   out from the ship: the arrow's direction is the approach direction and its
-  length the entry speed: any speed the fuel allows, from stopped up to the
-  arrival speed plus all the probe's delta-v. Rotating and tilting the map
+  length the entry speed, from the slowest to the fastest speed the fuel can
+  reach in that direction at the drive dial's setting (the velocity can
+  change by up to the delta-v the fuel gives at that setting; keeping the
+  current velocity costs nothing). A direction the fuel cannot reach is not
+  taken. Rotating and tilting the map
   lets the arrow point anywhere in 3D. While dragging, the map shows the
   coasting path at that velocity (under gravity), highlights the body it
   passes closest to, and the screen shows the entry burn's speed change,

@@ -29,12 +29,14 @@ import neumann.core.sim.ShipPerformance
 import neumann.core.world.Vessel
 import kotlin.math.exp
 import kotlin.math.ln
+import kotlin.math.sqrt
 
 /**
  * Arrival: the probe is at the start point, moving at its arrival speed. The
  * player drags the arrow out from the ship to choose the entry velocity: its
- * direction is the approach, its length the entry speed, anything from
- * stopped up to what the fuel allows. The screen shows the entry burn's
+ * direction is the approach, its length the entry speed, from the slowest to
+ * the fastest the fuel allows in that direction at the drive dial's setting
+ * (keeping the current velocity costs nothing). The screen shows the entry burn's
  * speed change, fuel, and time at the drive dial's setting, and the
  * coasting path at that velocity. ENTER starts the entry burn.
  */
@@ -46,14 +48,15 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
     val probe = world.player
     val performance = remember { ShipPerformance(data.munitions) }
     val predictor = remember(world) { TrajectoryPredictor(world.star, world.planets) }
-    // The fastest entry the fuel allows: the arrival speed plus all its delta-v at the most economical setting.
-    val topSpeed = remember(world) {
-        val mass = performance.massKg(probe)
-        arrival.speedMS + performance.exhaustMS(probe, 0.0) * ln(mass / (mass - probe.fuel * 1000.0))
-    }
-    var direction by remember(scenario) { mutableStateOf(probe.velocity.normalized()) }
-    var speed by remember(scenario) { mutableStateOf(minOf(DEFAULT_ENTRY_MS, topSpeed)) }
+    var aimed by remember(scenario) { mutableStateOf(probe.velocity.normalized()) }
     var drive by remember(scenario) { mutableStateOf(0.0) }
+    var chosen by remember(scenario) { mutableStateOf(DEFAULT_ENTRY_MS) }
+    val reach = EntryReach(probe, performance, drive)
+    // If the drive setting puts the aimed direction out of reach, keep the current heading.
+    val direction = if (reach.speeds(aimed) != null) aimed else probe.velocity.normalized()
+    // Possible speeds in this direction at this drive setting; the chosen speed is kept inside them.
+    val range = reach.speeds(direction)!!
+    val speed = chosen.coerceIn(range.start, range.endInclusive)
     val prediction = remember(direction, speed) {
         // Long enough to cross the system from the start point and out the other side.
         val span = PREDICT_CROSSINGS * probe.position.length() / maxOf(speed, 1_000.0)
@@ -67,7 +70,8 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
         // The default view: the star, every planet, and the ship.
         val startView = remember(scenario, area) { MapCamera.framing(world.planets.filter { !it.isMoon }.map { it.position } + probe.position + Vec3.ZERO, area) }
         var camera by remember(startView) { mutableStateOf(startView) }
-        val fraction = (speed / topSpeed).toFloat()
+        val span = range.endInclusive - range.start
+        val fraction = if (span > 0.0) ((speed - range.start) / span).toFloat() else 1f
         MapView(
             world, camera, { camera = it },
             onReset = { camera = startView },
@@ -76,9 +80,12 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
             arrow = ApproachArrow(direction, 20f + fraction * (maxArrow - 20f)),
             onArrow = { drag ->
                 val len = drag.getDistance()
-                if (len > 8f) {
-                    direction = camera.screenToSpace(drag.x, drag.y).normalized()
-                    speed = ((len - 20f) / (maxArrow - 20f)).coerceIn(0f, 1f) * topSpeed
+                val dir = camera.screenToSpace(drag.x, drag.y).normalized()
+                // A direction the fuel cannot reach at this drive setting is not taken.
+                val r = reach.speeds(dir)
+                if (len > 8f && r != null) {
+                    aimed = dir
+                    chosen = r.start + ((len - 20f) / (maxArrow - 20f)).coerceIn(0f, 1f) * (r.endInclusive - r.start)
                 }
             },
         )
@@ -91,7 +98,7 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
         }
 
         Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().background(Theme.panel.copy(alpha = 0.85f)).padding(8.dp)) {
-            Line("Entry speed %.1f km/s".format(speed / Units.KM))
+            Line("Entry speed %.1f km/s (%.1f–%.1f)".format(speed / Units.KM, range.start / Units.KM, range.endInclusive / Units.KM))
             if (burn.possible) {
                 Line("Entry burn %.0f km/s: %.1f t fuel, about %s".format(burn.deltaV / Units.KM, burn.fuelT, DisplayFormat.duration(burn.seconds)))
             } else {
@@ -114,11 +121,32 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
     }
 }
 
+/**
+ * Which entry speeds the fuel can reach from the current velocity, at drive
+ * setting [drive]: the velocity can change by up to [deltaV], so in a given
+ * direction the reachable speeds are where that ray crosses a sphere of
+ * radius [deltaV] around the current velocity.
+ */
+private class EntryReach(probe: Vessel, performance: ShipPerformance, drive: Double) {
+    private val velocity = probe.velocity
+    val deltaV = performance.massKg(probe).let { m -> performance.exhaustMS(probe, drive) * ln(m / (m - probe.fuel * 1000.0)) }
+
+    /** Slowest and fastest reachable speeds along [direction]; null if no speed in that direction is reachable. */
+    fun speeds(direction: Vec3): ClosedFloatingPointRange<Double>? {
+        val along = direction.dot(velocity)
+        val disc = along * along - velocity.lengthSquared() + deltaV * deltaV
+        if (disc < 0.0) return null
+        val hi = along + sqrt(disc)
+        if (hi < 0.0) return null
+        return maxOf(0.0, along - sqrt(disc))..hi
+    }
+}
+
 /** The entry burn to [velocity]: its speed change, the fuel it needs, roughly how long it takes, and whether the fuel allows it. */
 private class EntryBurn(probe: Vessel, performance: ShipPerformance, velocity: Vec3, drive: Double) {
     val deltaV = (velocity - probe.velocity).length()
     val fuelT = performance.massKg(probe) * (1 - exp(-deltaV / performance.exhaustMS(probe, drive))) / 1000.0
-    val possible = fuelT <= probe.fuel
+    val possible = fuelT <= probe.fuel + 1e-6
     val seconds = deltaV / performance.accelerationMS2(probe, drive)
 }
 

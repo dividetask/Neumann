@@ -31,6 +31,9 @@ belt: { chance: 0.5, minGapAu: 0.3 }   # drawn only; no gravity
 
 entry:
   detectionRangeMultiple: 4     # entry sphere: this many enemy detection ranges beyond the outermost orbit
+  originLyMin: 3                # the last star is this far away (light years)...
+  originLyMax: 15               # ...to this
+  arrivalFuelReserveFraction: 0.25  # cruise speed leaves this much of the tanks after braking to a stop
   elevationDegMax: 15
 
 enemies:

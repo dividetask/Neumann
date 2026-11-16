@@ -16,7 +16,7 @@ import neumann.core.data.GameDataLoader
 import neumann.core.game.GameSession
 import kotlin.random.Random
 
-/** Hosts the approach screen for a random system, then the bridge. */
+/** Hosts the arrival screen for a random system, then the bridge (which runs the entry burn first). */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,8 +28,8 @@ class MainActivity : ComponentActivity() {
             Box(Modifier.fillMaxSize().background(Theme.background).safeDrawingPadding()) {
                 val s = session
                 if (s == null) {
-                    ApproachScreen(data, seed, version, onNewSystem = { seed = newSeed() }) { scenario, approach ->
-                        session = GameSession(data, scenario, approach)
+                    ApproachScreen(data, seed, version, onNewSystem = { seed = newSeed() }) { scenario, velocity, drive ->
+                        session = GameSession.arriving(data, scenario, velocity, drive)
                     }
                 } else {
                     BridgeScreen(s, version) { seed = newSeed(); session = null }

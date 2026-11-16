@@ -60,8 +60,9 @@ class SystemGenerator(private val data: GameData) {
         val entry = EntryConfig(entryRadius, listOf(rnd.range(0.0, 360.0), rnd.range(-g.entry.elevationDegMax, g.entry.elevationDegMax)),
             f.minSpeedKmS, f.maxSpeedKmS, f.defaultSpeedKmS)
 
-        return ScenarioConfig("$starName system", star, planets, entry, data.scenario.player,
+        val scenario = ScenarioConfig("$starName system", star, planets, entry, data.scenario.player,
             enemies(rnd, rockyWorlds, giants, planets, starMass), belt, seed)
+        return scenario.copy(originLy = rnd.range(g.entry.originLyMin, g.entry.originLyMax))
     }
 
     private fun moons(rnd: Random, planet: PlanetConfig, starMass: Double, count: Int): List<PlanetConfig> {

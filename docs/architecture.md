@@ -52,6 +52,8 @@ on load into the world.
 ### `neumann.core.world` — state holders (no flow logic)
 
 - `World` — the whole state of one battle.
+- `Arrival` — how the probe arrived: origin distance, cruise speed, trip
+  time, speed and fuel at the start.
 - `Star`, `Planet` — bodies on fixed circular orbits. A `Planet` with a
   `parent` is a moon of that planet.
 - `Vessel` — a ship, fixed defence, or base. `VesselRole`, `Faction`.
@@ -114,10 +116,13 @@ capacities, sensor and threat range from the working modules).
 
 - `DetectionReach` — the furthest any enemy could detect the probe (sets how
   far out the probe arrives).
+- `ArrivalPlanner` — the probe's arrival from its last star: cruise speed,
+  and the speed and fuel at the start point (`Arrival`).
 - `SystemGenerator` — a random `ScenarioConfig` from a seed (same seed, same
   system).
-- `ScenarioBuilder` — builds a `World` from a scenario and the approach
-  vector.
+- `ScenarioBuilder` — builds a `World` from a scenario: on arrival from the
+  last star (generated systems), or after entry at an approach vector (the
+  fixed test system).
 - `Coaster` — carries a coasting object forward in time under gravity.
 - `BogeyEstimator` — dead reckoning for the map: each bogey's seen
   position and its estimated position now, or a ghost (`BogeyEstimate`).

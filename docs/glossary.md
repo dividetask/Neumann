@@ -13,6 +13,8 @@
 - **Bogey** — An enemy ship or torpedo: something that moves on its own, so
   once seen its position can only be estimated. Not slugs, fixed defences,
   or bases.
+- **Cruise speed** — The speed the probe crossed from its last star at, set by
+  its fuel.
 - **Burn** — Firing the ship's engine to change its velocity.
 - **Claimed** — A star system with every enemy ship, fixed defence, and base
   destroyed.

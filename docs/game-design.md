@@ -43,7 +43,9 @@ E. Back to A, keeping the ship's state.
 
 ## Time skips
 
-Controls: **1 minute**, **1 hour**, **4 hours**, **1 day**, **1 month** (30 days).
+Controls: **1 minute**, **1 hour**, **4 hours**, **1 day**, **1 month** (30 days),
+and, while a burn is running, **BURN END**: run on until the burn ends
+(pausing as usual). The entry burn starts this way by itself.
 
 A time skip moves the game forward until the chosen time has passed, or until
 an auto-pause event happens, whichever comes first.
@@ -153,12 +155,36 @@ to spend torpedoes against point defence.
   star or the system. They are used only on the bridge.
 - **Choosing the approach vector is done on the map.** The ship is shown at
   its arrival point on the entry sphere (`radiusAu` from the star), at a
-  bearing set by where it came from (random in the first version). The
-  player drags an arrow out from the ship: the arrow's direction is the
-  approach direction and its length the entry speed (between the entry
-  speed limits). Rotating and tilting the map lets the arrow point anywhere
-  in 3D. While dragging, the map shows the predicted coasting path (under
-  gravity) and highlights the body it passes closest to. ENTER commits.
+  bearing set by where it came from (random in the first version), moving
+  at its arrival speed (see [Arrival](#arrival)). The player drags an arrow
+  out from the ship: the arrow's direction is the approach direction and its
+  length the entry speed: any speed the fuel allows, from stopped up to the
+  arrival speed plus all the probe's delta-v. Rotating and tilting the map
+  lets the arrow point anywhere in 3D. While dragging, the map shows the
+  coasting path at that velocity (under gravity), highlights the body it
+  passes closest to, and the screen shows the entry burn's speed change,
+  fuel, and time at the drive dial's setting. ENTER commits: the probe
+  burns toward that velocity (a matching burn), and the game runs on
+  normally, pausing as usual, until the burn ends.
+
+### Arrival
+
+- The probe comes from its last star, a random `originLyMin`–`originLyMax`
+  (3–15) light years away (`data/system-generation.yaml`).
+- It left that star with full tanks and crossed at the **cruise speed**: the
+  speed it can reach and then brake to a stop from, at the drive's most
+  economical setting, keeping `arrivalFuelReserveFraction` (a quarter) of
+  its tanks. With today's probe that is about 255 km/s; the trip time
+  (distance ÷ cruise speed, thousands of years) is shown. **(interpretation)**
+  The star's distance changes only the trip time: with a fixed fuel load,
+  the speed is set by the fuel.
+- It arrives at the start point at the cruise speed, heading for the star,
+  with the fuel left after reaching cruise. If braking to a stop at full
+  economy would take more than the distance left to the star, it had
+  already started braking before the game begins: it arrives at the speed
+  it can still stop from in that distance, with the fuel that braking left.
+- The fixed test system (`data/scenario.yaml`) starts after entry instead:
+  the probe is already moving at the approach vector, with full tanks.
 - **Realistic scale.** Distances are real: a system is billions of km across,
   and light takes minutes to cross it.
 - **Light delay.** Sensors show where a contact was when its light left it,

@@ -44,6 +44,8 @@ class World(
     val seed: Long = 0,
 ) {
     var time = 0.0
+    /** How the probe arrived from its last star; null for a fixed system, which starts after entry. */
+    var arrival: Arrival? = null
     val vessels = ArrayList<Vessel>()
     val torpedoes = ArrayList<Torpedo>()
     val slugs = ArrayList<Slug>()

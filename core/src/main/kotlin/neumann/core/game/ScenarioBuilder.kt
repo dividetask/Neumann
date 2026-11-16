@@ -16,19 +16,40 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-/** Builds the battle's World from a scenario (fixed or generated) and the player's approach vector. */
+/**
+ * Builds the battle's World from a scenario (fixed or generated): either
+ * after entry, moving at the player's approach vector ([build]), or on
+ * arrival from the last star ([arrive]; see docs/game-design.md#arrival).
+ */
 class ScenarioBuilder(private val data: GameData) {
     fun build(approach: ApproachVector): World = build(data.scenario, approach)
 
+    /** After entry: the probe already moving at the approach vector, with full tanks. */
     fun build(s: ScenarioConfig, approach: ApproachVector): World {
-        val star = Star(s.star.name, s.star.massSolar * Units.SOLAR_MASS, s.star.radiusKm * Units.KM)
-        val planets = bodies(s, star)
         val bearing = arrivalBearing(s)
         val speed = approach.speedKmS.coerceIn(s.entry.minSpeedKmS, s.entry.maxSpeedKmS) * Units.KM
         val aim = approach.direction?.normalized()?.takeIf { it.lengthSquared() > 0.0 } ?: -bearing
+        return assemble(s, aim * speed, aim) {}
+    }
+
+    /** On arrival: heading for the star at the arrival speed, with the fuel the crossing left. */
+    fun arrive(s: ScenarioConfig): World {
+        val inward = -arrivalBearing(s)
+        return assemble(s, Vec3.ZERO, inward) { world ->
+            val p = world.player
+            val arrival = ArrivalPlanner(data).plan(p, s.originLy, p.position.length())
+            p.velocity = inward * arrival.speedMS
+            p.fuel = arrival.fuelT
+            world.arrival = arrival
+        }
+    }
+
+    private fun assemble(s: ScenarioConfig, velocity: Vec3, facing: Vec3, prepare: (World) -> Unit): World {
+        val star = Star(s.star.name, s.star.massSolar * Units.SOLAR_MASS, s.star.radiusKm * Units.KM)
+        val planets = bodies(s, star)
         val factory = VesselFactory(data)
         val player = factory.build("P", s.player.name, Faction.PLAYER, s.player.design,
-            bearing * (s.entry.radiusAu * Units.AU), aim * speed, aim)
+            arrivalBearing(s) * (s.entry.radiusAu * Units.AU), velocity, facing)
         val world = World(data, star, planets, player, s.belt, s.seed)
         world.vessels.add(player)
 
@@ -52,6 +73,7 @@ class ScenarioBuilder(private val data: GameData) {
             world.vessels.add(v)
         }
 
+        prepare(world)
         for (v in world.vessels) v.history.record(HistorySample(0.0, v.position, v.velocity, false))
         world.lastHistorySample = 0.0
         return world

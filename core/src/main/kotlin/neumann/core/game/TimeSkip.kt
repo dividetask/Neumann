@@ -21,7 +21,8 @@ class TimeSkip(
     private val groupSeconds: Double,
     private val firstStepSeconds: Double,
 ) {
-    fun run(world: World, seconds: Double): TimeSkipResult {
+    /** Runs for [seconds], or until a pause, or until [until] says to stop. */
+    fun run(world: World, seconds: Double, until: () -> Boolean = { false }): TimeSkipResult {
         val start = world.time
         val end = start + seconds
         val collector = PauseCollector(groupSeconds)
@@ -36,6 +37,7 @@ class TimeSkip(
             val fresh = world.log.events.subList(seen, world.log.events.size).toList()
             seen = world.log.events.size
             collector.offer(monitor.pausing(fresh), world.time)?.let { return TimeSkipResult(world.time - start, it) }
+            if (until()) break
         }
         return TimeSkipResult(world.time - start, collector.remaining())
     }

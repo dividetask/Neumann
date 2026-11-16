@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -71,17 +72,24 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
         tick++
     }
 
-    fun skip(seconds: Double) {
+    fun runSkip(skip: () -> TimeSkipResult) {
         busy = true
         notice = null
         skipStart = world.time
         scope.launch {
-            val r = withContext(Dispatchers.Default) { session.skip(seconds) }
+            val r = withContext(Dispatchers.Default) { skip() }
             lastSkip = r
             busy = false
             tick++
         }
     }
+
+    fun skip(seconds: Double) = runSkip { session.skip(seconds) }
+
+    fun skipToBurnEnd() = runSkip { session.skipUntilBurnEnds() }
+
+    // Entering a system starts with the entry burn: run on until it ends (pausing as usual).
+    LaunchedEffect(session) { if (world.player.burn != null) skipToBurnEnd() }
 
     BoxWithConstraints(Modifier.fillMaxSize().background(Theme.background)) {
         val area = with(LocalDensity.current) { Size(maxWidth.toPx(), maxHeight.toPx()) }
@@ -100,7 +108,7 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
         // whenever tick changes (after every skip or order).
         key(tick) {
             Column(Modifier.align(Alignment.TopStart).fillMaxWidth().background(Theme.panel.copy(alpha = 0.85f)).padding(6.dp)) {
-                TopBar(session, version, busy, onNewGame, ::skip)
+                TopBar(session, version, busy, onNewGame, ::skip, ::skipToBurnEnd)
                 MessagePanel(world, busy, lastSkip, skipStart, notice)
             }
             Column(Modifier.align(Alignment.BottomStart).fillMaxWidth()) {
@@ -124,7 +132,8 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
 }
 
 @Composable
-private fun TopBar(session: GameSession, version: String, busy: Boolean, onNewGame: () -> Unit, skip: (Double) -> Unit) {
+private fun TopBar(session: GameSession, version: String, busy: Boolean, onNewGame: () -> Unit, skip: (Double) -> Unit,
+                   skipToBurnEnd: () -> Unit) {
     val world = session.world
     Row(verticalAlignment = Alignment.CenterVertically) {
         Line("${DisplayFormat.missionTime(world.time)} ", Theme.alert)
@@ -133,6 +142,9 @@ private fun TopBar(session: GameSession, version: String, busy: Boolean, onNewGa
     Line(remainingText(session.remaining()), Theme.text)
     Row(Modifier.fillMaxWidth()) {
         for ((seconds, label) in skips) ConsoleButton(label, enabled = !busy && !world.over) { skip(seconds) }
+    }
+    if (world.player.burn != null) Row(Modifier.fillMaxWidth()) {
+        ConsoleButton("BURN END", enabled = !busy && !world.over) { skipToBurnEnd() }
     }
     when {
         world.claimed -> Line("*** SYSTEM CLAIMED ***", Theme.alert)

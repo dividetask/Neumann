@@ -40,6 +40,15 @@ class OrderDesk(private val world: World) {
         return null
     }
 
+    /** Entering a system: burn until moving at [velocity] (m/s, relative to the star), at drive setting [drive]. */
+    fun enter(velocity: Vec3, drive: Double): String? {
+        if (!player.has(ModuleKind.PROPULSION)) return "No working propulsion"
+        if (player.fuel <= 0.0) return "No fuel"
+        player.heading = Heading(HeadingMode.MATCH_VELOCITY, velocity)
+        player.burn = Burn(drive.coerceIn(0.0, 1.0), null, null, world.time, player.position, player.velocity)
+        return null
+    }
+
     fun cancelBurn() {
         player.burn = null
     }

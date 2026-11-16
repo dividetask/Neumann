@@ -227,6 +227,8 @@ data class ScenarioConfig(
     val belt: BeltConfig? = null,
     /** The seed a random system was generated from (0 for a fixed system). */
     val seed: Long = 0,
+    /** Light years to the star the probe came from; 0 for a fixed system, which starts after entry. */
+    val originLy: Double = 0.0,
 )
 
 /** An asteroid belt: drawn only, no gravity. */
@@ -330,6 +332,10 @@ data class BeltRanges(val chance: Double, val minGapAu: Double)
 data class EntryRanges(
     /** The entry sphere lies this many enemy detection ranges beyond the outermost orbit. */
     val detectionRangeMultiple: Double,
+    val originLyMin: Double,
+    val originLyMax: Double,
+    /** Cruise speed leaves this fraction of the tanks after braking to a stop. */
+    val arrivalFuelReserveFraction: Double,
     val elevationDegMax: Double,
 )
 

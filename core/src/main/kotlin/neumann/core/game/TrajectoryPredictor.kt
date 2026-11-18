@@ -8,18 +8,24 @@ import neumann.core.world.Star
 import kotlin.math.max
 
 /**
- * Predicts a coasting path under the gravity of the star, planets, and moons
- * (which follow their orbits meanwhile), for the approach arrow.
+ * Predicts a path under the gravity of the star, planets, and moons (which
+ * follow their orbits meanwhile), for the approach arrow: first a matching
+ * burn toward a target velocity, if one is given, then coasting.
  */
 class TrajectoryPredictor(private val star: Star, private val bodies: List<Planet>) {
     /** The path, and the body it passes closest to (relative to that body's size). */
     class Prediction(val points: List<Vec3>, val closest: Planet?, val closestDistance: Double, val closestTime: Double, val hits: Boolean)
 
+    /** A matching burn toward [targetVelocity] at [thrustN], starting at [massKg] and using [fuelKgS]. */
+    class BurnPlan(val targetVelocity: Vec3, val thrustN: Double, val massKg: Double, val fuelKgS: Double)
+
     private val mover = PlanetMover()
 
-    fun predict(start: Vec3, velocity: Vec3, seconds: Double, step: Double, pointEvery: Int = 4): Prediction {
+    fun predict(start: Vec3, velocity: Vec3, seconds: Double, step: Double, pointEvery: Int = 4, burn: BurnPlan? = null): Prediction {
         var p = start
         var v = velocity
+        var mass = burn?.massKg ?: 0.0
+        var burning = burn != null
         val points = arrayListOf(start)
         var closest: Planet? = null
         var closestRatio = Double.MAX_VALUE
@@ -31,6 +37,15 @@ class TrajectoryPredictor(private val star: Star, private val bodies: List<Plane
             val at = bodies.associateWith { mover.positionAt(it, t) }
             var a = pull(-p, star.mass, star.radius)
             for ((b, pos) in at) a += pull(pos - p, b.mass, b.radius)
+            if (burning && burn != null) {
+                // Thrust toward the target velocity until it is reached; lighter as the fuel burns.
+                val gap = burn.targetVelocity - v
+                val dv = minOf(burn.thrustN / mass * step, gap.length())
+                if (dv < 1e-9) burning = false else {
+                    v += gap.normalized() * dv
+                    mass -= burn.fuelKgS * step * (dv / (burn.thrustN / mass * step))
+                }
+            }
             v += a * step
             p += v * step
             t += step

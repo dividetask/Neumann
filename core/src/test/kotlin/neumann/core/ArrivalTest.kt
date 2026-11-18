@@ -61,3 +61,21 @@ class ArrivalTest {
         assertTrue(p.fuel >= 0.25 * perf.fuelCapacity(p), "a quarter tank kept")
     }
 }
+
+class EntryPathTest {
+    @Test
+    fun `the predicted entry path includes the burn, so it differs from switching velocity at once`() {
+        val data = Fixture.data
+        val perf = ShipPerformance(data.munitions)
+        val world = ScenarioBuilder(data).arrive(SystemGenerator(data).generate(42))
+        val p = world.player
+        val predictor = neumann.core.game.TrajectoryPredictor(world.star, world.planets)
+        val target = p.velocity.normalized() * 40_000.0
+        val days = 400 * 86400.0
+        val instant = predictor.predict(p.position, target, days, 3600.0)
+        val plan = neumann.core.game.TrajectoryPredictor.BurnPlan(target, perf.thrustN(p, 0.0), perf.massKg(p), perf.fuelKgS(p, 0.0))
+        val burning = predictor.predict(p.position, p.velocity, days, 3600.0, burn = plan)
+        val gap = (burning.points.last() - instant.points.last()).length()
+        assertTrue(gap > 5 * Units.AU, "months of braking from ~250 km/s carry it many AU further: ${gap / Units.AU} AU")
+    }
+}

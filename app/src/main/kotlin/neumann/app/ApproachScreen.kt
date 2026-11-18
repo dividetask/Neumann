@@ -38,7 +38,7 @@ import kotlin.math.sqrt
  * the fastest the fuel allows in that direction at the drive dial's setting
  * (keeping the current velocity costs nothing). The screen shows the entry burn's
  * speed change, fuel, and time at the drive dial's setting, and the
- * coasting path at that velocity. ENTER starts the entry burn.
+ * predicted path (the entry burn, then coasting). ENTER starts the entry burn.
  */
 @Composable
 fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () -> Unit, onEnter: (ScenarioConfig, Vec3, Double) -> Unit) {
@@ -57,12 +57,14 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
     // Possible speeds in this direction at this drive setting; the chosen speed is kept inside them.
     val range = reach.speeds(direction)!!
     val speed = chosen.coerceIn(range.start, range.endInclusive)
-    val prediction = remember(direction, speed) {
-        // Long enough to cross the system from the start point and out the other side.
-        val span = PREDICT_CROSSINGS * probe.position.length() / maxOf(speed, 1_000.0)
-        predictor.predict(probe.position, direction * speed, span, span / PREDICT_STEPS)
-    }
     val burn = EntryBurn(probe, performance, direction * speed, drive)
+    val prediction = remember(direction, speed, drive) {
+        // The entry burn as it really happens (months of thrust), then long enough to cross the system and out.
+        val span = burn.seconds + PREDICT_CROSSINGS * probe.position.length() / maxOf(speed, 1_000.0)
+        val plan = TrajectoryPredictor.BurnPlan(direction * speed, performance.thrustN(probe, drive),
+            performance.massKg(probe), performance.fuelKgS(probe, drive))
+        predictor.predict(probe.position, probe.velocity, span, span / PREDICT_STEPS, burn = plan)
+    }
 
     BoxWithConstraints(Modifier.fillMaxSize().background(Theme.background)) {
         val area = with(LocalDensity.current) { Size(maxWidth.toPx(), maxHeight.toPx()) }

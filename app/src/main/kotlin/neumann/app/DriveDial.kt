@@ -1,8 +1,12 @@
 package neumann.app
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import neumann.core.sim.ShipPerformance
 import neumann.core.world.Vessel
 
@@ -19,4 +23,9 @@ fun DriveDial(drive: Double, ship: Vessel, performance: ShipPerformance, onChang
     Line("Drive  %.3f m/s²  %.2f t fuel per km/s".format(accel, perKmS))
     Slider(drive.toFloat(), { onChange(it.toDouble()) },
         colors = SliderDefaults.colors(thumbColor = Theme.alert, activeTrackColor = Theme.text, inactiveTrackColor = Theme.dim))
+    Row(Modifier.fillMaxWidth()) {
+        Line("ECONOMY", Theme.dim)
+        Box(Modifier.weight(1f))
+        Line("THRUST", Theme.dim)
+    }
 }

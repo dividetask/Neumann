@@ -165,8 +165,9 @@ to spend torpedoes against point defence.
   taken. A drag that starts on the ship or anywhere along the arrow moves
   the arrow; one that starts elsewhere pans the map. Rotating and tilting the map
   lets the arrow point anywhere in 3D. While dragging, the map shows the
-  coasting path at that velocity (under gravity), highlights the body it
-  passes closest to, and the screen shows the entry burn's speed change,
+  predicted path: the entry burn as it really happens (months of thrust at
+  the drive dial's setting, toward the chosen velocity), then coasting, all
+  under gravity. It highlights the body the path passes closest to, and the screen shows the entry burn's speed change,
   fuel, and time at the drive dial's setting, or "Not enough fuel" with the
   fuel it needs and has (ENTER is then disabled). ENTER commits: the probe
   burns toward that velocity (a matching burn), and the game runs on

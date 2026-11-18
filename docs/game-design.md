@@ -162,7 +162,8 @@ to spend torpedoes against point defence.
   reach in that direction at the drive dial's setting (the velocity can
   change by up to the delta-v the fuel gives at that setting; keeping the
   current velocity costs nothing). A direction the fuel cannot reach is not
-  taken. Rotating and tilting the map
+  taken. A drag that starts on the ship or anywhere along the arrow moves
+  the arrow; one that starts elsewhere pans the map. Rotating and tilting the map
   lets the arrow point anywhere in 3D. While dragging, the map shows the
   coasting path at that velocity (under gravity), highlights the body it
   passes closest to, and the screen shows the entry burn's speed change,

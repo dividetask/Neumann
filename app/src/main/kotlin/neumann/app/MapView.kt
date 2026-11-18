@@ -66,6 +66,7 @@ fun MapView(
     val arrowDrag by rememberUpdatedState(onArrow)
     val reset by rememberUpdatedState(onReset)
     val shipAt by rememberUpdatedState(world.player.position)
+    val arrowNow by rememberUpdatedState(arrow)
     Canvas(
         modifier.fillMaxSize().background(Theme.background)
             .pointerInput(Unit) {
@@ -77,8 +78,9 @@ fun MapView(
                     val down = awaitFirstDown(requireUnconsumed = false)
                     val area = Size(size.width.toFloat(), size.height.toFloat())
                     val ship = cam.project(shipAt, area)
-                    // A drag that starts on the ship moves the approach arrow (approach screen only).
-                    var dragging = arrowDrag != null && (down.position - ship).getDistance() < 64.dp.toPx()
+                    // A drag that starts on the ship or anywhere along the arrow moves the arrow (approach screen only).
+                    val tip = arrowNow?.let { ship + screenDirection(cam, shipAt, it.direction, area) * it.lengthPx } ?: ship
+                    var dragging = arrowDrag != null && distanceToSegment(down.position, ship, tip) < ARROW_GRAB_DP.dp.toPx()
                     var tap = true
                     var upTime = down.uptimeMillis
                     do {
@@ -287,7 +289,9 @@ private const val MOON_MIN_DP = 2.5f
 private const val SHIP_DP = 9f
 
 /** Unit screen direction of a direction in space, as seen from [from]; zero if it points straight at the viewer. */
-private fun DrawScope.direction(cam: MapCamera, from: Vec3, dir: Vec3): Offset {
+private fun DrawScope.direction(cam: MapCamera, from: Vec3, dir: Vec3): Offset = screenDirection(cam, from, dir, size)
+
+private fun screenDirection(cam: MapCamera, from: Vec3, dir: Vec3, size: Size): Offset {
     if (dir.lengthSquared() == 0.0) return Offset.Zero
     val a = cam.project(from, size)
     val b = cam.project(from + dir.normalized() * (1.0 / cam.scale * 100), size)
@@ -295,6 +299,18 @@ private fun DrawScope.direction(cam: MapCamera, from: Vec3, dir: Vec3): Offset {
     val len = d.getDistance()
     return if (len < 1e-3f) Offset.Zero else d / len
 }
+
+/** Distance on screen from [p] to the segment [a]–[b]. */
+private fun distanceToSegment(p: Offset, a: Offset, b: Offset): Float {
+    val ab = b - a
+    val len2 = ab.x * ab.x + ab.y * ab.y
+    if (len2 < 1e-6f) return (p - a).getDistance()
+    val t = (((p - a).x * ab.x + (p - a).y * ab.y) / len2).coerceIn(0f, 1f)
+    return (p - (a + ab * t)).getDistance()
+}
+
+/** How close to the arrow (anywhere along it) a drag must start to move it. */
+private const val ARROW_GRAB_DP = 40f
 
 /** A circular orbit of [radius] around [centre], tilted by [inclination] (same tilt as PlanetMover). */
 private fun DrawScope.ring(cam: MapCamera, centre: Vec3, radius: Double, inclination: Double, color: Color, width: Float) {

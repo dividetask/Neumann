@@ -23,11 +23,13 @@ import neumann.core.data.ScenarioConfig
 import neumann.core.game.ScenarioBuilder
 import neumann.core.game.SystemGenerator
 import neumann.core.game.TrajectoryPredictor
+import neumann.core.math.Frame
 import neumann.core.math.Units
 import neumann.core.math.Vec3
 import neumann.core.sim.ShipPerformance
 import neumann.core.world.Vessel
 import kotlin.math.exp
+import kotlin.math.asin
 import kotlin.math.ln
 import kotlin.math.sqrt
 
@@ -52,8 +54,8 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
     var drive by remember(scenario) { mutableStateOf(0.0) }
     var chosen by remember(scenario) { mutableStateOf(DEFAULT_ENTRY_MS) }
     val reach = EntryReach(probe, performance, drive)
-    // If the drive setting puts the aimed direction out of reach, keep the current heading.
-    val direction = if (reach.speeds(aimed) != null) aimed else probe.velocity.normalized()
+    // Beyond the turn the drive setting allows, the direction stays on the edge of what it allows.
+    val direction = reach.clamp(aimed)
     // Possible speeds in this direction at this drive setting; the chosen speed is kept inside them.
     val range = reach.speeds(direction)!!
     val speed = chosen.coerceIn(range.start, range.endInclusive)
@@ -82,8 +84,8 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
             arrow = ApproachArrow(direction, 20f + fraction * (maxArrow - 20f)),
             onArrow = { drag ->
                 val len = drag.getDistance()
-                val dir = camera.screenToSpace(drag.x, drag.y).normalized()
-                // A direction the fuel cannot reach at this drive setting is not taken.
+                // Dragged past the turn the fuel allows: as close to it as the fuel can reach.
+                val dir = reach.clamp(camera.screenToSpace(drag.x, drag.y).normalized())
                 val r = reach.speeds(dir)
                 if (len > 8f && r != null) {
                     aimed = dir
@@ -101,6 +103,7 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
 
         Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().background(Theme.panel.copy(alpha = 0.85f)).padding(8.dp)) {
             Line("Entry speed %.1f km/s (%.1f–%.1f)".format(speed / Units.KM, range.start / Units.KM, range.endInclusive / Units.KM))
+            if (reach.maxTurn < Math.PI) Line("Drive allows turns up to %.0f°".format(Math.toDegrees(reach.maxTurn)), Theme.alert)
             if (burn.possible) {
                 Line("Entry burn %.0f km/s: %.1f t fuel, about %s".format(burn.deltaV / Units.KM, burn.fuelT, DisplayFormat.duration(burn.seconds)))
             } else {
@@ -133,6 +136,19 @@ private class EntryReach(probe: Vessel, performance: ShipPerformance, drive: Dou
     private val velocity = probe.velocity
     val deltaV = performance.massKg(probe).let { m -> performance.exhaustMS(probe, drive) * ln(m / (m - probe.fuel * 1000.0)) }
 
+    /** The widest turn from the current heading the fuel can reach (π: any direction). */
+    val maxTurn: Double = if (deltaV >= velocity.length()) Math.PI else asin(deltaV / velocity.length()) * TURN_MARGIN
+
+    /** [direction], or if the fuel cannot turn that far, the nearest direction it can reach. */
+    fun clamp(direction: Vec3): Vec3 {
+        val heading = velocity.normalized()
+        val angle = heading.angleTo(direction)
+        if (angle <= maxTurn) return direction
+        var axis = heading.cross(direction)
+        if (axis.lengthSquared() < 1e-12) axis = Frame.upFor(heading)
+        return Frame.rotate(heading, axis.normalized(), maxTurn).normalized()
+    }
+
     /** Slowest and fastest reachable speeds along [direction]; null if no speed in that direction is reachable. */
     fun speeds(direction: Vec3): ClosedFloatingPointRange<Double>? {
         val along = direction.dot(velocity)
@@ -153,5 +169,8 @@ private class EntryBurn(probe: Vessel, performance: ShipPerformance, velocity: V
 }
 
 private const val DEFAULT_ENTRY_MS = 40_000.0
+
+/** Stays a hair inside the widest turn, so a direction on the edge still has a speed. */
+private const val TURN_MARGIN = 0.999
 private const val PREDICT_CROSSINGS = 2.0
 private const val PREDICT_STEPS = 3000

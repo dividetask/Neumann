@@ -161,8 +161,10 @@ to spend torpedoes against point defence.
   length the entry speed, from the slowest to the fastest speed the fuel can
   reach in that direction at the drive dial's setting (the velocity can
   change by up to the delta-v the fuel gives at that setting; keeping the
-  current velocity costs nothing). A direction the fuel cannot reach is not
-  taken. A drag that starts on the ship or anywhere along the arrow moves
+  current velocity costs nothing). The fuel limits how far the velocity can
+  turn: dragged beyond that, the arrow stays on the edge of what the fuel
+  can reach, nearest the drag, and the panel shows the widest turn the drive
+  setting allows. A drag that starts on the ship or anywhere along the arrow moves
   the arrow; one that starts elsewhere pans the map. Rotating and tilting the map
   lets the arrow point anywhere in 3D. While dragging, the map shows the
   predicted path: the entry burn as it really happens (months of thrust at

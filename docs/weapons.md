@@ -50,7 +50,8 @@ The bare minimum to test the game.
 - **Missile bays** hold each torpedo in its own launch cell, so a bay can
   launch all it holds at once: a salvo leaves together and arrives together.
   **(interpretation)** Cells fire a second or two apart, which is ignored. A
-  launch-now order launches one torpedo.
+  launch-now order launches a salvo of the number of torpedoes the player
+  chooses, from every bay with the target in its arc.
 
 ### Torpedo salvos
 
@@ -58,7 +59,9 @@ A torpedo that point defence shoots down is wasted, so automatic launches
 (the player's torpedo auto-launch rule and the AI) fire a salvo big enough
 to get through, or nothing. How well a ship plans depends on its computer
 (see [ships.md](ships.md#computers)). Launch-now orders are not planned: players can
-play as well or as poorly as they like.
+play as well or as poorly as they like. To help, the WEAPONS panel shows the
+probe's own estimate for the target: how many torpedoes a salvo needs to get
+one hit (*k* + 1) and to destroy it (*k* + *h*).
 
 - **Point-defence estimate.** Each of the target's laser turrets does
   `beamMW` × `focusRangeKm` × (2 − `focusRangeKm` ÷ `rangeKm`) ÷ *v* damage to

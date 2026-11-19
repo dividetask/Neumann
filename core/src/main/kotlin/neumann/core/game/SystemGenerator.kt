@@ -111,7 +111,7 @@ class SystemGenerator(private val data: GameData) {
         for (i in 0 until e.raiderCount) {
             val nearBase = giants.isEmpty() || rnd.nextDouble() < e.nearBaseChance
             val (body, distance) = if (nearBase) {
-                home to minOf(rnd.range(e.patrolKmMin, e.patrolKmMax), hillKm(home, starMass) * e.hillFraction)
+                home to patrolDistance(rnd, home, all, minOf(e.patrolKmMax, hillKm(home, starMass) * e.hillFraction), station)
             } else {
                 // Among a giant's moons: orbit the giant just outside one of its moons.
                 val giant = giants[rnd.nextInt(giants.size)]
@@ -127,11 +127,30 @@ class SystemGenerator(private val data: GameData) {
         return list
     }
 
+    /**
+     * A patrol orbit around [home] clear of its moons' orbits (a moon passing
+     * close would pull the ship out of orbit), up to [maxKm]; if none fits,
+     * just outside the stations.
+     */
+    private fun patrolDistance(rnd: Random, home: PlanetConfig, all: List<PlanetConfig>, maxKm: Double, stationKm: Double): Double {
+        val moons = all.filter { it.parent == home.name }.map { it.orbitKm }
+        repeat(PATROL_TRIES) {
+            val d = rnd.range(minOf(g.enemies.patrolKmMin, maxKm), maxKm)
+            if (moons.none { d in it * MOON_CLEAR_INSIDE..it * MOON_CLEAR_OUTSIDE }) return d
+        }
+        return stationKm * 2
+    }
+
     /** Hill-sphere radius of a planet around the star, in km: inside it, the planet's gravity holds orbits. */
     private fun hillKm(p: PlanetConfig, starMassSolar: Double): Double =
         p.orbitAu * Units.AU / Units.KM * (p.massEarth * Units.EARTH_MASS / (3 * starMassSolar * Units.SOLAR_MASS)).pow(1.0 / 3)
 
     companion object {
+        private const val PATROL_TRIES = 20
+        // A patrol orbit stays out of this band around each moon's orbit (as fractions of it).
+        private const val MOON_CLEAR_INSIDE = 0.7
+        private const val MOON_CLEAR_OUTSIDE = 1.4
+
         // Approximate mass-radius relations for real planets and moons.
         fun rockyRadiusKm(massEarth: Double) = 6371.0 * massEarth.pow(0.27)
         fun giantRadiusKm(massEarth: Double) = 25_000.0 + 45_000.0 * minOf(1.0, massEarth / 318.0)

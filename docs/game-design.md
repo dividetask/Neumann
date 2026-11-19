@@ -131,8 +131,10 @@ All directions are relative to the ship. They are chosen with:
   tracking as things move.
 C. **Pick a target** from the contact list.
 D. **Fire a weapon now** at the target. **(interpretation)** One cannon fires
-   one slug and one missile bay launches one torpedo, as soon as one is ready
-   with the target in its arc. The laser turrets fire a burst of
+   one slug, as soon as one is ready with the target in its arc. Torpedoes
+   launch as a salvo: the player picks how many (− / +) and LAUNCH fires
+   them all at once from the bays with the target in their arc (see
+   [weapons.md](weapons.md#torpedo-salvos)). The laser turrets fire a burst of
    `burstSeconds`, each while the target is in its range and arc.
 E. **Set weapon rules**: laser point defence, laser auto-fire at target,
    cannon auto-fire at target, torpedo auto-launch at target (launches only
@@ -157,7 +159,10 @@ to spend torpedoes against point defence.
   its arrival point on the entry sphere (`radiusAu` from the star), at a
   bearing set by where it came from (random in the first version), moving
   at its arrival speed (see [Arrival](#arrival)). The player drags an arrow
-  out from the ship: the arrow's direction is the approach direction and its
+  out from the ship, level with the planets' plane: the arrow's tip follows
+  the finger as if on that plane, whatever the view's rotation and tilt. The
+  **ELEVATION** slider (default 0°, level) tilts it up or down out of the
+  plane. The arrow's direction is the approach direction and its
   length the entry speed, from the slowest to the fastest speed the fuel can
   reach in that direction at the drive dial's setting (the velocity can
   change by up to the delta-v the fuel gives at that setting; keeping the
@@ -166,7 +171,7 @@ to spend torpedoes against point defence.
   can reach, nearest the drag, and the panel shows the widest turn the drive
   setting allows. A drag that starts on the ship or anywhere along the arrow moves
   the arrow; one that starts elsewhere pans the map. Rotating and tilting the map
-  lets the arrow point anywhere in 3D. While dragging, the map shows the
+  changes only the view. While dragging, the map shows the
   predicted path: the entry burn as it really happens (months of thrust at
   the drive dial's setting, toward the chosen velocity), then coasting, all
   under gravity. It highlights the body the path passes closest to, and the screen shows the entry burn's speed change,
@@ -269,8 +274,12 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
   (drawn as a ring; no gravity). **(interpretation)**
 - **Enemies:** the base orbits a random rocky planet, and the defence
   platform orbits the same planet. The four raiders patrol near the base or
-  around a giant's moons; one may lie in ambush.
-- **Arrival:** a random bearing on the entry sphere, always far out:
+  around a giant's moons; one may lie in ambush. **(interpretation)** A raider patrolling
+  near the base keeps its orbit clear of that planet's moons (outside 0.7–1.4
+  times each moon's orbit), so a moon passing close does not pull it out
+  of orbit.
+- **Arrival:** a random bearing on the entry sphere, in the planets' plane
+  (`elevationDegMax` 0) **(interpretation)**, always far out:
   beyond the outermost orbit by `detectionRangeMultiple` (4) times the
   furthest any enemy could detect the probe, so nothing can attack before
   the first pause. **(interpretation)** That range is worked out from the

@@ -126,6 +126,8 @@ capacities, sensor and threat range from the working modules).
 - `Coaster` — carries a coasting object forward in time under gravity.
 - `BogeyEstimator` — dead reckoning for the map: each bogey's seen
   position and its estimated position now, or a ghost (`BogeyEstimate`).
+- `SalvoEstimate` — how many torpedoes a salvo at the target needs to hit,
+  and to destroy it (shown on the WEAPONS panel).
 - `RemainingCount` — enemy ships, defences, and bases seen and not
   destroyed (`Remaining`).
 - `KnownFixtures` — fixed defences and bases found and not destroyed.

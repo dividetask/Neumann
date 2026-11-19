@@ -93,7 +93,8 @@ class Vessel(
     val rules = WeaponRules()
     var laserBurstRemaining = 0.0
     var fireCannonNow = false
-    var launchTorpedoNow = false
+    /** Torpedoes to launch now at the target, as one salvo (a launch-now order). */
+    var torpedoesToLaunch = 0
     /** Torpedoes this ship has promised to an allied salvo, to launch once the target is in range. */
     var salvoShare: SalvoShare? = null
 

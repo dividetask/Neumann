@@ -20,25 +20,27 @@ import neumann.core.world.World
  * range and arc pools its torpedoes, and they launch together only if
  * [SalvoPlanner] expects some to get through. Allies counted on but not yet
  * in range promise their share and launch it when they get there. A
- * launch-now order launches one torpedo, unplanned.
+ * launch-now order launches the salvo the player chose, unplanned.
  */
 class TorpedoLaunchPhase(data: GameData) {
     private val torpedo = data.munitions.torpedo
     private val planner = SalvoPlanner(data)
 
     fun run(world: World) {
-        for (v in world.vessels) if (v.active && v.launchTorpedoNow) launchNow(world, v)
+        for (v in world.vessels) if (v.active && v.torpedoesToLaunch > 0) launchNow(world, v)
         for (v in world.vessels) if (v.active && v.salvoShare != null) keepPromise(world, v)
         val groups = world.vessels.filter { it.active && it.rules.torpedoAutoLaunch && it.targetId != null && it.salvoShare == null }
             .groupBy { Triple(it.faction, it.targetId!!, it.computer!!.type.computer!!) }
         for ((key, shooters) in groups) salvo(world, key.second, shooters, key.third)
     }
 
+    /** A launch-now salvo: as many of the ordered torpedoes as the bays with the target in their arc hold. */
     private fun launchNow(world: World, v: Vessel) {
-        v.launchTorpedoNow = false
+        var left = v.torpedoesToLaunch
+        v.torpedoesToLaunch = 0
         val target = v.contacts[v.targetId]?.takeIf { it.kind.isVessel }
-        val bay = target?.let { t -> readyBays(v, t, inRange = false).firstOrNull() }
-        if (target == null || bay == null) {
+        val bays = target?.let { t -> readyBays(v, t, inRange = false) }.orEmpty()
+        if (target == null || bays.isEmpty()) {
             if (v === world.player) world.event(EventKind.INFO, v.id, "Torpedo cannot launch: " + when {
                 target == null -> "no target"
                 v.torpedoes <= 0 -> "no torpedoes"
@@ -46,7 +48,8 @@ class TorpedoLaunchPhase(data: GameData) {
             })
             return
         }
-        launch(world, v, bay, target)
+        for (b in bays) while (left > 0 && b.torpedoes > 0) { launch(world, v, b, target); left-- }
+        if (left > 0 && v === world.player) world.event(EventKind.INFO, v.id, "$left torpedoes not launched: no more in bays facing the target")
     }
 
     /** Ships with the same computer plan alike, so they pool into one salvo. */

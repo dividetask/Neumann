@@ -65,6 +65,7 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
     var notice by remember { mutableStateOf<String?>(null) }
     var tab by remember { mutableStateOf<Tab?>(null) }
     val manoeuvre = remember { ManoeuvreState() }
+    var salvo by remember { mutableStateOf(1) }
     val scope = rememberCoroutineScope()
 
     fun changed(problem: String? = null) {
@@ -118,7 +119,7 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
                             Tab.SHIP -> ShipPanel(session)
                             Tab.CONTACTS -> ContactsPanel(session, ::changed)
                             Tab.MANOEUVRE -> ManoeuvrePanel(session, manoeuvre, ::changed)
-                            Tab.WEAPONS -> WeaponsPanel(session, ::changed)
+                            Tab.WEAPONS -> WeaponsPanel(session, salvo, { salvo = it }, ::changed)
                             Tab.LOG -> LogPanel(session)
                         }
                     }
@@ -236,14 +237,24 @@ private fun ManoeuvrePanel(session: GameSession, s: ManoeuvreState, changed: (St
 }
 
 @Composable
-private fun WeaponsPanel(session: GameSession, changed: (String?) -> Unit) {
+private fun WeaponsPanel(session: GameSession, salvo: Int, onSalvo: (Int) -> Unit, changed: (String?) -> Unit) {
     val world = session.world
     val player = world.player
     Row(Modifier.fillMaxWidth()) {
         ConsoleButton("LASER", enabled = !world.over) { changed(session.orders.fireNow(WeaponKind.LASER)) }
         ConsoleButton("CANNON", enabled = !world.over) { changed(session.orders.fireNow(WeaponKind.CANNON)) }
-        ConsoleButton("TORPEDO", enabled = !world.over) { changed(session.orders.fireNow(WeaponKind.TORPEDO)) }
     }
+    // Torpedoes: choose a salvo size, then launch it all at once.
+    val count = salvo.coerceIn(1, maxOf(1, player.torpedoes))
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        ConsoleButton("−", enabled = count > 1) { onSalvo(count - 1) }
+        Line(" $count ")
+        ConsoleButton("+", enabled = count < player.torpedoes) { onSalvo(count + 1) }
+        ConsoleButton("LAUNCH $count", enabled = !world.over && player.torpedoes > 0) { changed(session.orders.launchTorpedoes(count)) }
+    }
+    val estimate = session.salvoEstimate()
+    Line(if (estimate == null) "Torpedoes ${player.torpedoes} aboard; no target"
+        else "Torpedoes ${player.torpedoes} aboard; target needs ${estimate.toHit} to hit, ${estimate.toDestroy} to destroy", Theme.dim)
     val rules = player.rules
     Rule("Laser point defence", rules.laserPointDefence) { rules.laserPointDefence = it; changed(null) }
     Rule("Laser auto-fire", rules.laserAutoFire) { rules.laserAutoFire = it; changed(null) }

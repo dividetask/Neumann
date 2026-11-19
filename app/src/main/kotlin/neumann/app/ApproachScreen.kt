@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +32,8 @@ import neumann.core.sim.ShipPerformance
 import neumann.core.world.Vessel
 import kotlin.math.exp
 import kotlin.math.asin
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.math.ln
 import kotlin.math.sqrt
 
@@ -50,7 +54,10 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
     val probe = world.player
     val performance = remember { ShipPerformance(data.munitions) }
     val predictor = remember(world) { TrajectoryPredictor(world.star, world.planets) }
-    var aimed by remember(scenario) { mutableStateOf(probe.velocity.normalized()) }
+    // The arrow's heading in the planets' plane, and its elevation out of it (radians).
+    var heading by remember(scenario) { mutableStateOf(flat(probe.velocity)) }
+    var elevation by remember(scenario) { mutableStateOf(0.0) }
+    val aimed = (heading * cos(elevation) + Vec3(0.0, 0.0, 1.0) * sin(elevation)).normalized()
     var drive by remember(scenario) { mutableStateOf(0.0) }
     var chosen by remember(scenario) { mutableStateOf(DEFAULT_ENTRY_MS) }
     val reach = EntryReach(probe, performance, drive)
@@ -84,12 +91,15 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
             arrow = ApproachArrow(direction, 20f + fraction * (maxArrow - 20f)),
             onArrow = { drag ->
                 val len = drag.getDistance()
-                // Dragged past the turn the fuel allows: as close to it as the fuel can reach.
-                val dir = reach.clamp(camera.screenToSpace(drag.x, drag.y).normalized())
-                val r = reach.speeds(dir)
-                if (len > 8f && r != null) {
-                    aimed = dir
-                    chosen = r.start + ((len - 20f) / (maxArrow - 20f)).coerceIn(0f, 1f) * (r.endInclusive - r.start)
+                // The finger moves the arrow's tip on the planets' plane; the elevation slider tilts it out.
+                val flatDir = camera.screenToPlane(drag.x, drag.y)
+                if (len > 8f && flatDir.lengthSquared() > 0.0) {
+                    heading = flatDir.normalized()
+                    // Dragged past the turn the fuel allows: as close to it as the fuel can reach.
+                    val dir = reach.clamp((heading * cos(elevation) + Vec3(0.0, 0.0, 1.0) * sin(elevation)).normalized())
+                    reach.speeds(dir)?.let { r ->
+                        chosen = r.start + ((len - 20f) / (maxArrow - 20f)).coerceIn(0f, 1f) * (r.endInclusive - r.start)
+                    }
                 }
             },
         )
@@ -110,6 +120,9 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
                 Line("Not enough fuel: needs %.1f t, have %.1f t".format(burn.fuelT, probe.fuel), Theme.alert)
             }
             DriveDial(drive, probe, performance) { drive = it }
+            Line("Elevation %+.0f° %s".format(Math.toDegrees(elevation), if (elevation == 0.0) "(level with the planets)" else "out of the planets' plane"))
+            Slider(Math.toDegrees(elevation).toFloat(), { elevation = Math.toRadians(Math.round(it).toDouble()) }, valueRange = -90f..90f,
+                colors = SliderDefaults.colors(thumbColor = Theme.alert, activeTrackColor = Theme.text, inactiveTrackColor = Theme.text))
             val closest = prediction.closest
             Line(when {
                 prediction.hits && closest != null -> "Path hits ${closest.name} in ${DisplayFormat.duration(prediction.closestTime)}!"
@@ -169,6 +182,9 @@ private class EntryBurn(probe: Vessel, performance: ShipPerformance, velocity: V
 }
 
 private const val DEFAULT_ENTRY_MS = 40_000.0
+
+/** [v] flattened onto the planets' plane, as a unit direction. */
+private fun flat(v: Vec3): Vec3 = Vec3(v.x, v.y, 0.0).let { if (it.lengthSquared() > 0.0) it.normalized() else Vec3(1.0, 0.0, 0.0) }
 
 /** Stays a hair inside the widest turn, so a direction on the edge still has a speed. */
 private const val TURN_MARGIN = 0.999

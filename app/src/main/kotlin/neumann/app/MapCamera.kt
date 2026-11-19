@@ -31,6 +31,16 @@ data class MapCamera(val centre: Vec3, val scale: Double, val yaw: Double = 0.0,
         return Vec3(x1 * cos(yaw) - y1 * sin(yaw), x1 * sin(yaw) + y1 * cos(yaw), z)
     }
 
+    /**
+     * The direction in the planets' plane that a screen movement of (dx, dy)
+     * pixels shows, as if the finger were on that plane (undoing the tilt).
+     */
+    fun screenToPlane(dx: Float, dy: Float): Vec3 {
+        val x1 = dx / scale
+        val y1 = -dy / scale / maxOf(cos(tilt), MIN_PLANE_COS)
+        return Vec3(x1 * cos(yaw) - y1 * sin(yaw), x1 * sin(yaw) + y1 * cos(yaw), 0.0)
+    }
+
     fun panned(dx: Float, dy: Float) = copy(centre = centre - screenToSpace(dx, dy))
 
     /** Zoom by [factor], keeping the point under [focus] still. */
@@ -47,6 +57,8 @@ data class MapCamera(val centre: Vec3, val scale: Double, val yaw: Double = 0.0,
 
     companion object {
         const val TILT_PER_PIXEL = 0.005
+        /** Seen nearly edge-on, the plane is squashed flat; past this, drags are not stretched further. */
+        private const val MIN_PLANE_COS = 0.1
 
         /** A camera centred on [centre] that fits [radius] metres into the smaller screen side. */
         fun fitting(centre: Vec3, radius: Double, size: Size) =

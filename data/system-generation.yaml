@@ -34,7 +34,7 @@ entry:
   originLyMin: 3                # the last star is this far away (light years)...
   originLyMax: 15               # ...to this
   arrivalFuelReserveFraction: 0.25  # cruise speed leaves this much of the tanks after braking to a stop
-  elevationDegMax: 15
+  elevationDegMax: 0            # arrive in the planets' plane
 
 enemies:
   stationOffsetKm: 40000        # base and platform from their planet

@@ -216,3 +216,21 @@ class ComputerTest {
         assertTrue(d.id in w.player.contacts.everSeen, "the sentient core never forgets")
     }
 }
+
+class LaunchSalvoTest {
+    @Test
+    fun `a launch-now order fires the chosen number of torpedoes at once`() {
+        val w = Fixture.world()
+        val d = Fixture.dummy(w)
+        Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO, forward = Vec3(1.0, 0.0, 0.0))
+        Fixture.place(w, d, Fixture.openSpace + Vec3(50_000.0 * Units.KM, 0.0, 0.0), Vec3.ZERO)
+        val step = SimulationStep(w.data)
+        step.sensors.run(w)
+        val orders = neumann.core.game.OrderDesk(w)
+        orders.setTarget(d.id)
+        kotlin.test.assertNull(orders.launchTorpedoes(5))
+        step.run(w, 1.0)
+        assertEquals(5, w.torpedoes.count { it.ownerId == w.player.id })
+        assertTrue(w.torpedoes.all { it.launchTime == w.torpedoes.first().launchTime }, "together")
+    }
+}

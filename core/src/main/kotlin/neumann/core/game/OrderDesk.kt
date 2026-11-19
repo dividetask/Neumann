@@ -76,6 +76,15 @@ class OrderDesk(private val world: World) {
         return null
     }
 
+    /** Launch a salvo of [count] torpedoes at the target, all at once, at the next step. */
+    fun launchTorpedoes(count: Int): String? {
+        player.contacts[player.targetId] ?: return "No target"
+        if (count <= 0) return "Choose how many torpedoes"
+        if (player.torpedoes <= 0) return "No torpedoes"
+        player.torpedoesToLaunch = minOf(count, player.torpedoes)
+        return null
+    }
+
     fun fireNow(weapon: WeaponKind): String? {
         val target = player.contacts[player.targetId] ?: return "No target"
         return when (weapon) {
@@ -92,11 +101,7 @@ class OrderDesk(private val world: World) {
                 player.fireCannonNow = true
                 null
             }
-            WeaponKind.TORPEDO -> {
-                if (player.torpedoes <= 0) return "No torpedoes"
-                player.launchTorpedoNow = true
-                null
-            }
+            WeaponKind.TORPEDO -> launchTorpedoes(1)
         }
     }
 }

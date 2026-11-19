@@ -175,8 +175,8 @@ class SystemGenerator(private val data: GameData) {
     companion object {
         private const val PATROL_TRIES = 20
         // A patrol orbit stays out of this band around each moon's orbit (as fractions of it).
-        private const val MOON_CLEAR_INSIDE = 0.7
-        private const val MOON_CLEAR_OUTSIDE = 1.4
+        private const val MOON_CLEAR_INSIDE = 0.5
+        private const val MOON_CLEAR_OUTSIDE = 2.0
 
         // Approximate mass-radius relations for real planets and moons.
         fun rockyRadiusKm(massEarth: Double) = 6371.0 * massEarth.pow(0.27)

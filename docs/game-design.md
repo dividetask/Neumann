@@ -311,7 +311,7 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
   planet with its radar on (`raiderSensors: RADAR`), and none lies in
   ambush (`ambushChance` 0: an ambusher lies dark). **(interpretation)** A raider patrolling
   near the base or among a giant's moons keeps its orbit clear of that
-  planet's moons (outside 0.7–1.4 times each moon's orbit), so a moon
+  planet's moons (outside 0.5–2 times each moon's orbit), so a moon
   passing close does not pull it out of orbit.
 - **Arrival:** a random bearing on the entry sphere, in the planets' plane
   (`elevationDegMax` 0) **(interpretation)**, always far out:

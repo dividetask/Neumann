@@ -40,6 +40,8 @@ data class AutoPauseConfig(
     val lowSupplyFraction: Double,
     val repeatSuppressionSeconds: Double,
     val groupSeconds: Double,
+    val collisionWarningSeconds: Double,
+    val collisionCheckSeconds: Double,
     val pauseOn: List<EventKind>,
 )
 
@@ -336,6 +338,9 @@ data class EntryRanges(
     val originLyMax: Double,
     /** Cruise speed leaves this fraction of the tanks after braking to a stop. */
     val arrivalFuelReserveFraction: Double,
+    /** The default entry path stays this far from every planet and moon. */
+    val planetClearanceKm: Double,
+    val defaultEntryKmS: Double,
     val elevationDegMax: Double,
 )
 

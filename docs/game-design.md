@@ -67,6 +67,13 @@ once.
   fuel tank was destroyed. Fuel running low from burns, turns, and jinking
   the player ordered is logged but does not pause.
 - The player's burn ends (see below).
+- **Collision warning:** the player's ship is on course to hit the star, a
+  planet, a moon, a ship, or a base within `collisionWarningSeconds` (a
+  day), coasting from where it is now (predicted every
+  `collisionCheckSeconds` under gravity; ships and bases from their
+  estimates). It warns once for each object it is on course for, and again
+  only after the course has changed and come back. **(interpretation)**
+  "Hitting" a ship or base means passing within its size plus a kilometre.
 - The system is claimed, or the player's ship is lost.
 
 Pausing requires new information. An event that continues something already
@@ -197,6 +204,13 @@ to spend torpedoes against point defence.
   fuel it needs and has (ENTER is then disabled). ENTER commits: the probe
   burns toward that velocity (a matching burn), and the game runs on
   normally, pausing as usual, until the burn ends.
+- **Default entry** (before the player drags anything): level with the
+  planets, at 40 km/s and the most economical drive setting, aimed so the
+  predicted path (entry burn included) passes the star at about half the
+  outermost planet's orbit, and never within `planetClearanceKm` (100,000
+  km; about twice the distance of Earth's geostationary satellites) of any
+  planet or moon. **(interpretation)** If no such aim exists, the one
+  passing furthest from every planet.
 
 ### Arrival
 

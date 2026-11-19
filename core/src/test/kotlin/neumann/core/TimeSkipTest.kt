@@ -119,3 +119,18 @@ class EventLogTest {
         assertNull(w.player.burn, "no burn left: it coasts")
     }
 }
+
+class CollisionWarningTest {
+    @Test
+    fun `a ship on course to hit a planet within a day pauses with a collision warning, once`() {
+        val w = Fixture.world()
+        val planet = w.planets.first { !it.isMoon }
+        // 50,000 km out from the planet, heading straight at it at 2 km/s (about 7 hours away), matching its motion.
+        val out = Vec3(1.0, 0.0, 0.0)
+        Fixture.place(w, w.player, planet.position + out * (50_000.0 * Units.KM), planet.velocity - out * 2_000.0)
+        val r = Fixture.timeSkip(w).run(w, 3600.0)
+        assertTrue(r.pausedBy.any { it.kind == EventKind.COLLISION_WARNING && it.message.contains(planet.name) })
+        val again = Fixture.timeSkip(w).run(w, 1800.0)
+        assertTrue(again.pausedBy.none { it.kind == EventKind.COLLISION_WARNING }, "still the same course: no second warning")
+    }
+}

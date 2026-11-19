@@ -25,6 +25,7 @@ class SimulationStep(data: GameData) {
     val sensors = SensorPhase(LightDelay(), rules.ships)
     private val rangeWatch = WeaponRangeWatch(performance)
     private val supplyWatch = SupplyWatch(rules.autoPause, performance)
+    private val collisionWatch = CollisionWatch(rules.autoPause)
     private val claimCheck = ClaimCheck()
     private val history = HistoryPhase(rules.sim)
 
@@ -46,6 +47,7 @@ class SimulationStep(data: GameData) {
         sensors.run(world)
         rangeWatch.run(world)
         supplyWatch.run(world)
+        collisionWatch.run(world)
         claimCheck.run(world)
         history.run(world)
         world.torpedoes.removeAll { !it.alive }

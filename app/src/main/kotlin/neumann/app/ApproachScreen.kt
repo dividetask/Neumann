@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,7 +23,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import neumann.core.data.GameData
 import neumann.core.data.ScenarioConfig
+import neumann.core.game.DefaultEntry
 import neumann.core.game.ScenarioBuilder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import neumann.core.game.SystemGenerator
 import neumann.core.game.TrajectoryPredictor
 import neumann.core.math.Frame
@@ -60,6 +64,15 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
     val aimed = (heading * cos(elevation) + Vec3(0.0, 0.0, 1.0) * sin(elevation)).normalized()
     var drive by remember(scenario) { mutableStateOf(0.0) }
     var chosen by remember(scenario) { mutableStateOf(DEFAULT_ENTRY_MS) }
+    // The default entry (missing the star and every planet) takes a moment to work out; until then, straight ahead.
+    var defaultReady by remember(scenario) { mutableStateOf(false) }
+    LaunchedEffect(scenario) {
+        val v = withContext(Dispatchers.Default) { DefaultEntry(data).velocity(world) }
+        heading = flat(v)
+        elevation = 0.0
+        chosen = v.length()
+        defaultReady = true
+    }
     val reach = EntryReach(probe, performance, drive)
     // Beyond the turn the drive setting allows, the direction stays on the edge of what it allows.
     val direction = reach.clamp(aimed)
@@ -109,6 +122,7 @@ fun ApproachScreen(data: GameData, seed: Long, version: String, onNewSystem: () 
             Line("ARRIVING: ${scenario.name.uppercase()}   seed $seed", Theme.alert)
             Line("From %.1f ly: %,.0f years at %.0f km/s".format(arrival.originLy, arrival.tripYears, arrival.cruiseMS / Units.KM), Theme.dim)
             Line("Now %.0f km/s, %.1f t fuel".format(arrival.speedMS / Units.KM, probe.fuel))
+            if (!defaultReady) Line("Working out a safe default entry...", Theme.dim)
         }
 
         Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().background(Theme.panel.copy(alpha = 0.85f)).padding(8.dp)) {

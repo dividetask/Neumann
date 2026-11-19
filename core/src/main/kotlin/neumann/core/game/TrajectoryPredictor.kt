@@ -1,5 +1,6 @@
 package neumann.core.game
 
+import neumann.core.math.ClosestApproach
 import neumann.core.math.Units
 import neumann.core.math.Vec3
 import neumann.core.sim.PlanetMover
@@ -13,8 +14,12 @@ import kotlin.math.max
  * burn toward a target velocity, if one is given, then coasting.
  */
 class TrajectoryPredictor(private val star: Star, private val bodies: List<Planet>) {
-    /** The path, and the body it passes closest to (relative to that body's size). */
-    class Prediction(val points: List<Vec3>, val closest: Planet?, val closestDistance: Double, val closestTime: Double, val hits: Boolean)
+    /**
+     * The path; the body it passes closest to (relative to that body's size); and the nearest it
+     * comes to the star ([nearestStar]) and to any planet or moon's centre ([nearestBody]).
+     */
+    class Prediction(val points: List<Vec3>, val closest: Planet?, val closestDistance: Double, val closestTime: Double, val hits: Boolean,
+                     val nearestStar: Double = 0.0, val nearestBody: Double = 0.0)
 
     /** A matching burn toward [targetVelocity] at [thrustN], starting at [massKg] and using [fuelKgS]. */
     class BurnPlan(val targetVelocity: Vec3, val thrustN: Double, val massKg: Double, val fuelKgS: Double)
@@ -31,6 +36,8 @@ class TrajectoryPredictor(private val star: Star, private val bodies: List<Plane
         var closestRatio = Double.MAX_VALUE
         var closestDistance = Double.MAX_VALUE
         var closestTime = 0.0
+        var nearestStar = start.length()
+        var nearestBody = Double.MAX_VALUE
         var t = 0.0
         var i = 0
         while (t < seconds) {
@@ -47,13 +54,17 @@ class TrajectoryPredictor(private val star: Star, private val bodies: List<Plane
                 }
             }
             v += a * step
+            val from = p
             p += v * step
+            // Nearest approach over this step, to the star and to each body (moving meanwhile).
+            nearestStar = minOf(nearestStar, ClosestApproach.between(from, p, Vec3.ZERO, Vec3.ZERO).distance)
+            for ((b, pos) in at) nearestBody = minOf(nearestBody, ClosestApproach.between(from, p, pos, mover.positionAt(b, t + step)).distance)
             t += step
             if (++i % pointEvery == 0) points.add(p)
-            if (p.length() < star.radius) return Prediction(points + p, closest, closestDistance, closestTime, hits = true)
+            if (p.length() < star.radius) return Prediction(points + p, closest, closestDistance, closestTime, hits = true, nearestStar, nearestBody)
             for ((b, pos) in at) {
                 val d = (p - pos).length()
-                if (d < b.radius) return Prediction(points + p, b, d, t, hits = true)
+                if (d < b.radius) return Prediction(points + p, b, d, t, hits = true, nearestStar, nearestBody)
                 // Moons are small; judge closeness by distance over the body's own scale.
                 val ratio = d / max(b.radius, 1.0)
                 if (!b.isMoon && ratio < closestRatio) {
@@ -64,7 +75,7 @@ class TrajectoryPredictor(private val star: Star, private val bodies: List<Plane
                 }
             }
         }
-        return Prediction(points, closest, closestDistance, closestTime, hits = false)
+        return Prediction(points, closest, closestDistance, closestTime, hits = false, nearestStar, nearestBody)
     }
 
     private fun pull(toBody: Vec3, mass: Double, radius: Double): Vec3 {

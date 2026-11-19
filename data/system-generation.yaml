@@ -34,6 +34,8 @@ entry:
   originLyMin: 3                # the last star is this far away (light years)...
   originLyMax: 15               # ...to this
   arrivalFuelReserveFraction: 0.25  # cruise speed leaves this much of the tanks after braking to a stop
+  planetClearanceKm: 100000     # the default entry path stays this far from every planet and moon
+  defaultEntryKmS: 40           # the default entry speed
   elevationDegMax: 0            # arrive in the planets' plane
 
 enemies:

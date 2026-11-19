@@ -8,6 +8,9 @@ import kotlin.random.Random
 /** What the player has already been warned about. */
 class PlayerWatch {
     val inRangeOf = HashSet<String>()
+    /** Objects the player was last warned of being on course to hit (warned once per course). */
+    val onCourseFor = HashSet<String>()
+    var lastCollisionCheck = Double.NEGATIVE_INFINITY
     var lowFuel = false
     /** Fuel capacity at the last check; a drop means a fuel tank was destroyed. */
     var fuelCapacity = -1.0

@@ -79,3 +79,23 @@ class EntryPathTest {
         assertTrue(gap > 5 * Units.AU, "months of braking from ~250 km/s carry it many AU further: ${gap / Units.AU} AU")
     }
 }
+
+class DefaultEntryTest {
+    @Test
+    fun `the default entry misses the star and every planet, passing about halfway out`() {
+        val data = Fixture.data
+        for (seed in listOf(42L, 427111L, 925819L)) {
+            val world = ScenarioBuilder(data).arrive(SystemGenerator(data).generate(seed))
+            val v = neumann.core.game.DefaultEntry(data).velocity(world)
+            val perf = ShipPerformance(data.munitions)
+            val p = world.player
+            val plan = neumann.core.game.TrajectoryPredictor.BurnPlan(v, perf.thrustN(p, 0.0), perf.massKg(p), perf.fuelKgS(p, 0.0))
+            val span = 4 * 365 * 86400.0
+            val path = neumann.core.game.TrajectoryPredictor(world.star, world.planets).predict(p.position, p.velocity, span, span / 4000, burn = plan)
+            val outer = world.planets.filter { !it.isMoon }.maxOf { it.orbitRadius }
+            assertTrue(!path.hits, "seed $seed: hits nothing")
+            assertTrue(path.nearestStar > outer / 4, "seed $seed: passes the star well clear (${path.nearestStar / Units.AU} AU)")
+            assertTrue(path.nearestBody >= 100_000.0 * Units.KM * 0.9, "seed $seed: clear of planets (${path.nearestBody / Units.KM} km)")
+        }
+    }
+}

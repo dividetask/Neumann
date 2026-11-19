@@ -106,7 +106,7 @@ Run in this order by `SimulationStep`:
 | `ClaimCheck` | Detects a claimed system or a lost ship. |
 | `HistoryPhase` | Records positions for light delay. |
 
-Helpers: `TorpedoPathPredictor` (where a torpedo coming at the ship will be, for cannon point defence), `SalvoPlanner` (how big an automatic torpedo salvo must be to get through point defence, or none), `LaserFalloff` (laser damage by distance: full to the focus range, then 1/distance²), `StepSizer` (step length: long when nothing is close, short near
+Helpers: `CollisionWatch` (warns when the player's coasting path hits anything within a day), `TorpedoPathPredictor` (where a torpedo coming at the ship will be, for cannon point defence), `SalvoPlanner` (how big an automatic torpedo salvo must be to get through point defence, or none), `LaserFalloff` (laser damage by distance: full to the focus range, then 1/distance²), `StepSizer` (step length: long when nothing is close, short near
 projectiles, weapon ranges, orbits, and the end of a burn), `BurnClock`
 (how long a burn has left), `DamageResolver` (applies a hit to a module), `HeadingResolver`
 (where a heading points now), `ShipPerformance` (mass, thrust, turn rate,
@@ -116,6 +116,8 @@ capacities, sensor and threat range from the working modules).
 
 - `DetectionReach` — the furthest any enemy could detect the probe (sets how
   far out the probe arrives).
+- `DefaultEntry` — the default entry velocity: passing the star about
+  halfway out, clear of every planet and moon.
 - `ArrivalPlanner` — the probe's arrival from its last star: cruise speed,
   and the speed and fuel at the start point (`Arrival`).
 - `SystemGenerator` — a random `ScenarioConfig` from a seed (same seed, same

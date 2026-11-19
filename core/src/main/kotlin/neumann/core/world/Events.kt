@@ -11,6 +11,7 @@ enum class EventKind {
     LOW_FUEL,
     LOW_AMMO,
     BURN_COMPLETE,
+    COLLISION_WARNING,
     SYSTEM_CLAIMED,
     SHIP_LOST,
     INFO,

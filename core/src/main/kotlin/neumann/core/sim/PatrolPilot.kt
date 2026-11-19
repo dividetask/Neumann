@@ -21,10 +21,9 @@ import kotlin.math.sqrt
  * Dumb, but it never steers into a body.
  */
 class PatrolPilot(private val config: AiConfig, private val performance: ShipPerformance) {
-    private val orbitR = config.patrolOrbitKm * Units.KM
-
     fun fly(world: World, v: Vessel, dt: Double) {
         val patrol = v.patrol ?: return
+        val orbitR = patrol.orbitKm * Units.KM
         if (!v.has(ModuleKind.PROPULSION) || v.fuel <= 0.0) return coast(v)
         if (avoidCrash(world, v, dt)) return
         val capacity = performance.fuelCapacity(v)
@@ -39,8 +38,8 @@ class PatrolPilot(private val config: AiConfig, private val performance: ShipPer
         val star = name == world.star.name
         val baseTarget = world.vessels.firstOrNull { it.name == name && it.active }
         when {
-            body != null -> orbit(world, v, patrol, body.position, body.velocity, body.mass, dt)
-            star -> orbit(world, v, patrol, Vec3.ZERO, Vec3.ZERO, world.star.mass, dt)
+            body != null -> orbit(world, v, patrol, body.position, body.velocity, body.mass, orbitR, dt)
+            star -> orbit(world, v, patrol, Vec3.ZERO, Vec3.ZERO, world.star.mass, orbitR, dt)
             baseTarget != null -> {
                 // A base has too little gravity to orbit: fly by within the patrol distance, then move on.
                 if ((baseTarget.position - v.position).length() <= orbitR) patrol.advance()
@@ -51,9 +50,10 @@ class PatrolPilot(private val config: AiConfig, private val performance: ShipPer
     }
 
     /** In orbit round the target: count the angle swept, and move on after a full orbit; otherwise get there. */
-    private fun orbit(world: World, v: Vessel, patrol: Patrol, at: Vec3, vel: Vec3, mass: Double, dt: Double) {
+    private fun orbit(world: World, v: Vessel, patrol: Patrol, at: Vec3, vel: Vec3, mass: Double, orbitR: Double, dt: Double) {
         val r = v.position - at
         val d = r.length()
+        // Near its own orbit distance (which the generator keeps clear of moons): in orbit.
         if (d in orbitR * IN_ORBIT_MIN..orbitR * IN_ORBIT_MAX) {
             val circular = sqrt(Units.G * mass / d)
             val rel = v.velocity - vel

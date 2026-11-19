@@ -4,10 +4,10 @@ import neumann.core.math.Vec3
 
 /**
  * A raider's patrol: [targets] in turn (planets, moons, the star, or bases by
- * name), with the one it is on, how far round its orbit it has come, and
+ * name), orbited (or flown by) at [orbitKm], with the one it is on, how far round its orbit it has come, and
  * whether it has broken off to refuel.
  */
-class Patrol(val targets: List<String>) {
+class Patrol(val targets: List<String>, val orbitKm: Double) {
     var index = 0
     /** Angle swept round the current target so far, radians; and where it was last step (relative to the target). */
     var swept = 0.0

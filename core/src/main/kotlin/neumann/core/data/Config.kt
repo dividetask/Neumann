@@ -286,6 +286,8 @@ data class EnemyPlacement(
     val ambushRangeKm: Double = 0.0,
     /** Patrol targets in turn (planets, moons, the star, or bases by name); empty: no patrol. */
     val patrol: List<String> = emptyList(),
+    /** This raider's patrol orbit distance; 0 = the rules' `patrolOrbitKm`. */
+    val patrolOrbitKm: Double = 0.0,
     val sensors: SensorPosture = SensorPosture.DARK,
 )
 

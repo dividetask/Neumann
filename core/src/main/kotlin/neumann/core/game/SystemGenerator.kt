@@ -126,7 +126,7 @@ class SystemGenerator(private val data: GameData) {
             val ambush = i == ambusher
             list.add(EnemyPlacement("Raider ${i + 1}", "raider", body.name, listOf(distance * cos(a), distance * sin(a), 0.0),
                 ambush = ambush, ambushRangeKm = if (ambush) e.ambushRangeKm else 0.0,
-                patrol = listOf(body.name), sensors = e.raiderSensors))
+                patrol = listOf(body.name), patrolOrbitKm = distance, sensors = e.raiderSensors))
         }
         return list
     }

@@ -19,13 +19,15 @@ class PatrolTest {
             val s = SystemGenerator(data).generate(seed)
             val w = ScenarioBuilder(data).arrive(s) // the probe far out: no raider sees it
             val raiders = w.vessels.filter { it.faction == Faction.ENEMY && it.design.role == VesselRole.SHIP }
-            val base = w.vessels.first { it.design.role == VesselRole.BASE }
             val step = SimulationStep(data)
             repeat(30 * 24 * 3) { step.run(w, 1200.0) }
             assertTrue(raiders.all { it.alive }, "seed $seed: " + w.log.events.filter { it.message.contains("crashing") }.joinToString { it.message })
             assertTrue(raiders.all { it.emitting }, "seed $seed: radar on while patrolling")
-            val home = w.planets.first { (it.position - base.position).length() < 200_000.0 * Units.KM }
-            assertTrue(raiders.all { (it.position - home.position).length() < 300_000.0 * Units.KM }, "seed $seed: still round the base's planet")
+            for (r in raiders) {
+                val home = w.planets.first { it.name == r.patrol!!.current }
+                val d = (r.position - home.position).length() / (r.patrol!!.orbitKm * Units.KM)
+                assertTrue(d in 0.5..2.0, "seed $seed: ${r.name} still round the base's planet, near its own patrol distance (x$d)")
+            }
         }
     }
 

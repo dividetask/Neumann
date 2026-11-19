@@ -370,7 +370,10 @@ player can build and configure raiders too:
 
 - **`patrol`:** a list of targets, visited in turn and then over again:
   planets, moons, the star, or bases. Around a planet, moon, or the star the
-  raider makes one complete orbit at `patrolOrbitKm` (100,000 km). A base
+  raider makes one complete orbit at its patrol distance: `patrolOrbitKm`
+  (100,000 km), or, where a planet's moons make that unsafe, the nearest
+  distance clear of them, which the generator picks for each raider
+  (`patrolOrbitKm` in its placement). A base
   has too little gravity to orbit, so it gets a **flyby**: the raider passes
   within `patrolOrbitKm` of it, then moves on. **(interpretation)**
 - **Moving on** to the next target: burn toward a point `patrolOrbitKm`

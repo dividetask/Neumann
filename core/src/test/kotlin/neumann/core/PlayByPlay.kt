@@ -16,6 +16,7 @@ class PlayByPlay {
         var logged = 0
         fun t(sec: Double): String { val x = sec.toLong(); return "%dd %02d:%02d:%02d".format(x / 86400, x % 86400 / 3600, x % 3600 / 60, x % 60) }
         val s = FourRaiderFight(
+            strategy = TorpedoStrategy.EVEN, // as the balance test
             onCommand = { s, text ->
                 for (e in s.world.log.events.drop(logged)) out.append("${t(e.time)}     ${e.kind.name.padEnd(20)} ${e.message}\n")
                 logged = s.world.log.events.size

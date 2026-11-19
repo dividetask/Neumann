@@ -51,6 +51,9 @@ fun EnemyPanel(session: GameSession, id: String, salvo: Int, onSalvo: (Int) -> U
     val aboard = player.torpedoes
     val count = salvo.coerceIn(1, maxOf(1, aboard))
     Line("Torpedoes: salvo $count of $aboard" + (e.salvo?.let { ", needs ${it.toHit} to hit, ${it.toDestroy} to destroy" } ?: ""))
+    e.salvoEscorted?.takeIf { it.toHit != e.salvo?.toHit }?.let {
+        Line("  (${it.toHit} to hit, ${it.toDestroy} to destroy if its allies defend it)", Theme.dim)
+    }
     if (aboard > 1) Slider(count.toFloat(), { onSalvo(Math.round(it)) }, valueRange = 1f..aboard.toFloat(), steps = maxOf(0, aboard - 2),
         colors = SliderDefaults.colors(thumbColor = Theme.alert, activeTrackColor = Theme.text, inactiveTrackColor = Theme.dim))
     ConsoleButton("LAUNCH $count", enabled = aboard > 0 && !session.world.over) { changed(session.orders.launchTorpedoes(count, id)) }

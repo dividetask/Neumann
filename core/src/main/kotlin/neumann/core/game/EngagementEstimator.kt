@@ -12,7 +12,9 @@ import kotlin.math.max
  * How well each of the player's weapons would do against one enemy now:
  * laser damage per second at its range, how long a slug would take to get
  * there and how far off its aim may be against the enemy's size, and the
- * torpedoes a salvo needs.
+ * torpedoes a salvo needs: with the target defended only by itself ([salvo];
+ * its allies busy defending themselves, as when every enemy is attacked at
+ * once), and with its allies helping ([salvoEscorted]).
  */
 class Engagement(
     val distanceM: Double,
@@ -23,6 +25,7 @@ class Engagement(
     val cannonRangeM: Double,
     val targetSizeM: Double,
     val salvo: SalvoEstimate?,
+    val salvoEscorted: SalvoEstimate?,
 )
 
 class EngagementEstimator(private val world: World, private val salvos: SalvoPlanner) {
@@ -35,8 +38,8 @@ class EngagementEstimator(private val world: World, private val salvos: SalvoPla
         val slugSeconds = if (cannon == null || contact.bearingOnly) null
             else contact.distance / max(cannon.muzzleSpeedKmS * Units.KM + contact.closingSpeed, 1.0)
         val computer = p.computer?.type?.computer
-        val salvo = if (design == null || computer == null) null else {
-            val k = salvos.shotDown(design, contact, computer)
+        fun salvo(escorted: Boolean) = if (design == null || computer == null) null else {
+            val k = salvos.shotDown(design, contact, computer, if (escorted) salvos.escorts(world, p, contact) else emptyList())
             SalvoEstimate(k + 1, k + salvos.hitsToDestroy(design, computer))
         }
         return Engagement(
@@ -47,7 +50,8 @@ class EngagementEstimator(private val world: World, private val salvos: SalvoPla
             slugAimErrorM = slugSeconds?.let { contact.uncertaintyM + contact.velocityUncertaintyMS * it },
             cannonRangeM = (cannon?.autoRangeKm ?: 0.0) * Units.KM,
             targetSizeM = design?.sizeM ?: 0.0,
-            salvo = salvo,
+            salvo = salvo(escorted = false),
+            salvoEscorted = salvo(escorted = true),
         )
     }
 }

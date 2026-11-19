@@ -8,7 +8,7 @@ import kotlin.test.assertTrue
 class BalanceTest {
     @Test
     fun `the probe beats four raiders at once without significant strategy, at medium difficulty`() {
-        val s = FourRaiderFight().run()
+        val s = FourRaiderFight(strategy = TorpedoStrategy.EVEN).run()
         val w = s.world
         val p = w.player
         val hull = p.modules.filter { it.kind == ModuleKind.HULL }

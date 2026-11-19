@@ -6,6 +6,8 @@ import neumann.core.data.LaserConfig
 import neumann.core.data.ShipDesign
 import neumann.core.math.Units
 import neumann.core.world.Contact
+import neumann.core.world.Vessel
+import neumann.core.world.World
 import neumann.core.world.PointDefenceModel
 import neumann.core.world.SalvoGoal
 import kotlin.math.ceil
@@ -22,9 +24,12 @@ import kotlin.math.max
 class SalvoPlanner(private val data: GameData) {
     private val torpedo = data.munitions.torpedo
 
-    /** Salvo size from [available] torpedoes against [design], as seen in [contact], planned by [computer]. */
-    fun size(available: Int, design: ShipDesign, contact: Contact, computer: ComputerConfig): Int {
-        val k = shotDown(design, contact, computer)
+    /**
+     * Salvo size from [available] torpedoes against [design], as seen in [contact], planned by [computer],
+     * with [escorts] (the target's allies close enough to help defend it).
+     */
+    fun size(available: Int, design: ShipDesign, contact: Contact, computer: ComputerConfig, escorts: List<ShipDesign> = emptyList()): Int {
+        val k = shotDown(design, contact, computer, escorts)
         val h = hitsToDestroy(design, computer)
         return when {
             available >= k + h -> k + h
@@ -33,13 +38,16 @@ class SalvoPlanner(private val data: GameData) {
         }
     }
 
-    /** Torpedoes the target's point defence is expected to stop, judged on the least favourable closing speed. */
-    fun shotDown(design: ShipDesign, contact: Contact, computer: ComputerConfig): Int {
+    /**
+     * Torpedoes the point defence of the target and its [escorts] is expected to stop, judged on the
+     * least favourable closing speed.
+     */
+    fun shotDown(design: ShipDesign, contact: Contact, computer: ComputerConfig, escorts: List<ShipDesign> = emptyList()): Int {
         val closing = max(0.0, contact.closingSpeed - 2 * contact.velocityUncertaintyMS)
         val burn = torpedo.deltaVKmS * Units.KM * (1 - torpedo.terminalReserveFraction)
         val v = closing + burn
         // Laser falloff integrated over the approach: full power inside focus range, 1/d² beyond.
-        val damage = turrets(design, computer).sumOf { (laser, count) ->
+        val damage = (listOf(design) + escorts).flatMap { turrets(it, computer) }.sumOf { (laser, count) ->
             val focus = laser.focusRangeKm * Units.KM
             count * laser.beamMW * focus * (2 - laser.focusRangeKm / laser.rangeKm) / v
         }
@@ -52,6 +60,18 @@ class SalvoPlanner(private val data: GameData) {
             else design.modules.entries.sumOf { (id, n) -> data.modules.getValue(id).hitPoints * n }
         return ceil(hp / torpedo.damage).toInt()
     }
+
+    /**
+     * The target's allies that can help defend it, as [shooter] sees them: its other known
+     * contacts of the same side within their own laser reach of it.
+     */
+    fun escorts(world: World, shooter: Vessel, target: Contact): List<ShipDesign> =
+        shooter.contacts.current.values.filter { it.id != target.id && it.kind.isVessel && !it.bearingOnly && it.faction == target.faction }
+            .mapNotNull { c ->
+                val design = world.vessel(c.id)?.design ?: return@mapNotNull null
+                val reach = design.modules.keys.mapNotNull { data.modules.getValue(it).laser?.rangeKm }.maxOrNull() ?: return@mapNotNull null
+                design.takeIf { (c.observedPosition - target.observedPosition).length() <= reach * Units.KM }
+            }
 
     /** The laser turrets counted: the design's, or the computer's assumption. */
     private fun turrets(design: ShipDesign, computer: ComputerConfig): List<Pair<LaserConfig, Int>> = when (computer.pointDefence) {

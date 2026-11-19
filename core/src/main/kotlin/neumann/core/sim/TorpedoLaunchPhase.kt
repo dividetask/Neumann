@@ -69,7 +69,7 @@ class TorpedoLaunchPhase(data: GameData) {
         }
         // Planned on the side's best track of the target.
         val best = ready.minBy { it.second.velocityUncertaintyMS }.second
-        var left = planner.size(available, design, best, computer)
+        var left = planner.size(available, design, best, computer, planner.escorts(world, ready.minBy { it.second.velocityUncertaintyMS }.first, best))
         for ((v, c, bays) in ready) for (b in bays) {
             while (left > 0 && b.torpedoes > 0) {
                 launch(world, v, b, c)

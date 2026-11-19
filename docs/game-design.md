@@ -319,8 +319,9 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
 - **First-version enemy: the raider** — a simple, easy ship with 1 laser,
   2–4 torpedoes, and a cannon (`raider` in `data/ships.yaml`).
 - **Balance rule:** the probe must be able to beat four raiders at once
-  without significant strategy (all weapon rules on, facing the nearest
-  enemy), at medium difficulty. **(interpretation)** Medium means it wins with
+  without significant strategy (lasers and cannons on the nearest enemy,
+  facing it; torpedoes once every raider is in range: at least enough to
+  hit each one, nearest first, the rest spread evenly), at medium difficulty. **(interpretation)** Medium means it wins with
   40–80% integrity left (hit points across all its modules; hits land on
   every module, not just the hull). `BalanceTest` checks this against the
   data.

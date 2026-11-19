@@ -75,14 +75,20 @@ to get through, or nothing. How well a ship plans depends on its computer
 (see [ships.md](ships.md#computers)). Launch-now orders are not planned: players can
 play as well or as poorly as they like. To help, the WEAPONS panel shows the
 probe's own estimate for the target: how many torpedoes a salvo needs to get
-one hit (*k* + 1) and to destroy it (*k* + *h*).
+one hit (*k* + 1) and to destroy it (*k* + *h*): with the target defending
+itself alone, and with its allies helping. **(interpretation)** Each ship
+shoots torpedoes aimed at itself first, so when every enemy is attacked at
+once its allies are busy and the first figure holds; a salvo at one enemy
+while the others are free faces the second.
 
 - **Point-defence estimate.** Each of the target's laser turrets does
   `beamMW` × `focusRangeKm` × (2 − `focusRangeKm` ÷ `rangeKm`) ÷ *v* damage to
   incoming torpedoes over a salvo's approach, where *v* is the torpedoes'
   closing speed at the end: the closing speed now plus the delta-v each
   torpedo burns before its terminal reserve. (This is the laser falloff
-  integrated over the approach.) The salvo loses that total ÷ the torpedo's
+  integrated over the approach.) The target's allies help: each of its
+  other known allies within its own laser reach of the target adds its
+  turrets the same way. The salvo loses that total ÷ the torpedo's
   `hitPoints` torpedoes, rounded down.
 - **Semi-accurate.** The closing speed comes from the shooter's sensor
   estimate, taken at its least favourable: closing speed − 2 × its velocity

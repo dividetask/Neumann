@@ -33,7 +33,7 @@ class GameSession(val data: GameData, val world: World) {
     private val estimator = BogeyEstimator(world)
     private val remaining = RemainingCount(world)
     private val fixtures = KnownFixtures(world)
-    private val salvos = SalvoPlanner(data)
+    private val engagements = EngagementEstimator(world, SalvoPlanner(data))
 
     fun skip(seconds: Double): TimeSkipResult = timeSkip.run(world, seconds)
 
@@ -43,19 +43,8 @@ class GameSession(val data: GameData, val world: World) {
     /** Every bogey the player has a position fix for: where it was seen, and where it probably is now. */
     fun bogeys(): List<BogeyEstimate> = estimator.estimate()
 
-    /**
-     * The probe's own estimate for a torpedo salvo at its target: how many to
-     * get one hit, and how many to destroy it. Null with no target or no
-     * working computer.
-     */
-    fun salvoEstimate(): SalvoEstimate? {
-        val p = world.player
-        val contact = p.contacts[p.targetId]?.takeIf { it.kind.isVessel } ?: return null
-        val design = world.vessel(contact.id)?.design ?: return null
-        val computer = p.computer?.type?.computer ?: return null
-        val k = salvos.shotDown(design, contact, computer)
-        return SalvoEstimate(k + 1, k + salvos.hitsToDestroy(design, computer))
-    }
+    /** How well each weapon would do against [contactId] now; null if it is not a current contact. */
+    fun engagement(contactId: String): Engagement? = world.player.contacts[contactId]?.let { engagements.estimate(it) }
 
     /** What is left to destroy, as far as the player knows. */
     fun remaining(): Remaining = remaining.count()

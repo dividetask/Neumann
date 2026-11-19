@@ -76,12 +76,30 @@ class OrderDesk(private val world: World) {
         return null
     }
 
-    /** Launch a salvo of [count] torpedoes at the target, all at once, at the next step. */
-    fun launchTorpedoes(count: Int): String? {
-        player.contacts[player.targetId] ?: return "No target"
+    /** Launch a salvo of [count] torpedoes at [targetId] (default: the target), all at once, at the next step. */
+    fun launchTorpedoes(count: Int, targetId: String? = player.targetId): String? {
+        val c = player.contacts[targetId] ?: return "No target"
+        if (!c.kind.isVessel) return "Only ships, defences, and bases can be targeted"
         if (count <= 0) return "Choose how many torpedoes"
         if (player.torpedoes <= 0) return "No torpedoes"
+        player.torpedoTargetId = c.id
         player.torpedoesToLaunch = minOf(count, player.torpedoes)
+        return null
+    }
+
+    /** Lasers on at [id] (the one laser target), or off with null. */
+    fun setLaserTarget(id: String?): String? {
+        if (id != null) player.contacts[id]?.takeIf { it.kind.isVessel } ?: return "Not a current enemy contact"
+        player.laserTargetId = id
+        player.rules.laserAutoFire = id != null
+        return null
+    }
+
+    /** Cannons on at [id] (the one cannon target), or off with null. */
+    fun setCannonTarget(id: String?): String? {
+        if (id != null) player.contacts[id]?.takeIf { it.kind.isVessel } ?: return "Not a current enemy contact"
+        player.cannonTargetId = id
+        player.rules.cannonAutoFire = id != null
         return null
     }
 

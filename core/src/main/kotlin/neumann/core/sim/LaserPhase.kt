@@ -11,8 +11,9 @@ import kotlin.math.max
 
 /**
  * Fires each laser turret continuously while it has something to fire at:
- * point defence against torpedoes first (spreading turrets over different
- * torpedoes), then the target. A turret fires only at things in its range
+ * point defence against torpedoes (spreading turrets over different
+ * torpedoes) and its target, in the order the point-defence-first switch
+ * says. A turret fires only at things in its range
  * and arc, and only with enough stored power.
  */
 class LaserPhase(private val damage: DamageResolver) {
@@ -26,8 +27,17 @@ class LaserPhase(private val damage: DamageResolver) {
                 val laser = turret.type.laser!!
                 val power = laser.powerMW * dt
                 val range = laser.rangeKm * Units.KM
-                val torpedo = if (v.rules.laserPointDefence) torpedoFor(world, v, range, laser.arcDeg, engaged) else null
-                val target = if (torpedo == null && (v.rules.laserAutoFire || bursting)) vesselTarget(world, v, range, laser.arcDeg) else null
+                // Point defence first, or the target first and torpedoes only when the target is out of reach.
+                val firing = v.rules.laserAutoFire || bursting
+                var torpedo: Torpedo? = null
+                var target: Vessel? = null
+                if (v.rules.pointDefenceFirst) {
+                    torpedo = torpedoFor(world, v, range, laser.arcDeg, engaged)
+                    if (torpedo == null && firing) target = vesselTarget(world, v, range, laser.arcDeg)
+                } else {
+                    if (firing) target = vesselTarget(world, v, range, laser.arcDeg)
+                    if (target == null) torpedo = torpedoFor(world, v, range, laser.arcDeg, engaged)
+                }
                 if ((torpedo == null && target == null) || v.energy < power) continue
                 v.energy -= power
                 if (torpedo != null) {
@@ -44,7 +54,7 @@ class LaserPhase(private val damage: DamageResolver) {
     }
 
     private fun vesselTarget(world: World, v: Vessel, range: Double, arcDeg: Double): Vessel? {
-        val target = world.vessel(v.targetId) ?: return null
+        val target = world.vessel(v.laserTargetId ?: v.targetId) ?: return null
         if (target.faction == v.faction || v.contacts[target.id] == null) return null
         return target.takeIf { inReach(v, it.position, range, arcDeg) }
     }

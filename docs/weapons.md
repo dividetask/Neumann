@@ -18,9 +18,10 @@ The bare minimum to test the game.
   the square of distance (the spot spreads), and is zero beyond `rangeKm`.
   Fires continuously while it has a target in
   range and arc, drawing `powerMW`; between engagements it has no target and
-  draws nothing. Also serves as point defence: with point
-  defence on, it fires at the nearest torpedo aimed at its ship before any
-  other target. **(interpretation)** Beam travel time is ignored (at laser
+  draws nothing. Also serves as point defence against torpedoes
+  aimed at its ship: with **point defence first** on, it fires at the
+  nearest such torpedo before its target; with it off, at its target first,
+  and at torpedoes only when the target is out of reach. **(interpretation)** Beam travel time is ignored (at laser
   range it is a fraction of a second).
 - **Cannon** — aims with the target's sensor estimate (see
   [sensors.md](sensors.md)), so it needs good tracking at range. Fires solid

@@ -48,12 +48,13 @@ class WeaponTest {
     fun `a torpedo hits a target that does not manoeuvre`() {
         val w = duel(50_000.0)
         val d = Fixture.dummy(w)
-        d.rules.laserPointDefence = false
+        d.working(neumann.core.world.ModuleKind.LASER_TURRET).forEach { it.hitPoints = 0.0 } // no point defence
+        val before = damageTaken(d)
         val orders = OrderDesk(w)
         assertNull(orders.setTarget(d.id))
         assertNull(orders.fireNow(WeaponKind.TORPEDO))
         Fixture.runFor(w, 3 * 3600.0) // a torpedo takes over an hour to cross 50,000 km
-        assertEquals(munitions.torpedo.damage, damageTaken(d), 1e-6)
+        assertEquals(munitions.torpedo.damage, damageTaken(d) - before, 1e-6)
         assertTrue(w.torpedoes.isEmpty())
     }
 

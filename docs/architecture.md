@@ -127,7 +127,9 @@ capacities, sensor and threat range from the working modules).
 - `BogeyEstimator` — dead reckoning for the map: each bogey's seen
   position and its estimated position now, or a ghost (`BogeyEstimate`).
 - `SalvoEstimate` — how many torpedoes a salvo at the target needs to hit,
-  and to destroy it (shown on the WEAPONS panel).
+  and to destroy it.
+- `EngagementEstimator` — how well each weapon would do against one enemy
+  now (`Engagement`), for its panel.
 - `RemainingCount` — enemy ships, defences, and bases seen and not
   destroyed (`Remaining`).
 - `KnownFixtures` — fixed defences and bases found and not destroyed.
@@ -154,6 +156,8 @@ capacities, sensor and threat range from the working modules).
 - `BridgeScreen` — the map, top bar, and bottom tabs (SHIP, CONTACTS,
   MANOEUVRE, WEAPONS, LOG); no scrolling.
 - `DirectionPad` — the two direction dials.
+- `EnemyPanel` — one enemy: lasers and cannons on or off at it, what each
+  weapon would do at this range, a torpedo salvo, manoeuvre target.
 - `DriveDial` — the drive dial (full thrust to most economical), with the
   acceleration and fuel per km/s it gives.
 - `MapView` — the full-screen 3D map and its gestures. `ApproachArrow` —

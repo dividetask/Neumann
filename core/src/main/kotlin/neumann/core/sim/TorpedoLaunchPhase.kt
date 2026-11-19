@@ -38,7 +38,7 @@ class TorpedoLaunchPhase(data: GameData) {
     private fun launchNow(world: World, v: Vessel) {
         var left = v.torpedoesToLaunch
         v.torpedoesToLaunch = 0
-        val target = v.contacts[v.targetId]?.takeIf { it.kind.isVessel }
+        val target = v.contacts[v.torpedoTargetId ?: v.targetId]?.takeIf { it.kind.isVessel }
         val bays = target?.let { t -> readyBays(v, t, inRange = false) }.orEmpty()
         if (target == null || bays.isEmpty()) {
             if (v === world.player) world.event(EventKind.INFO, v.id, "Torpedo cannot launch: " + when {

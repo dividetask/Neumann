@@ -31,6 +31,7 @@ autoPause:
     - DAMAGE_TAKEN
     - DESTROYED
     - LOW_FUEL
+    - BURN_COMPLETE
     - SYSTEM_CLAIMED
     - SHIP_LOST
 

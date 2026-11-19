@@ -64,7 +64,7 @@ class ScenarioBuilder(private val data: GameData) {
             val facing = if (data.designs.getValue(e.design).role == VesselRole.SHIP) orbit else offset
             val v = factory.build(world.newId("E"), e.name, Faction.ENEMY, e.design, centre + offset,
                 centreVelocity + orbit, facing)
-            v.rules.laserPointDefence = true
+            v.rules.pointDefenceFirst = true
             v.rules.laserAutoFire = true
             v.rules.cannonAutoFire = true
             v.rules.torpedoAutoLaunch = true

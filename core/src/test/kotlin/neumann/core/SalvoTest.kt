@@ -234,3 +234,23 @@ class LaunchSalvoTest {
         assertTrue(w.torpedoes.all { it.launchTime == w.torpedoes.first().launchTime }, "together")
     }
 }
+
+class EngagementTest {
+    @Test
+    fun `each enemy shows laser damage at its range, a slug's flight and aim error, and the torpedoes needed`() {
+        fun at(km: Double): neumann.core.game.Engagement {
+            val w = Fixture.world()
+            val d = Fixture.dummy(w)
+            Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO)
+            Fixture.place(w, d, Fixture.openSpace + Vec3(km * Units.KM, 0.0, 0.0), Vec3.ZERO)
+            SimulationStep(w.data).sensors.run(w)
+            return neumann.core.game.GameSession(w.data, w).engagement(d.id)!!
+        }
+        val near = at(4_000.0)
+        val far = at(40_000.0)
+        assertTrue(near.laserMJS > far.laserMJS * 50, "lasers fall off with the square of distance beyond focus")
+        assertTrue(far.slugSeconds!! > near.slugSeconds!! * 5, "slugs take longer further out")
+        assertTrue(near.salvo!!.toDestroy > near.salvo!!.toHit)
+        assertEquals(80.0, near.targetSizeM)
+    }
+}

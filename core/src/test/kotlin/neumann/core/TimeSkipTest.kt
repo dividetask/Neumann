@@ -107,4 +107,15 @@ class EventLogTest {
         Fixture.place(w, d, w.player.position + Vec3(10_000.0 * Units.KM, 0.0, 0.0), Vec3.ZERO)
         assertEquals(w.data.rules.sim.baseStepSeconds, sizer.next(w, 1e9), 1e-9, "in weapon range: base steps")
     }
+
+    @Test
+    fun `reaching the desired speed ends the burn and pauses the game, and the ship then coasts`() {
+        val w = Fixture.world()
+        Fixture.place(w, w.player, Fixture.openSpace, Vec3.ZERO, forward = Vec3(0.0, 0.0, 1.0))
+        neumann.core.game.OrderDesk(w).burn(neumann.core.world.HeadingMode.FIXED, Vec3(0.0, 0.0, 1.0), 1.0, 0.2, null)
+        val r = Fixture.timeSkip(w).run(w, 86_400.0)
+        assertTrue(r.pausedBy.any { it.kind == EventKind.BURN_COMPLETE }, "paused when the speed was reached")
+        assertTrue(r.elapsedSeconds < 86_400.0)
+        assertNull(w.player.burn, "no burn left: it coasts")
+    }
 }

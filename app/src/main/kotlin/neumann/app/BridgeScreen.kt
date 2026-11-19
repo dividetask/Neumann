@@ -35,7 +35,6 @@ import neumann.core.sim.SensorPhase
 import neumann.core.world.BurnStage
 import neumann.core.world.EventKind
 import neumann.core.world.HeadingMode
-import neumann.core.world.WeaponKind
 
 private val skips = listOf(60.0 to "1 MIN", 3600.0 to "1 HR", 4 * 3600.0 to "4 HR", 86400.0 to "1 DAY", 30 * 86400.0 to "1 MON")
 private val modes = listOf(
@@ -66,6 +65,7 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
     var tab by remember { mutableStateOf<Tab?>(null) }
     val manoeuvre = remember { ManoeuvreState() }
     var salvo by remember { mutableStateOf(1) }
+    var selected by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
     fun changed(problem: String? = null) {
@@ -117,9 +117,11 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
                     Column(Modifier.fillMaxWidth().background(Theme.panel.copy(alpha = 0.92f)).padding(8.dp)) {
                         when (t) {
                             Tab.SHIP -> ShipPanel(session)
-                            Tab.CONTACTS -> ContactsPanel(session, ::changed)
+                            Tab.CONTACTS -> selected?.let { id ->
+                                EnemyPanel(session, id, salvo, { salvo = it }, { selected = null }, ::changed)
+                            } ?: ContactsPanel(session) { selected = it }
                             Tab.MANOEUVRE -> ManoeuvrePanel(session, manoeuvre, ::changed)
-                            Tab.WEAPONS -> WeaponsPanel(session, salvo, { salvo = it }, ::changed)
+                            Tab.WEAPONS -> WeaponsPanel(session, ::changed)
                             Tab.LOG -> LogPanel(session)
                         }
                     }
@@ -183,17 +185,20 @@ private fun ShipPanel(session: GameSession) {
 
 /** The nearest contacts, one line each; tap a vessel to target it. */
 @Composable
-private fun ContactsPanel(session: GameSession, changed: (String?) -> Unit) {
+/** The contacts, nearest first; tapping an enemy opens its panel. Marks: L lasers, C cannons, > manoeuvre target. */
+private fun ContactsPanel(session: GameSession, onSelect: (String) -> Unit) {
     val player = session.world.player
     val contacts = player.contacts.current.values.sortedBy { it.distance }
     if (contacts.isEmpty()) Line("No contacts", Theme.dim)
     for (c in contacts.take(CONTACT_LINES)) {
         val targeted = c.id == player.targetId
+        val marks = (if (player.rules.laserAutoFire && player.laserTargetId == c.id) "L" else " ") +
+            (if (player.rules.cannonAutoFire && player.cannonTargetId == c.id) "C" else " ")
         val color = if (c.targetsObserver || targeted) Theme.alert else Theme.text
         val range = if (c.bearingOnly) "bearing only" else "${DisplayFormat.distance(c.distance)} ±${DisplayFormat.distance(c.uncertaintyM)}"
         val closing = if (c.bearingOnly) "" else "  ${DisplayFormat.speed(c.closingSpeed)}"
-        Line("${if (targeted) ">" else " "} ${c.name.take(14)} $range$closing (${SensorPhase.sensorName(c.sensor)})", color,
-            Modifier.fillMaxWidth().clickable(enabled = c.kind.isVessel) { changed(session.orders.setTarget(c.id)) }.padding(vertical = 3.dp))
+        Line("${if (targeted) ">" else " "}$marks ${c.name.take(14)} $range$closing (${SensorPhase.sensorName(c.sensor)})", color,
+            Modifier.fillMaxWidth().clickable(enabled = c.kind.isVessel) { onSelect(c.id) }.padding(vertical = 3.dp))
     }
     if (contacts.size > CONTACT_LINES) Line("+${contacts.size - CONTACT_LINES} further", Theme.dim)
 }
@@ -237,33 +242,15 @@ private fun ManoeuvrePanel(session: GameSession, s: ManoeuvreState, changed: (St
 }
 
 @Composable
-private fun WeaponsPanel(session: GameSession, salvo: Int, onSalvo: (Int) -> Unit, changed: (String?) -> Unit) {
-    val world = session.world
-    val player = world.player
-    Row(Modifier.fillMaxWidth()) {
-        ConsoleButton("LASER", enabled = !world.over) { changed(session.orders.fireNow(WeaponKind.LASER)) }
-        ConsoleButton("CANNON", enabled = !world.over) { changed(session.orders.fireNow(WeaponKind.CANNON)) }
-    }
-    // Torpedoes: choose a salvo size, then launch it all at once.
-    val count = salvo.coerceIn(1, maxOf(1, player.torpedoes))
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        ConsoleButton("−", enabled = count > 1) { onSalvo(count - 1) }
-        Line(" $count ")
-        ConsoleButton("+", enabled = count < player.torpedoes) { onSalvo(count + 1) }
-        ConsoleButton("LAUNCH $count", enabled = !world.over && player.torpedoes > 0) { changed(session.orders.launchTorpedoes(count)) }
-    }
-    val estimate = session.salvoEstimate()
-    Line(if (estimate == null) "Torpedoes ${player.torpedoes} aboard; no target"
-        else "Torpedoes ${player.torpedoes} aboard; target needs ${estimate.toHit} to hit, ${estimate.toDestroy} to destroy", Theme.dim)
+private fun WeaponsPanel(session: GameSession, changed: (String?) -> Unit) {
+    val player = session.world.player
     val rules = player.rules
-    Rule("Laser point defence", rules.laserPointDefence) { rules.laserPointDefence = it; changed(null) }
-    Rule("Laser auto-fire", rules.laserAutoFire) { rules.laserAutoFire = it; changed(null) }
-    Rule("Cannon auto-fire", rules.cannonAutoFire) { rules.cannonAutoFire = it; changed(null) }
-    Rule("Torpedo auto-launch", rules.torpedoAutoLaunch) { rules.torpedoAutoLaunch = it; changed(null) }
+    Rule("Point defence first (lasers shoot torpedoes before their target)", rules.pointDefenceFirst) { rules.pointDefenceFirst = it; changed(null) }
     val sr = player.sensorRules
     Rule("Radar on (can be detected)", sr.radarActive) { sr.radarActive = it; changed(null) }
     Rule("Lidar on target (can be detected)", sr.lidarActive) { sr.lidarActive = it; changed(null) }
     Rule("Evasive jinking (fuel, heat)", player.evasive) { changed(session.orders.setEvasive(it)) }
+    Line("Lasers, cannons, and torpedoes: CONTACTS, tap an enemy.", Theme.dim)
 }
 
 @Composable

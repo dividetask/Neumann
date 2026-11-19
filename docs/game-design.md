@@ -66,6 +66,7 @@ once.
 - Fuel runs low (drops below `lowSupplyFraction`) unexpectedly: because a
   fuel tank was destroyed. Fuel running low from burns, turns, and jinking
   the player ordered is logged but does not pause.
+- The player's burn ends (see below).
 - The system is claimed, or the player's ship is lost.
 
 Pausing requires new information. An event that continues something already
@@ -83,7 +84,10 @@ skip runs on to the end of the window so everything arriving inside it
 lists them all. **(interpretation)** This applies to every kind of pause
 event; claiming the system and losing the ship still pause at once.
 
-The end of a burn does not pause; it is logged.
+The end of a burn pauses, for whatever reason it ends (desired speed or
+distance reached, velocity matched, out of fuel): the player can then give
+a new order. Unless they do, the ship carries on as the last order left it:
+after a burn it coasts.
 
 Ammunition running low does not pause either, and is logged: the player
 fires only while paused and can see how much will remain, so it is never
@@ -129,18 +133,26 @@ All directions are relative to the ship. They are chosen with:
   from target, and match target velocity (burns against the velocity relative
   to the target and stops itself when that reaches zero). Presets keep
   tracking as things move.
-C. **Pick a target** from the contact list.
-D. **Fire a weapon now** at the target. **(interpretation)** One cannon fires
-   one slug, as soon as one is ready with the target in its arc. Torpedoes
-   launch as a salvo: the player picks how many (− / +) and LAUNCH fires
-   them all at once from the bays with the target in their arc (see
-   [weapons.md](weapons.md#torpedo-salvos)). The laser turrets fire a burst of
-   `burstSeconds`, each while the target is in its range and arc.
-E. **Set weapon rules**: laser point defence, laser auto-fire at target,
-   cannon auto-fire at target, torpedo auto-launch at target (launches only
-   salvos big enough to get through; see
-   [weapons.md](weapons.md#torpedo-salvos)). Each fires only
-   when the target is in that weapon's range and arc.
+C. **Fight each enemy from its own panel** (CONTACTS, tap an enemy):
+   - **Lasers on / off** at this enemy. One laser target at a time: turning
+     lasers on at one enemy turns them off at the last. They fire whenever
+     it is in range and arc.
+   - **Cannons on / off** at this enemy, the same way (one cannon target).
+     They fire whenever it is within `autoRangeKm` and in arc.
+   - **Torpedoes:** a slider for how many, and LAUNCH, which starts
+     launching that salvo now from the bays with the enemy in their arc
+     (see [weapons.md](weapons.md#torpedo-salvos)).
+   - **Manoeuvre target:** the enemy that toward / away / match target
+     velocity steer by.
+   - How well each weapon would do at the current range: laser damage per
+     second, how long a slug takes to get there and how far off its aim may
+     be against the enemy's size, and the torpedoes needed to hit and to
+     destroy it.
+D. **Point defence first** (WEAPONS): lasers shoot torpedoes coming at the
+   ship before their target; off, they shoot their target first and
+   torpedoes only when the target is out of reach. **(interpretation)**
+E. *(Replaced by C: the ship-wide auto-fire switches are gone; enemies still
+   use them.)*
 F. **Set sensor rules**: radar on/off, lidar on/off (see
    [sensors.md](sensors.md)).
 G. **Evasive manoeuvres** on/off: jink sideways with the thrusters to spoil
@@ -384,7 +396,10 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
   from the last skip are bright, older ones dim.
 - **Bottom tab bar:** SHIP, CONTACTS, MANOEUVRE, WEAPONS, LOG. Each opens
   one compact panel over the lower part of the map; tapping it again hides
-  it. The direction dials live in MANOEUVRE.
+  it. The direction dials live in MANOEUVRE. CONTACTS lists the contacts;
+  tapping an enemy opens its panel (see [Orders](#orders) C), and BACK
+  returns to the list. WEAPONS holds point defence first, the sensor rules,
+  and evasive manoeuvres.
 - **Approach screen:** the full-screen map, the ship's arrow (see
   [Space](#space)), the entry speed it gives, and ENTER.
 - **No instructions on the game screens.** How to play (gestures, setting

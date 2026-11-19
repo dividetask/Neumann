@@ -22,7 +22,7 @@ class CannonPhase(private val solver: InterceptSolver, private val slug: SlugCon
             if (!v.active) continue
             val cannons = v.working(ModuleKind.CANNON)
             for (c in cannons) c.cooldown = max(0.0, c.cooldown - dt)
-            val target = v.contacts[v.targetId]?.takeIf { it.kind.isVessel && !it.bearingOnly }
+            val target = v.contacts[v.cannonTargetId ?: v.targetId]?.takeIf { it.kind.isVessel && !it.bearingOnly }
             if (v.fireCannonNow && (target == null || v.slugs <= 0 || cannons.isEmpty())) {
                 v.fireCannonNow = false
                 if (v === world.player) world.event(EventKind.INFO, v.id, "Cannon cannot fire: " + when {

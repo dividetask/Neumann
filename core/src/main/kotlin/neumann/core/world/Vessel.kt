@@ -42,16 +42,24 @@ class Burn(
 /** Switches for the active sensors. Passive sensors are always on. */
 class SensorRules(var radarActive: Boolean = true, var lidarActive: Boolean = true)
 
+/**
+ * Weapon switches. [pointDefenceFirst]: lasers shoot torpedoes aimed at the
+ * ship before their target (off: target first, torpedoes only when the
+ * target is out of reach). The auto-fire switches fire each weapon at its
+ * target whenever it can; the player sets them per enemy (see
+ * docs/game-design.md#orders), the AI ship-wide.
+ */
 class WeaponRules(
-    var laserPointDefence: Boolean = true,
+    var pointDefenceFirst: Boolean = true,
     var laserAutoFire: Boolean = false,
     var cannonAutoFire: Boolean = false,
     var torpedoAutoLaunch: Boolean = false,
 )
 
-/** A ship, fixed defence, or base, built from a design's modules. */
 /** A ship's part of an allied salvo: [torpedoes] still to launch at [targetId]. */
 class SalvoShare(val targetId: String, var torpedoes: Int)
+
+/** A ship, fixed defence, or base, built from a design's modules. */
 
 class Vessel(
     override val id: String,
@@ -89,11 +97,16 @@ class Vessel(
 
     var heading: Heading? = null
     var burn: Burn? = null
+    /** The manoeuvre target (toward / away / match), and the target of any weapon without its own. */
     var targetId: String? = null
+    /** Each weapon's own target, if it has one; otherwise it uses [targetId]. */
+    var laserTargetId: String? = null
+    var cannonTargetId: String? = null
+    var torpedoTargetId: String? = null
     val rules = WeaponRules()
     var laserBurstRemaining = 0.0
     var fireCannonNow = false
-    /** Torpedoes to launch now at the target, as one salvo (a launch-now order). */
+    /** Torpedoes to launch now at the torpedo target, as one salvo (a launch-now order). */
     var torpedoesToLaunch = 0
     /** Torpedoes this ship has promised to an allied salvo, to launch once the target is in range. */
     var salvoShare: SalvoShare? = null

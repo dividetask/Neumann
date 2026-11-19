@@ -64,11 +64,14 @@ class LaserPhase(private val damage: DamageResolver) {
         return to.length() < range && v.forward.angleTo(to) <= arcDeg * Units.DEGREE
     }
 
-    /** Nearest hostile torpedo in reach, preferring ones no other turret has engaged. */
+    /**
+     * A hostile torpedo in reach: those aimed at this ship first, then those aimed at
+     * allies; nearest first; preferring ones no other turret has engaged.
+     */
     private fun torpedoFor(world: World, v: Vessel, range: Double, arcDeg: Double, engaged: Set<String>): Torpedo? {
         val inReach = world.torpedoes
             .filter { it.alive && it.faction != v.faction && v.contacts[it.id] != null && inReach(v, it.position, range, arcDeg) }
-            .sortedBy { (it.position - v.position).length() }
+            .sortedWith(compareBy({ if (it.targetId == v.id) 0 else 1 }, { (it.position - v.position).length() }))
         return inReach.firstOrNull { it.id !in engaged } ?: inReach.firstOrNull()
     }
 

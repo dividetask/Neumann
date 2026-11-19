@@ -27,4 +27,19 @@ class BalanceTest {
             assertTrue(share >= 0.1, "all three weapons matter: $weapon dealt ${(share * 100).toInt()}% of the probe's damage")
         }
     }
+
+    @Test
+    fun `comparing torpedo strategies - spread evenly against one raider at a time`() {
+        for (strategy in listOf(TorpedoStrategy.EVEN, TorpedoStrategy.CONCENTRATE)) {
+            val w = FourRaiderFight(strategy = strategy).run().world
+            val p = w.player
+            val integrity = p.modules.sumOf { it.hitPoints } / p.modules.sumOf { it.type.hitPoints }
+            val byWeapon = w.damage.by(p.id)
+            val total = byWeapon.values.sum()
+            println("strategy $strategy: claimed=${w.claimed} after ${"%.1f".format(w.time / 3600)} h, integrity ${(integrity * 100).toInt()}%, " +
+                "damage taken ${Fixture.damageTaken(p).toInt()}, torpedoes left ${p.torpedoes}, by weapon " +
+                byWeapon.mapValues { "${(it.value / total * 100).toInt()}%" })
+            assertTrue(w.claimed, "$strategy: the probe still wins")
+        }
+    }
 }

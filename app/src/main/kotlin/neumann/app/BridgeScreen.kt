@@ -119,7 +119,7 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
                             Tab.SHIP -> ShipPanel(session)
                             Tab.CONTACTS -> selected?.let { id ->
                                 EnemyPanel(session, id, salvo, { salvo = it }, { selected = null }, ::changed)
-                            } ?: ContactsPanel(session) { selected = it }
+                            } ?: ContactsPanel(session, ::changed) { selected = it }
                             Tab.MANOEUVRE -> ManoeuvrePanel(session, manoeuvre, ::changed)
                             Tab.WEAPONS -> WeaponsPanel(session, ::changed)
                             Tab.LOG -> LogPanel(session)
@@ -185,20 +185,28 @@ private fun ShipPanel(session: GameSession) {
 
 /** The nearest contacts, one line each; tap a vessel to target it. */
 @Composable
-/** The contacts, nearest first; tapping an enemy opens its panel. Marks: L lasers, C cannons, > manoeuvre target. */
-private fun ContactsPanel(session: GameSession, onSelect: (String) -> Unit) {
+/**
+ * The contacts, nearest first. Tapping an enemy opens its panel; tapping a
+ * torpedo or slug turns lidar on it (or off). Marks: > manoeuvre target,
+ * L lasers, C cannons, D lidar.
+ */
+private fun ContactsPanel(session: GameSession, changed: (String?) -> Unit, onSelect: (String) -> Unit) {
     val player = session.world.player
     val contacts = player.contacts.current.values.sortedBy { it.distance }
     if (contacts.isEmpty()) Line("No contacts", Theme.dim)
     for (c in contacts.take(CONTACT_LINES)) {
         val targeted = c.id == player.targetId
         val marks = (if (player.rules.laserAutoFire && player.laserTargetId == c.id) "L" else " ") +
-            (if (player.rules.cannonAutoFire && player.cannonTargetId == c.id) "C" else " ")
+            (if (player.rules.cannonAutoFire && player.cannonTargetId == c.id) "C" else " ") +
+            (if (player.lidarTargetId == c.id) "D" else " ")
         val color = if (c.targetsObserver || targeted) Theme.alert else Theme.text
         val range = if (c.bearingOnly) "bearing only" else "${DisplayFormat.distance(c.distance)} ±${DisplayFormat.distance(c.uncertaintyM)}"
         val closing = if (c.bearingOnly) "" else "  ${DisplayFormat.speed(c.closingSpeed)}"
         Line("${if (targeted) ">" else " "}$marks ${c.name.take(14)} $range$closing (${SensorPhase.sensorName(c.sensor)})", color,
-            Modifier.fillMaxWidth().clickable(enabled = c.kind.isVessel) { onSelect(c.id) }.padding(vertical = 3.dp))
+            Modifier.fillMaxWidth().clickable {
+                if (c.kind.isVessel) onSelect(c.id)
+                else changed(session.orders.setLidarTarget(if (player.lidarTargetId == c.id) null else c.id))
+            }.padding(vertical = 3.dp))
     }
     if (contacts.size > CONTACT_LINES) Line("+${contacts.size - CONTACT_LINES} further", Theme.dim)
 }
@@ -245,7 +253,8 @@ private fun ManoeuvrePanel(session: GameSession, s: ManoeuvreState, changed: (St
 private fun WeaponsPanel(session: GameSession, changed: (String?) -> Unit) {
     val player = session.world.player
     val rules = player.rules
-    Rule("Point defence first (lasers shoot torpedoes before their target)", rules.pointDefenceFirst) { rules.pointDefenceFirst = it; changed(null) }
+    Rule("Laser point defence first (torpedoes before the target)", rules.pointDefenceFirst) { rules.pointDefenceFirst = it; changed(null) }
+    Rule("Cannon point defence first (needs a lidar track)", rules.cannonPointDefenceFirst) { rules.cannonPointDefenceFirst = it; changed(null) }
     val sr = player.sensorRules
     Rule("Radar on (can be detected)", sr.radarActive) { sr.radarActive = it; changed(null) }
     Rule("Lidar on target (can be detected)", sr.lidarActive) { sr.lidarActive = it; changed(null) }

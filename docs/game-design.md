@@ -148,9 +148,15 @@ C. **Fight each enemy from its own panel** (CONTACTS, tap an enemy):
      second, how long a slug takes to get there and how far off its aim may
      be against the enemy's size, and the torpedoes needed to hit and to
      destroy it.
-D. **Point defence first** (WEAPONS): lasers shoot torpedoes coming at the
-   ship before their target; off, they shoot their target first and
-   torpedoes only when the target is out of reach. **(interpretation)**
+D. **Point defence first** (WEAPONS), for lasers and for cannons
+   separately: lasers shoot torpedoes coming at the ship before their
+   target, and off, their target first and torpedoes only when the target is
+   out of reach; cannons shoot the nearest torpedo coming at the ship, and
+   off, only their target (see [weapons.md](weapons.md)).
+   **(interpretation)**
+   **Lidar target:** lidar tracks one contact. The player picks it: LIDAR ON
+   in an enemy's panel, or tapping a torpedo or slug in the contact list.
+   Without one, lidar tracks the manoeuvre target.
 E. *(Replaced by C: the ship-wide auto-fire switches are gone; enemies still
    use them.)*
 F. **Set sensor rules**: radar on/off, lidar on/off (see

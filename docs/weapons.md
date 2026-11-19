@@ -36,6 +36,18 @@ The bare minimum to test the game.
   slugs give off no heat, firing does not raise the shooter's signature, and
   only radar can see a slug, at short range (see [sensors.md](sensors.md#slugs)).
   Lasers do not shoot at slugs. **(interpretation)**
+- **Cannon point defence.** With **cannon point defence first** on, a
+  cannon fires at the nearest torpedo coming at its ship that is within its
+  `autoRangeKm` and has a known distance, before its target. It aims at
+  where the torpedo will be: a torpedo steers by a fixed law, so assuming
+  the ship keeps its course, its path can be predicted (it accelerates
+  toward the ship at its `acceleration`). Off, the cannon fires only at its
+  target. A slug that passes within a torpedo's `sizeM` hits it, for its
+  kinetic energy against the torpedo's `hitPoints`. **(interpretation)**
+  Only a lidar track is precise enough to hit a 5 m torpedo; radar's errors
+  are hundreds of metres or more. A torpedo's ablative armour (3000) takes
+  about three or four slug hits, so cannon point defence is weak, as the
+  physics says.
 - **Guided exploding torpedo** — launched from a missile bay at
   `launchSpeed`, then accelerates
   at `acceleration` until only `terminalReserveFraction` of its `deltaV` is

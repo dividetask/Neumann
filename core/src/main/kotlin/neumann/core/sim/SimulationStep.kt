@@ -17,7 +17,7 @@ class SimulationStep(data: GameData) {
     private val jinks = JinkPhase(performance, rules.ships)
     private val guidance = TorpedoGuidance(rules.sim)
     private val lasers = LaserPhase(damage)
-    private val cannons = CannonPhase(InterceptSolver(), data.munitions.slug)
+    private val cannons = CannonPhase(InterceptSolver(), data.munitions.slug, data.munitions.torpedo)
     private val launches = TorpedoLaunchPhase(data)
     private val motion = MotionPhase(GravityField(), rules.sim)
     private val impacts = ImpactPhase(damage)

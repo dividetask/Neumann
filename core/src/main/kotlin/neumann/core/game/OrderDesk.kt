@@ -95,6 +95,13 @@ class OrderDesk(private val world: World) {
         return null
     }
 
+    /** Lidar on [id] (any current contact, torpedoes included), or back to the manoeuvre target with null. */
+    fun setLidarTarget(id: String?): String? {
+        if (id != null && player.contacts[id] == null) return "Not a current contact"
+        player.lidarTargetId = id
+        return null
+    }
+
     /** Cannons on at [id] (the one cannon target), or off with null. */
     fun setCannonTarget(id: String?): String? {
         if (id != null) player.contacts[id]?.takeIf { it.kind.isVessel } ?: return "Not a current enemy contact"

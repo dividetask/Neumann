@@ -1,6 +1,9 @@
 package neumann.core.sim
 
 import neumann.core.data.SlugConfig
+import neumann.core.data.TorpedoConfig
+import neumann.core.world.Contact
+import neumann.core.world.Vessel
 import neumann.core.math.Units
 import neumann.core.world.ContactKind
 import neumann.core.world.EventKind
@@ -16,7 +19,9 @@ import kotlin.math.max
  * batteries hold its shot energy; slugs come from the shared ammo containers. A fire-now order waits until a
  * cannon can fire.
  */
-class CannonPhase(private val solver: InterceptSolver, private val slug: SlugConfig) {
+class CannonPhase(private val solver: InterceptSolver, private val slug: SlugConfig, torpedo: TorpedoConfig) {
+    private val torpedoPaths = TorpedoPathPredictor(torpedo)
+
     fun run(world: World, dt: Double) {
         for (v in world.vessels) {
             if (!v.active) continue
@@ -32,15 +37,21 @@ class CannonPhase(private val solver: InterceptSolver, private val slug: SlugCon
                 })
                 continue
             }
-            if (target == null) continue
-            val r = target.predictedPosition - v.position
             for (c in cannons) {
                 val cfg = c.type.cannon!!
                 if (v.slugs <= 0 || c.cooldown > 0.0 || v.energy < cfg.shotEnergyMJ) continue
-                val auto = v.rules.cannonAutoFire && target.distance <= cfg.autoRangeKm * Units.KM
-                if (!(v.fireCannonNow || auto)) continue
                 val speed = cfg.muzzleSpeedKmS * Units.KM
-                val aim = solver.aim(r, target.observedVelocity - v.velocity, speed) ?: r.normalized()
+                // Point defence first: the nearest torpedo coming at the ship, aimed along its predicted path.
+                val incoming = if (v.rules.cannonPointDefenceFirst) nearestIncoming(v, cfg.autoRangeKm * Units.KM) else null
+                val aim = if (incoming != null) {
+                    torpedoPaths.aim(v, incoming, speed) ?: continue
+                } else {
+                    if (target == null) continue
+                    val auto = v.rules.cannonAutoFire && target.distance <= cfg.autoRangeKm * Units.KM
+                    if (!(v.fireCannonNow || auto)) continue
+                    val r = target.predictedPosition - v.position
+                    solver.aim(r, target.observedVelocity - v.velocity, speed) ?: r.normalized()
+                }
                 if (v.forward.angleTo(aim) > cfg.arcDeg * Units.DEGREE) continue
                 val s = Slug(world.newId("S"), v.id, v.faction, v.position, v.velocity + aim * speed, slug.massKg, slug.sizeM, world.time)
                 s.history.record(HistorySample(world.time, s.position, s.velocity, false))
@@ -52,4 +63,9 @@ class CannonPhase(private val solver: InterceptSolver, private val slug: SlugCon
             }
         }
     }
+
+    /** The nearest torpedo coming at [v] with a known distance, within [range]. */
+    private fun nearestIncoming(v: Vessel, range: Double): Contact? =
+        v.contacts.current.values.filter { it.kind == ContactKind.TORPEDO && it.targetsObserver && !it.bearingOnly && it.distance <= range }
+            .minByOrNull { it.distance }
 }

@@ -85,7 +85,7 @@ class SensorPhase(private val lightDelay: LightDelay, private val rules: ShipRul
             SensorType.TELESCOPE -> distance <= range * t.signature(burning)
             // Radar range goes as cross-section^(1/4), and cross-section as size^2.
             SensorType.RADAR -> distance <= range * sqrt(t.sizeM / RADAR_REFERENCE_SIZE_M)
-            SensorType.LIDAR -> t.id == observer.targetId && observer.contacts.current.containsKey(t.id) && distance <= range
+            SensorType.LIDAR -> t.id == (observer.lidarTargetId ?: observer.targetId) && observer.contacts.current.containsKey(t.id) && distance <= range
             SensorType.EMISSION_RECEIVER -> t.emitting && distance <= range
         }
     }

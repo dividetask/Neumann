@@ -33,7 +33,11 @@ fun EnemyPanel(session: GameSession, id: String, salvo: Int, onSalvo: (Int) -> U
         ConsoleButton(if (lasersOn) "LASERS ON" else "LASERS OFF", selected = lasersOn) { changed(session.orders.setLaserTarget(if (lasersOn) null else id)) }
         ConsoleButton(if (cannonsOn) "CANNONS ON" else "CANNONS OFF", selected = cannonsOn) { changed(session.orders.setCannonTarget(if (cannonsOn) null else id)) }
     }
-    ConsoleButton("MANOEUVRE TARGET", selected = player.targetId == id) { changed(session.orders.setTarget(id)) }
+    val lidarOn = player.lidarTargetId == id
+    Row(Modifier.fillMaxWidth()) {
+        ConsoleButton(if (lidarOn) "LIDAR ON" else "LIDAR OFF", selected = lidarOn) { changed(session.orders.setLidarTarget(if (lidarOn) null else id)) }
+        ConsoleButton("MANOEUVRE TARGET", selected = player.targetId == id) { changed(session.orders.setTarget(id)) }
+    }
 
     val e = session.engagement(id) ?: return
     Line(if (e.laserMJS > 0.0) "Lasers %.1f MJ/s at this range (reach %s)".format(e.laserMJS, DisplayFormat.distance(e.laserRangeM))

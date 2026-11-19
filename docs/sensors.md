@@ -10,7 +10,7 @@ untuned.
 |---|---|---|---|
 | **Telescope** (infrared/optical) | Passive | Anything within `rangeAu × signature`: an engine plume is visible across the system, a cold hull only up close | Direction very precise; distance poor |
 | **Radar** (microwave) | Active | Anything within `rangeAu × √(sizeM ÷ 100 m)`, hot or cold (radar range goes as the fourth root of radar cross-section, which goes as size²) | Good direction, good distance and speed |
-| **Lidar** (laser ranging) | Active | Only the vessel's current target, if already known and within `rangeAu` | Very precise distance and speed |
+| **Lidar** (laser ranging) | Active | Only one contact, the **lidar target** (the player picks it; otherwise the vessel's target), if already known and within `rangeAu` | Very precise distance and speed |
 | **Emission receiver** | Passive | Any vessel using an active sensor, within `rangeAu` | Direction only |
 
 Every sensor has:

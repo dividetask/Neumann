@@ -51,6 +51,8 @@ class SensorRules(var radarActive: Boolean = true, var lidarActive: Boolean = tr
  */
 class WeaponRules(
     var pointDefenceFirst: Boolean = true,
+    /** Cannons shoot the nearest torpedo coming at the ship before their target. */
+    var cannonPointDefenceFirst: Boolean = false,
     var laserAutoFire: Boolean = false,
     var cannonAutoFire: Boolean = false,
     var torpedoAutoLaunch: Boolean = false,
@@ -103,6 +105,8 @@ class Vessel(
     var laserTargetId: String? = null
     var cannonTargetId: String? = null
     var torpedoTargetId: String? = null
+    /** What lidar tracks (one contact); otherwise [targetId]. */
+    var lidarTargetId: String? = null
     val rules = WeaponRules()
     var laserBurstRemaining = 0.0
     var fireCannonNow = false

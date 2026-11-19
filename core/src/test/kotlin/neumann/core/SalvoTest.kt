@@ -254,3 +254,30 @@ class EngagementTest {
         assertEquals(80.0, near.targetSizeM)
     }
 }
+
+class CannonPointDefenceTest {
+    @Test
+    fun `cannons set to point defence first hit an incoming torpedo along its predicted path, given a lidar track`() {
+        val w = Fixture.world()
+        val d = Fixture.dummy(w)
+        val p = w.player
+        val east = Vec3(1.0, 0.0, 0.0)
+        Fixture.place(w, p, Fixture.openSpace, Vec3.ZERO, forward = east)
+        Fixture.place(w, d, Fixture.openSpace + east * (5_000_000.0 * Units.KM), Vec3.ZERO)
+        p.working(ModuleKind.LASER_TURRET).forEach { it.hitPoints = 0.0 } // cannons only
+        val start = p.position + east * (5_000.0 * Units.KM)
+        val v = -east * 3_000.0
+        val t = neumann.core.world.Torpedo("T-x", "Torpedo T-x", d.id, d.faction, p.id, w.data.munitions.torpedo, start, v, w.time)
+        t.history.record(neumann.core.world.HistorySample(w.time - 60.0, start - v * 60.0, v, true))
+        t.history.record(neumann.core.world.HistorySample(w.time, start, v, true))
+        w.torpedoes.add(t)
+        p.rules.cannonPointDefenceFirst = true
+        val step = SimulationStep(w.data)
+        step.sensors.run(w)
+        kotlin.test.assertNull(neumann.core.game.OrderDesk(w).setLidarTarget(t.id))
+        val armour = t.hitPoints
+        var guard = 0
+        while (t.alive && guard++ < 20_000) step.run(w, 0.5)
+        assertTrue(t.hitPoints < armour, "at least one slug hit the torpedo")
+    }
+}

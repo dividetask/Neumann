@@ -35,6 +35,10 @@ class StepSizer(private val config: SimConfig, private val performance: ShipPerf
                 if (!v.alive || v.faction == s.faction) continue
                 soonest = min(soonest, timeToReach(s.position, s.velocity, v.position, v.velocity))
             }
+            for (t in world.torpedoes) {
+                if (!t.alive || t.faction == s.faction) continue
+                soonest = min(soonest, timeToReach(s.position, s.velocity, t.position, t.velocity))
+            }
         }
         if (soonest == Double.MAX_VALUE) return config.maxStepSeconds
         return (soonest / config.fineStepDivisions).coerceIn(config.fineStepSeconds, config.baseStepSeconds)

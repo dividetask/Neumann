@@ -69,6 +69,8 @@ class ScenarioBuilder(private val data: GameData) {
             v.rules.cannonAutoFire = true
             v.rules.torpedoAutoLaunch = true
             v.ambush = e.ambush
+            if (e.patrol.isNotEmpty()) v.patrol = neumann.core.world.Patrol(e.patrol)
+            v.sensorPosture = e.sensors
             v.ambushRange = e.ambushRangeKm * Units.KM
             world.vessels.add(v)
         }

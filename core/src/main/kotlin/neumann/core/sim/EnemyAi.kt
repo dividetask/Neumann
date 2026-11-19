@@ -7,6 +7,7 @@ import neumann.core.world.Faction
 import neumann.core.world.Heading
 import neumann.core.world.HeadingMode
 import neumann.core.world.ModuleKind
+import neumann.core.world.SensorPosture
 import neumann.core.world.Vessel
 import neumann.core.world.VesselRole
 import neumann.core.world.World
@@ -20,18 +21,25 @@ import kotlin.math.sqrt
  * near.
  */
 class EnemyAi(private val config: AiConfig, private val performance: ShipPerformance) {
+    private val patrols = PatrolPilot(config, performance)
+
     fun run(world: World, dt: Double) {
         for (v in world.vessels) {
             if (!v.active || v.faction != Faction.ENEMY) continue
             // Active sensors on once the player has been seen, unless lying in ambush.
             val active = world.player.id in v.contacts.everSeen && !v.ambush
-            v.sensorRules.radarActive = active
+            // Radar on once the player has been seen, or all along for a ship patrolling with radar.
+            v.sensorRules.radarActive = active || (v.sensorPosture == SensorPosture.RADAR && !v.ambush)
             v.sensorRules.lidarActive = active
             // Jink while a hostile ship is close, if it has thrusters that can translate.
             v.evasive = !v.ambush && v.contacts.current.values.any {
                 it.kind.isVessel && it.distance <= config.jinkRangeKm * Units.KM
             } && v.working(ModuleKind.PROPULSION).any { it.type.propulsion!!.translates }
-            val player = v.contacts[world.player.id] ?: continue
+            val player = v.contacts[world.player.id]
+            if (player == null) {
+                if (v.design.role == VesselRole.SHIP && !v.ambush) patrols.fly(world, v, dt) // ambushers lie still
+                continue
+            }
             if (v.ambush) {
                 if (player.distance > v.ambushRange) continue
                 v.ambush = false

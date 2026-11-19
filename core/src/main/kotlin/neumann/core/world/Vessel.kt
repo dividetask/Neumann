@@ -122,6 +122,9 @@ class Vessel(
 
     var ambush = false
     var ambushRange = 0.0
+    /** An enemy ship's patrol, if it has one, and whether it keeps radar on while patrolling. */
+    var patrol: Patrol? = null
+    var sensorPosture = SensorPosture.DARK
 
     val contacts = ContactBook()
 

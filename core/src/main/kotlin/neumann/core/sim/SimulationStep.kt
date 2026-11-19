@@ -11,6 +11,7 @@ class SimulationStep(data: GameData) {
     private val headings = HeadingResolver()
     private val planetMover = PlanetMover()
     private val enemyAi = EnemyAi(rules.ai, performance)
+    private val refuel = RefuelPhase(rules.ai, performance)
     private val power = PowerPhase(performance)
     private val turns = TurnPhase(headings, performance, rules.ships)
     private val burns = BurnPhase(headings, performance, rules.ships)
@@ -31,6 +32,7 @@ class SimulationStep(data: GameData) {
 
     fun run(world: World, dt: Double) {
         enemyAi.run(world, dt)
+        refuel.run(world, dt)
         power.run(world, dt)
         turns.run(world, dt)
         burns.run(world, dt)

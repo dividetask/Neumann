@@ -8,6 +8,7 @@ import neumann.core.data.PlanetConfig
 import neumann.core.data.ScenarioConfig
 import neumann.core.data.StarConfig
 import neumann.core.math.Units
+import neumann.core.world.RaiderPlacement
 import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
@@ -108,9 +109,13 @@ class SystemGenerator(private val data: GameData) {
             EnemyPlacement("${home.name} Platform", "defencePlatform", home.name, listOf(-station, 0.0, station / 8)),
         )
         val ambusher = if (rnd.nextDouble() < e.ambushChance) rnd.nextInt(e.raiderCount) else -1
+        val guard = e.raiderPlacement == RaiderPlacement.GUARD
         for (i in 0 until e.raiderCount) {
-            val nearBase = giants.isEmpty() || rnd.nextDouble() < e.nearBaseChance
-            val (body, distance) = if (nearBase) {
+            val nearBase = guard || giants.isEmpty() || rnd.nextDouble() < e.nearBaseChance
+            val (body, distance) = if (guard) {
+                // Guarding: orbit the base's planet at the patrol distance, if that is clear of its moons and bound.
+                home to guardDistance(rnd, home, all, hillKm(home, starMass) * e.hillFraction, station)
+            } else if (nearBase) {
                 home to patrolDistance(rnd, home, all, minOf(e.patrolKmMax, hillKm(home, starMass) * e.hillFraction), station)
             } else {
                 // Among a giant's moons: orbit the giant in a gap between its moons' orbits.
@@ -120,7 +125,8 @@ class SystemGenerator(private val data: GameData) {
             val a = rnd.range(0.0, 2 * Math.PI)
             val ambush = i == ambusher
             list.add(EnemyPlacement("Raider ${i + 1}", "raider", body.name, listOf(distance * cos(a), distance * sin(a), 0.0),
-                ambush = ambush, ambushRangeKm = if (ambush) e.ambushRangeKm else 0.0))
+                ambush = ambush, ambushRangeKm = if (ambush) e.ambushRangeKm else 0.0,
+                patrol = listOf(body.name), sensors = e.raiderSensors))
         }
         return list
     }
@@ -136,7 +142,17 @@ class SystemGenerator(private val data: GameData) {
             val d = rnd.range(minOf(g.enemies.patrolKmMin, maxKm), maxKm)
             if (moons.none { d in it * MOON_CLEAR_INSIDE..it * MOON_CLEAR_OUTSIDE }) return d
         }
-        return stationKm * 2
+        // Nothing fits: just outside the stations, but kept inside the innermost moon's band.
+        val inside = moons.minOrNull()?.let { it * MOON_CLEAR_INSIDE * 0.95 } ?: Double.MAX_VALUE
+        return minOf(stationKm * 2, inside)
+    }
+
+    /** The patrol orbit distance round [home], or the nearest clear one if its moons or Hill sphere rule that out. */
+    private fun guardDistance(rnd: Random, home: PlanetConfig, all: List<PlanetConfig>, maxKm: Double, stationKm: Double): Double {
+        val want = data.rules.ai.patrolOrbitKm
+        val moons = all.filter { it.parent == home.name }.map { it.orbitKm }
+        val clear = moons.none { want in it * MOON_CLEAR_INSIDE..it * MOON_CLEAR_OUTSIDE }
+        return if (clear && want <= maxKm) want else patrolDistance(rnd, home, all, maxKm, stationKm)
     }
 
     /**

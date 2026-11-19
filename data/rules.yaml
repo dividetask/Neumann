@@ -43,6 +43,11 @@ ai:
   standoffKm: 2000             # enemy ships try to hold this distance
   combatDvKmS: 0.5             # inside weapon range, burn only for course errors bigger than this
   maxClosingSpeedKmS: 10
+  patrolOrbitKm: 100000        # raiders orbit patrol targets (or fly by bases) this far out
+  refuelRangeKm: 200000        # a raider this close to its base can refuel...
+  refuelSpeedMS: 100           # ...if moving within this speed of the base's velocity
+  refuelTPerHour: 1
+  refuelBelowFraction: 0.5     # a raider below this fraction of its tanks (and not fighting) goes to refuel
 
 map:
   estimateMaxAgeSeconds: 86400 # a bogey's estimate and sphere are drawn this long after its last fix; then only a ghost

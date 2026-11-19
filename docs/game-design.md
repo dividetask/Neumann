@@ -305,8 +305,11 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
 - **Asteroid belt:** sometimes, between the inner and outer planets
   (drawn as a ring; no gravity). **(interpretation)**
 - **Enemies:** the base orbits a random rocky planet, and the defence
-  platform orbits the same planet. The four raiders patrol near the base or
-  around a giant's moons; one may lie in ambush. **(interpretation)** A raider patrolling
+  platform orbits the same planet. Each raider has its own patrol settings
+  (see [Raider patrols](#raider-patrols)); in this first encounter every
+  raider guards the base (`raiderPlacement: GUARD`), orbiting the base's
+  planet with its radar on (`raiderSensors: RADAR`), and none lies in
+  ambush (`ambushChance` 0: an ambusher lies dark). **(interpretation)** A raider patrolling
   near the base or among a giant's moons keeps its orbit clear of that
   planet's moons (outside 0.7–1.4 times each moon's orbit), so a moon
   passing close does not pull it out of orbit.
@@ -358,6 +361,35 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
     back to waiting.
   - Enemy ships with translating thrusters jink while a hostile ship is
     within `jinkRangeKm` (`data/rules.yaml`). The raider has none.
+  - Until it has seen the player, a raider patrols (below).
+
+### Raider patrols
+
+Each raider carries its own settings (in its placement), so that later the
+player can build and configure raiders too:
+
+- **`patrol`:** a list of targets, visited in turn and then over again:
+  planets, moons, the star, or bases. Around a planet, moon, or the star the
+  raider makes one complete orbit at `patrolOrbitKm` (100,000 km). A base
+  has too little gravity to orbit, so it gets a **flyby**: the raider passes
+  within `patrolOrbitKm` of it, then moves on. **(interpretation)**
+- **Moving on** to the next target: burn toward a point `patrolOrbitKm`
+  beside it (never at its centre), match its velocity, then settle into a
+  circular orbit (or carry on, after a flyby). It is dumb, but it never
+  steers into a body: when on course to hit one within a day, it burns
+  straight away from it first. **(interpretation)**
+- **`sensors`:** `RADAR` (radar on while patrolling) or `DARK` (radar off
+  until it has seen the player).
+- **`placement`:** how the system generator picks the patrol: `GUARD` (the
+  body the base orbits; this encounter), `PICKET` (the outer planets) or
+  `SCREEN` (planets between the base and the outer system); the last two
+  are **Pending**.
+- **Refuelling:** a raider within `refuelRangeKm` (200,000 km) of one of
+  its bases, moving within `refuelSpeedMS` (100 m/s) of the base's velocity,
+  takes on fuel at `refuelTPerHour` (1 t per hour). One below
+  `refuelBelowFraction` (half) of its tanks and not fighting goes to its
+  base to refuel, then goes back to its patrol. **(interpretation)** The
+  speed limit stands in for docking with the base's fuel tenders.
 
 ## Travel
 

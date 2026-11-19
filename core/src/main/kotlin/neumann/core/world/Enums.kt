@@ -47,3 +47,9 @@ enum class Coordination { IN_RANGE, ALL_ALLIES }
 
 /** When an automatic torpedo salvo is fired: only to destroy, or also when at least one should hit. */
 enum class SalvoGoal { DESTROY, DESTROY_OR_HIT }
+
+/** Whether a ship keeps its radar on while patrolling, or stays dark until it has seen the player. */
+enum class SensorPosture { RADAR, DARK }
+
+/** How the system generator picks a raider's patrol: the base's planet; the outer planets; between (the last two Pending). */
+enum class RaiderPlacement { GUARD, PICKET, SCREEN }

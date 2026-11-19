@@ -45,5 +45,7 @@ enemies:
   patrolKmMax: 300000
   hillFraction: 0.3             # keep orbits well inside the Hill sphere so they stay bound
   nearBaseChance: 0.5
-  ambushChance: 0.5
+  ambushChance: 0                # an ambusher lies dark; this encounter's raiders keep radar on
+  raiderPlacement: GUARD         # GUARD: orbit the base's planet (PICKET, SCREEN: Pending)
+  raiderSensors: RADAR           # RADAR: radar on while patrolling; DARK: off until the player is seen
   ambushRangeKm: 2000000

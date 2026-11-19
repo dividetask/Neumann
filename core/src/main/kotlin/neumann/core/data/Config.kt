@@ -6,6 +6,8 @@ import neumann.core.world.EventKind
 import neumann.core.world.Material
 import neumann.core.world.ModuleKind
 import neumann.core.world.PointDefenceModel
+import neumann.core.world.RaiderPlacement
+import neumann.core.world.SensorPosture
 import neumann.core.world.SalvoGoal
 import neumann.core.world.SensorType
 import neumann.core.world.VesselRole
@@ -57,6 +59,12 @@ data class AiConfig(
     val standoffKm: Double,
     val maxClosingSpeedKmS: Double,
     val combatDvKmS: Double,
+    /** Raiders orbit patrol targets, or fly by bases, this far out. */
+    val patrolOrbitKm: Double,
+    val refuelRangeKm: Double,
+    val refuelSpeedMS: Double,
+    val refuelTPerHour: Double,
+    val refuelBelowFraction: Double,
 )
 
 @Serializable
@@ -276,6 +284,9 @@ data class EnemyPlacement(
     val offsetKm: List<Double>,
     val ambush: Boolean = false,
     val ambushRangeKm: Double = 0.0,
+    /** Patrol targets in turn (planets, moons, the star, or bases by name); empty: no patrol. */
+    val patrol: List<String> = emptyList(),
+    val sensors: SensorPosture = SensorPosture.DARK,
 )
 
 /** Ranges for generating a random star system (data/system-generation.yaml). */
@@ -355,6 +366,8 @@ data class EnemyPlacementRanges(
     val nearBaseChance: Double,
     val ambushChance: Double,
     val ambushRangeKm: Double,
+    val raiderPlacement: RaiderPlacement,
+    val raiderSensors: SensorPosture,
 )
 
 /** Everything loaded from data/. [scenario] is the fixed test system; games use generated ones. */

@@ -52,6 +52,7 @@ on load into the world.
 ### `neumann.core.world` — state holders (no flow logic)
 
 - `World` — the whole state of one battle.
+- `Patrol` — a raider's patrol targets and progress.
 - `Arrival` — how the probe arrived: origin distance, cruise speed, trip
   time, speed and fuel at the start.
 - `Star`, `Planet` — bodies on fixed circular orbits. A `Planet` with a
@@ -106,7 +107,7 @@ Run in this order by `SimulationStep`:
 | `ClaimCheck` | Detects a claimed system or a lost ship. |
 | `HistoryPhase` | Records positions for light delay. |
 
-Helpers: `CollisionWatch` (warns when the player's coasting path hits anything within a day), `TorpedoPathPredictor` (where a torpedo coming at the ship will be, for cannon point defence), `SalvoPlanner` (how big an automatic torpedo salvo must be to get through point defence, or none), `LaserFalloff` (laser damage by distance: full to the focus range, then 1/distance²), `StepSizer` (step length: long when nothing is close, short near
+Helpers: `PatrolPilot` (flies a raider's patrol, flybys, refuelling trips), `RefuelPhase` (ships near a base take on fuel), `CollisionWatch` (warns when the player's coasting path hits anything within a day), `TorpedoPathPredictor` (where a torpedo coming at the ship will be, for cannon point defence), `SalvoPlanner` (how big an automatic torpedo salvo must be to get through point defence, or none), `LaserFalloff` (laser damage by distance: full to the focus range, then 1/distance²), `StepSizer` (step length: long when nothing is close, short near
 projectiles, weapon ranges, orbits, and the end of a burn), `BurnClock`
 (how long a burn has left), `DamageResolver` (applies a hit to a module), `HeadingResolver`
 (where a heading points now), `ShipPerformance` (mass, thrust, turn rate,

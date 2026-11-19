@@ -113,11 +113,9 @@ class SystemGenerator(private val data: GameData) {
             val (body, distance) = if (nearBase) {
                 home to patrolDistance(rnd, home, all, minOf(e.patrolKmMax, hillKm(home, starMass) * e.hillFraction), station)
             } else {
-                // Among a giant's moons: orbit the giant just outside one of its moons.
+                // Among a giant's moons: orbit the giant in a gap between its moons' orbits.
                 val giant = giants[rnd.nextInt(giants.size)]
-                val moons = all.filter { it.parent == giant.name }
-                val r = moons.randomOrNull(rnd)?.orbitKm?.times(1.1) ?: (giant.radiusKm * 20)
-                giant to minOf(r, hillKm(giant, starMass) * e.hillFraction)
+                giant to amongMoons(rnd, giant, all, hillKm(giant, starMass) * e.hillFraction)
             }
             val a = rnd.range(0.0, 2 * Math.PI)
             val ambush = i == ambusher
@@ -139,6 +137,19 @@ class SystemGenerator(private val data: GameData) {
             if (moons.none { d in it * MOON_CLEAR_INSIDE..it * MOON_CLEAR_OUTSIDE }) return d
         }
         return stationKm * 2
+    }
+
+    /**
+     * A patrol orbit among [giant]'s moons, clear of each moon's orbit (as for
+     * patrols near the base): in a gap between two moons, inside the innermost,
+     * or outside the outermost, up to [maxKm].
+     */
+    private fun amongMoons(rnd: Random, giant: PlanetConfig, all: List<PlanetConfig>, maxKm: Double): Double {
+        val moons = all.filter { it.parent == giant.name }.map { it.orbitKm }.sorted()
+        val edges = listOf(giant.radiusKm * 3 / MOON_CLEAR_OUTSIDE) + moons + listOf(maxKm / MOON_CLEAR_INSIDE)
+        val gaps = edges.zipWithNext { a, b -> a * MOON_CLEAR_OUTSIDE to minOf(b * MOON_CLEAR_INSIDE, maxKm) }.filter { (lo, hi) -> hi > lo }
+        val (lo, hi) = gaps.randomOrNull(rnd) ?: return minOf(giant.radiusKm * 20, maxKm)
+        return rnd.range(lo, hi)
     }
 
     /** Hill-sphere radius of a planet around the star, in km: inside it, the planet's gravity holds orbits. */

@@ -293,9 +293,9 @@ system can be replayed. The ranges live in `data/system-generation.yaml`.
 - **Enemies:** the base orbits a random rocky planet, and the defence
   platform orbits the same planet. The four raiders patrol near the base or
   around a giant's moons; one may lie in ambush. **(interpretation)** A raider patrolling
-  near the base keeps its orbit clear of that planet's moons (outside 0.7–1.4
-  times each moon's orbit), so a moon passing close does not pull it out
-  of orbit.
+  near the base or among a giant's moons keeps its orbit clear of that
+  planet's moons (outside 0.7–1.4 times each moon's orbit), so a moon
+  passing close does not pull it out of orbit.
 - **Arrival:** a random bearing on the entry sphere, in the planets' plane
   (`elevationDegMax` 0) **(interpretation)**, always far out:
   beyond the outermost orbit by `detectionRangeMultiple` (4) times the

@@ -37,6 +37,9 @@ class GameSession(val data: GameData, val world: World) {
 
     fun skip(seconds: Double): TimeSkipResult = timeSkip.run(world, seconds)
 
+    /** Runs on until the next auto-pause event (TO EVENT), at most `eventSkipLimitSeconds`. */
+    fun skipToEvent(): TimeSkipResult = timeSkip.run(world, data.rules.autoPause.eventSkipLimitSeconds)
+
     /** Runs on, pausing as usual, until the player's burn ends (e.g. the entry burn). */
     fun skipUntilBurnEnds(): TimeSkipResult = timeSkip.run(world, BURN_SKIP_LIMIT_S) { world.player.burn == null }
 

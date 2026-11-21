@@ -44,8 +44,10 @@ E. Back to A, keeping the ship's state.
 ## Time skips
 
 Controls: **1 minute**, **1 hour**, **4 hours**, **1 day**, **1 month** (30 days),
-and, while a burn is running, **BURN END**: run on until the burn ends
-(pausing as usual). The entry burn starts this way by itself.
+**TO EVENT**: run on until the next auto-pause event (up to
+`eventSkipLimitSeconds`, 3 years), and, while a burn is running, **BURN
+END**: run on until the burn ends (pausing as usual). The entry burn starts
+this way by itself.
 
 A time skip moves the game forward until the chosen time has passed, or until
 an auto-pause event happens, whichever comes first.

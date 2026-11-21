@@ -25,6 +25,7 @@ autoPause:
   groupSeconds: 60             # a pause waits this long to gather everything arriving with it
   collisionWarningSeconds: 86400 # pause if on course to hit anything within this
   collisionCheckSeconds: 600   # how often that course is predicted
+  eventSkipLimitSeconds: 94608000 # TO EVENT runs at most this long (3 years)
   pauseOn:
     - NEW_CONTACT
     - TORPEDO_INBOUND

@@ -44,6 +44,8 @@ data class AutoPauseConfig(
     val groupSeconds: Double,
     val collisionWarningSeconds: Double,
     val collisionCheckSeconds: Double,
+    /** TO EVENT runs at most this long. */
+    val eventSkipLimitSeconds: Double,
     val pauseOn: List<EventKind>,
 )
 

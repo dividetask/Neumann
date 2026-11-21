@@ -89,6 +89,8 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
 
     fun skipToBurnEnd() = runSkip { session.skipUntilBurnEnds() }
 
+    fun skipToEvent() = runSkip { session.skipToEvent() }
+
     // Entering a system starts with the entry burn: run on until it ends (pausing as usual).
     LaunchedEffect(session) { if (world.player.burn != null) skipToBurnEnd() }
 
@@ -109,7 +111,7 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
         // whenever tick changes (after every skip or order).
         key(tick) {
             Column(Modifier.align(Alignment.TopStart).fillMaxWidth().background(Theme.panel.copy(alpha = 0.85f)).padding(6.dp)) {
-                TopBar(session, version, busy, onNewGame, ::skip, ::skipToBurnEnd)
+                TopBar(session, version, busy, onNewGame, ::skip, ::skipToBurnEnd, ::skipToEvent)
                 MessagePanel(world, busy, lastSkip, skipStart, notice)
             }
             Column(Modifier.align(Alignment.BottomStart).fillMaxWidth()) {
@@ -136,7 +138,7 @@ fun BridgeScreen(session: GameSession, version: String, onNewGame: () -> Unit) {
 
 @Composable
 private fun TopBar(session: GameSession, version: String, busy: Boolean, onNewGame: () -> Unit, skip: (Double) -> Unit,
-                   skipToBurnEnd: () -> Unit) {
+                   skipToBurnEnd: () -> Unit, skipToEvent: () -> Unit) {
     val world = session.world
     Row(verticalAlignment = Alignment.CenterVertically) {
         Line("${DisplayFormat.missionTime(world.time)} ", Theme.alert)
@@ -146,8 +148,9 @@ private fun TopBar(session: GameSession, version: String, busy: Boolean, onNewGa
     Row(Modifier.fillMaxWidth()) {
         for ((seconds, label) in skips) ConsoleButton(label, enabled = !busy && !world.over) { skip(seconds) }
     }
-    if (world.player.burn != null) Row(Modifier.fillMaxWidth()) {
-        ConsoleButton("BURN END", enabled = !busy && !world.over) { skipToBurnEnd() }
+    Row(Modifier.fillMaxWidth()) {
+        ConsoleButton("TO EVENT", enabled = !busy && !world.over) { skipToEvent() }
+        if (world.player.burn != null) ConsoleButton("BURN END", enabled = !busy && !world.over) { skipToBurnEnd() }
     }
     when {
         world.claimed -> Line("*** SYSTEM CLAIMED ***", Theme.alert)

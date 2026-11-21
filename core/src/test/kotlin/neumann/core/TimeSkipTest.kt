@@ -134,3 +134,16 @@ class CollisionWarningTest {
         assertTrue(again.pausedBy.none { it.kind == EventKind.COLLISION_WARNING }, "still the same course: no second warning")
     }
 }
+
+class SkipToEventTest {
+    @Test
+    fun `TO EVENT runs on past quiet months and stops at the next event`() {
+        val data = Fixture.data
+        val sc = neumann.core.game.SystemGenerator(data).generate(42)
+        val world = neumann.core.game.ScenarioBuilder(data).arrive(sc)
+        val s = neumann.core.game.GameSession(data, world) // no entry burn: coasting in from far out
+        val r = s.skipToEvent()
+        assertTrue(r.pausedBy.isNotEmpty(), "stopped for an event")
+        assertTrue(r.elapsedSeconds > 30 * 86400.0, "ran past at least a month of nothing: ${r.elapsedSeconds / 86400} d")
+    }
+}
